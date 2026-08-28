@@ -1,0 +1,38 @@
+---
+import ToolChip from './ToolChip.astro';
+import type { Glyph } from './ToolChip.astro';
+
+// These are the tools whose output Assay verifies. Not customers, not
+// partners, not endorsements. The label above the row says so explicitly.
+const tools: { name: string; glyph: Glyph }[] = [
+  { name: 'GitHub Copilot Autofix', glyph: 'circle-curve' },
+  { name: 'Cursor', glyph: 'cube' },
+  { name: 'Claude Code', glyph: 'asterisk' },
+  { name: 'OpenAI Codex', glyph: 'dot' },
+  { name: 'Snyk', glyph: 'rounded-square' },
+  { name: 'Pixee', glyph: 'diamond' },
+  { name: 'Mobb', glyph: 'triangle' },
+  { name: 'ZeroPath', glyph: 'notched-square' },
+  { name: 'DARPA AIxCC systems', glyph: 'notched-square' },
+];
+---
+
+<div class="rule-t rule-b py-9">
+  <div class="shell">
+    <p class="micro reveal">Verifies fixes from</p>
+
+    <ul class="reveal mt-5 flex flex-wrap gap-2.5" style="--reveal-delay:60ms">
+      {
+        tools.map((tool) => (
+          <li>
+            <ToolChip name={tool.name} glyph={tool.glyph} />
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="mono reveal mt-5 text-[11px] text-fg-2" style="--reveal-delay:120ms">
+      We are vendor neutral by design. We do not write fixes.
+    </p>
+  </div>
+</div>

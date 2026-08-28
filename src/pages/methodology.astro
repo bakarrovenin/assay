@@ -1,0 +1,754 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import CodePanel from '../components/CodePanel.astro';
+import { highlightJson } from '../lib/highlight';
+import { METHOD_VERSION } from '../lib/site';
+
+const lastUpdated = new Date().toISOString().slice(0, 10);
+
+const verdicts = [
+  {
+    verdict: 'VERIFIED',
+    tone: 'accent',
+    meaning:
+      'All four checks ran with sufficient evidence and all four passed. The vulnerability class is no longer reachable on any path we could test, behaviour was preserved on inputs the fixing agent never saw, no new finding was introduced, and the change shows no signs of tampering.',
+  },
+  {
+    verdict: 'NOT VERIFIED',
+    tone: 'fail',
+    meaning:
+      'At least one check failed. The verdict names which check, on which input, with the evidence attached.',
+  },
+  {
+    verdict: 'INSUFFICIENT EVIDENCE',
+    tone: 'muted',
+    meaning:
+      'We could not run one or more checks to a standard we would stand behind. This is not a pass. It is an explicit statement that we do not know.',
+  },
+];
+
+const artifact = `{
+  "schema_version": "1.0",
+  "verdict": "NOT_VERIFIED",
+  "finding": {
+    "fingerprint": "cwe89:query:sqlalchemy.text:req.args.get",
+    "class": "CWE-89",
+    "scanner": "semgrep@1.98.0",
+    "ruleset": "p/security-audit@2026-07-11"
+  },
+  "change": {
+    "base": "8f39a7c2",
+    "head": "c41b0de9",
+    "author_agent": "copilot-autofix",
+    "token_scope": "contents:write"
+  },
+  "checks": {
+    "closed": {
+      "result": "FAIL",
+      "detail": "sink present and reachable; input filter added upstream",
+      "evidence": ["app/db.py:118"]
+    },
+    "behaviour_held": {
+      "result": "FAIL",
+      "held_out_cases": 34,
+      "passed": 29,
+      "failed": ["sqli_tautology_v2", "sqli_union_encoded", "sqli_stacked"],
+      "differential": "no divergence on 412 benign inputs"
+    },
+    "no_regression": {
+      "result": "PASS",
+      "new_findings": 0,
+      "surface_delta": []
+    },
+    "provenance_clean": {
+      "result": "PASS",
+      "flags": []
+    }
+  },
+  "reproduce": "assay verify --base 8f39a7c2 --head c41b0de9 --case-set 7c1f",
+  "generated_at": "2026-08-28T14:22:07Z"
+}`;
+
+const artifactHtml = highlightJson(artifact);
+
+const limitations = [
+  {
+    title: 'Business logic and authorization are the weak spot.',
+    body:
+      'Held-out case generation depends on a taxonomy of what wrong input looks like. For injection classes that taxonomy is well understood. For “this endpoint should not let one tenant read another tenant’s data” it is specific to your application and cannot be generated from a class definition. On these findings we return INSUFFICIENT EVIDENCE far more often than we return VERIFIED.',
+  },
+  {
+    title: 'We cannot verify what we cannot run.',
+    body:
+      'Check 02 requires a buildable, executable environment. Projects without one, or with a build we cannot reproduce, receive INSUFFICIENT EVIDENCE on the behavioural check regardless of how good the patch is.',
+  },
+  {
+    title: 'Language coverage is narrow at launch.',
+    body:
+      'Held-out generation and differential execution are implemented per language. Coverage is deepest where we started and thin elsewhere. Current coverage is published on this page and updated with each release, rather than being described vaguely.',
+  },
+  {
+    title: 'Checks 01 and 03 inherit scanner blind spots.',
+    body:
+      'If your scanner cannot see a class of weakness, our re scan will not see it either. Check 02 partially compensates, because it tests the vulnerability class directly rather than through the scanner, but only for classes we can generate cases for.',
+  },
+  {
+    title: 'Provenance signals are heuristic.',
+    body:
+      'Check 04 detects patterns associated with manipulation. It cannot prove intent, it will produce false positives on unusual but legitimate changes, and a sufficiently careful attacker who stays inside the expected blast radius will not trip it.',
+  },
+  {
+    title: 'VERIFIED is a scoped claim, not a security guarantee.',
+    body:
+      'It means: this vulnerability class is no longer reachable on the paths we tested, behaviour was preserved on the inputs we tried, no new finding was introduced by this change, and no tampering signals were present. It does not mean the code is secure, that no other vulnerabilities exist, or that no path exists which we did not think to test. Anyone selling you the stronger claim is selling you something we do not believe is possible.',
+  },
+  {
+    title: 'Held-out corpus leakage is a live risk.',
+    body:
+      'Over time, published verdicts leak information about how our cases are shaped. Rotation mitigates this. It does not eliminate it, and we would rather name the risk than pretend we have solved it.',
+  },
+];
+
+const terms = [
+  ['Finding', 'A single reported weakness, identified by a semantic fingerprint rather than a file and line number.'],
+  ['Sink', 'The point where untrusted data reaches a dangerous operation, such as a query execution or a shell invocation.'],
+  ['Source', 'Where untrusted data enters, such as a request parameter or a file read.'],
+  ['Reachable', 'A path exists from a source to a sink. Necessary for exploitability, not sufficient for it.'],
+  ['Exploitable', 'The conditions the weakness requires are actually met in this code, in this configuration. The stronger and rarer signal.'],
+  ['Overfitting', 'A patch that satisfies the tests it was evaluated against without solving the underlying problem. The failure this entire product exists to catch.'],
+  ['Held-out case', 'A test generated before the fixing agent runs, kept out of every context the agent can read, used only to score the result.'],
+  ['Differential testing', 'Running pre patch and post patch code against identical inputs and comparing behaviour.'],
+  ['Metamorphic relation', 'An invariant that must hold between related inputs, used to detect unintended semantic change.'],
+  ['Blast radius', 'The set of files a legitimate fix for a given finding would plausibly need to modify.'],
+  ['Attestation', 'The signed record of a verdict: which agent, what authority, what was checked, what the result was, who approved.'],
+] as const;
+---
+
+<BaseLayout
+  title="Methodology"
+  description="How Assay decides whether a fix actually worked. The four checks in full, the artifact schema, the assumptions, and the limitations."
+  path="/methodology"
+>
+  <PageHeader
+    eyebrow="Methodology"
+    title="How we decide whether a fix actually worked."
+    lede="Assay makes one claim: that a specific change to your code closed a specific vulnerability without breaking anything and without being tampered with. That claim is only worth something if you can see how it was reached. This page is the whole method, including the parts where it does not work."
+    subLede="If you find a hole in this, we want to hear about it. The harness is open source and every verdict is reproducible from the artifact it emits."
+  />
+
+  <!-- 1. The contract -->
+  <Section id="contract" rule={false}>
+    <Eyebrow class="reveal">The contract</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      Three verdicts, and the third one is the important one.
+    </h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        Most tools in this space return a binary. Fixed, or not fixed. That is dishonest,
+        because it collapses two very different situations: &ldquo;we checked and it
+        holds&rdquo; and &ldquo;we could not check.&rdquo;
+      </p>
+      <p>Assay returns three states.</p>
+    </div>
+
+    <div class="reveal mt-10 overflow-hidden rounded-[3px] border border-line bg-bg">
+      <table class="w-full border-collapse text-left">
+        <caption class="sr-only">
+          The three verdicts Assay can return, and what each one means.
+        </caption>
+        <thead>
+          <tr class="border-b border-line">
+            <th
+              scope="col"
+              class="mono w-[38%] px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:w-[30%] sm:px-5"
+            >
+              Verdict
+            </th>
+            <th
+              scope="col"
+              class="mono px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-5"
+            >
+              Meaning
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            verdicts.map((row, i) => (
+              <tr class={i > 0 ? 'border-t border-line' : ''}>
+                <th scope="row" class="px-4 py-5 align-top sm:px-5">
+                  <span
+                    class={`mono text-[12px] font-medium uppercase tracking-[0.1em] ${
+                      row.tone === 'accent'
+                        ? 'text-accent'
+                        : row.tone === 'fail'
+                          ? 'text-fail'
+                          : 'text-fg-2'
+                    }`}
+                  >
+                    {row.verdict}
+                  </span>
+                </th>
+                <td class="px-4 py-5 align-top text-[14.5px] leading-[1.62] text-fg-2 sm:px-5">
+                  {row.meaning}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="longform reveal mt-10">
+      <p>
+        INSUFFICIENT EVIDENCE is the state that makes the other two mean anything. A
+        verifier that always returns an answer is a verifier that is guessing some of the
+        time. We would rather tell you we could not test a business logic flaw than
+        quietly mark it green.
+      </p>
+      <p>
+        In our own testing, INSUFFICIENT EVIDENCE is not rare. Expect it on authorization
+        logic, on code with no buildable environment, and on languages outside our current
+        coverage. We report the rate publicly in every edition of the Index.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 2. Check 01 -->
+  <Section id="check-01" tint>
+    <Eyebrow class="reveal">Check 01</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      Closed. Is the hole actually gone, or did it just move?
+    </h2>
+
+    <p class="question reveal mt-8">
+      The question: does the vulnerability still exist after the patch?
+    </p>
+
+    <div class="longform reveal mt-9">
+      <h3>Why the obvious approach fails.</h3>
+      <p>
+        The industry standard is to re-run the scanner and see whether the alert
+        disappeared. That is circular, because the fixing agent was optimising to make
+        that alert disappear. It also fails for four mundane reasons that have nothing to
+        do with AI:
+      </p>
+      <ul>
+        <li>
+          <strong>Line numbers move.</strong> A finding keyed to <code>file.py:402</code>
+          vanishes when the patch inserts a line above it, even though the vulnerable code
+          is untouched.
+        </li>
+        <li>
+          <strong>Suppression looks like remediation.</strong> Adding <code>#&nbsp;nosec</code>,
+          an entry to <code>.semgrepignore</code>, a <code>//&nbsp;lgtm[...]</code> annotation,
+          or a severity override in config makes the alert go quiet without changing a line
+          of vulnerable code. We have seen agents do exactly this.
+        </li>
+        <li>
+          <strong>Refactoring loses the thread.</strong> If the patch moves the sink into a
+          helper function, some scanners simply stop tracking it.
+        </li>
+        <li>
+          <strong>Scanner version drift.</strong> If the before and after scans ran
+          different rule versions, the comparison is meaningless.
+        </li>
+      </ul>
+
+      <h3>What we actually do.</h3>
+      <p>
+        We build a semantic fingerprint of the original finding rather than a positional
+        one. The fingerprint combines the weakness class, the sink function and its
+        receiver, the normalised path from source to sink expressed over the syntax tree
+        rather than over line numbers, and the enclosing symbol. That fingerprint survives
+        reformatting, renaming and reordering.
+      </p>
+      <p>
+        We then re-scan at the patched commit, pinned to the identical scanner version and
+        ruleset as the original scan, and ask whether a finding with a matching fingerprint
+        still exists.
+      </p>
+      <p>
+        Separately, and independently of the scanner, we ask whether the dangerous
+        construct itself is still present and reachable. If a patch adds an input filter
+        but leaves a string-concatenated query in place, the sink is still there. We treat
+        that as unresolved even when the scanner has gone quiet, and we say so in the
+        verdict.
+      </p>
+      <p>
+        Finally we scan the diff for suppression artifacts: added ignore comments, new
+        entries in scanner ignore files, rule disabling, severity downgrades, and
+        configuration changes that alter which findings are reported. Any of these on a
+        change presented as a fix is an automatic NOT VERIFIED with the reason stated
+        plainly.
+      </p>
+
+      <h3>What this check cannot do.</h3>
+      <p>
+        It inherits the scanner&rsquo;s blind spots. If the underlying scanner could not
+        see a variant of the vulnerability in the first place, we will not see it here
+        either. Check 02 is the reason that matters less than it sounds.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 3. Check 02 -->
+  <Section id="check-02">
+    <Eyebrow class="reveal">Check 02</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      Behaviour held. Tested on cases the agent never saw.
+    </h2>
+
+    <p class="lede reveal mt-6">
+      This is the hard check, and it is the reason the company exists.
+    </p>
+
+    <p class="question reveal mt-8">
+      The question: does the patch generalise beyond the specific example it was shown,
+      and does the software still do what it did before?
+    </p>
+
+    <div class="longform reveal mt-9">
+      <h3>The trap.</h3>
+      <p>
+        Every existing approach validates a patch by running the test suite. But the patch
+        was generated to pass that suite. Running it back is not a check, it is a
+        restatement of the objective. This is the failure mode that automated program
+        repair research named overfitting, and the numbers are not marginal. In one
+        canonical study, ninety eight percent of the test-passing patches produced by a
+        classic repair tool did not actually fix the bug. Even a strong 2024 method using
+        frontier models lands near a coin flip.
+      </p>
+      <p>
+        The fix for this is the same one machine learning uses for the same problem: hold
+        out the evaluation set. You do not measure a model on data it trained on. You
+        should not measure a patch on tests it was written against.
+      </p>
+
+      <h3>How we generate held-out cases.</h3>
+      <p>Three sources, combined per finding.</p>
+      <p>
+        <strong>Class expansion.</strong> Every weakness class has a taxonomy of variants
+        that the reported example is one instance of. For an injection finding, the
+        reported payload might be a simple tautology. We generate the rest of the class:
+        alternative tautologies, union based, stacked statements, comment terminated,
+        boolean and time based blind variants, and encoding variants including URL,
+        unicode, and double encoding. For path traversal we generate absolute paths,
+        traversal sequences, encoded separators, and platform specific variants. For
+        deserialization we generate gadget shaped inputs appropriate to the runtime. The
+        reported payload is deliberately excluded from the scored set, because that is the
+        one the agent already saw.
+      </p>
+      <p>
+        <strong>Differential behaviour testing.</strong> We execute the pre-patch and
+        post-patch versions against a corpus of benign inputs drawn from the
+        project&rsquo;s own fixtures, from observed request shapes where available, and
+        from generated inputs matching the parameter&rsquo;s type and constraints. Any
+        divergence in output on an input unrelated to the vulnerability is a behavioural
+        regression.
+      </p>
+      <p>
+        This catches the second most common failure after overfitting, which is the
+        over-broad fix. A patch that rejects every apostrophe stops the injection and also
+        stops every customer named O&rsquo;Brien from logging in. The scanner is
+        delighted. Support is not.
+      </p>
+      <p>
+        <strong>Metamorphic relations.</strong> Where a function has invariants that must
+        hold across input transformations, we assert them. For a sanitiser, sanitising
+        twice should equal sanitising once. For a parser, round tripping should preserve
+        semantics. For an authorization check, the decision should be invariant to input
+        ordering. Violations of these do not always indicate a vulnerability, but they
+        reliably indicate that the patch changed something the author did not intend.
+      </p>
+      <p>
+        The existing test suite is a floor, not a ceiling. We run it. A failure is a hard
+        failure. A pass earns nothing, because passing it is the bar the agent already
+        cleared.
+      </p>
+
+      <h3>Isolation.</h3>
+      <p>
+        Held-out cases are generated before the fixing agent is invoked and are never
+        present in any context the agent can read: not in the repository, not in the
+        prompt, not in the issue, not in a comment. If a held-out case leaks into the
+        agent&rsquo;s context, it stops being held out and its result is discarded.
+      </p>
+
+      <h3>Where this check is strong and where it is weak.</h3>
+      <p>
+        Strongest on classes with well defined input taxonomies: injection, path
+        traversal, deserialization, memory safety, and cryptographic misuse. Weakest on
+        business logic and authorization, where &ldquo;correct behaviour&rdquo; is specific
+        to the application and cannot be generated from a taxonomy. On those classes we
+        frequently return INSUFFICIENT EVIDENCE rather than guess.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 4. Check 03 -->
+  <Section id="check-03" tint>
+    <Eyebrow class="reveal">Check 03</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      No regression. Did the fix introduce something new?
+    </h2>
+
+    <p class="question reveal mt-8">
+      The question: is the codebase, taken as a whole, no worse than before?
+    </p>
+
+    <div class="longform reveal mt-9">
+      <p>
+        A meaningful share of automated fixes trade one problem for another. A patch that
+        adds input validation may introduce a denial of service through catastrophic
+        backtracking in the new regular expression. A patch that pins a dependency to
+        resolve one advisory may pull in a version carrying two others.
+      </p>
+
+      <h3>What we do.</h3>
+      <p>
+        We run a full scan at both commits and diff the finding sets using the same
+        semantic fingerprints from Check 01, so that findings which merely moved are not
+        counted as new. Anything appearing only at the patched commit is attributed to the
+        patch.
+      </p>
+      <p>
+        We scan the change itself as an artifact, independently of whole repository
+        results, so attribution is unambiguous even in a repository with a large existing
+        backlog.
+      </p>
+      <p>
+        We resolve any dependency changes in the patch and check the introduced versions
+        against advisory data, including transitive additions. A fix that upgrades a
+        package is not exempt from being a vulnerability introduction.
+      </p>
+      <p>
+        We flag surface area growth: new network egress, new subprocess invocation, new
+        file system paths, new exported symbols, relaxed permissions, and new endpoints.
+        These are reported as informational context rather than automatic failures, because
+        sometimes a correct fix legitimately needs one, and the reviewer should be the one
+        to judge.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 5. Check 04 -->
+  <Section id="check-04">
+    <Eyebrow class="reveal">Check 04</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      Provenance clean. Was the agent itself manipulated?
+    </h2>
+
+    <p class="question reveal mt-8">
+      The question: is this change what the agent intended to write, or what somebody else
+      persuaded it to write?
+    </p>
+
+    <div class="longform reveal mt-9">
+      <p>
+        Coding agents read your repository to do their work. They read issue titles, pull
+        request descriptions, CONTRIBUTING.md, configuration files, rules files, and
+        anything a connected tool reflects back to them. Every one of those is attacker
+        reachable, and every one of them has been used.
+      </p>
+      <p>
+        This is documented, not theoretical. Researchers demonstrated hidden unicode
+        instructions planted in assistant configuration files that silently steered
+        generated code. A prompt injection flaw in a major assistant allowed remote code
+        execution by steering the agent into editing its own settings. A flaw in an
+        automated code security review action allowed an attacker to obtain write access
+        to repositories running it, using nothing more than an opened issue. In that last
+        case the vendor&rsquo;s own repository used the same workflow, which would have
+        allowed the compromise to propagate downstream.
+      </p>
+
+      <h3>What we look at.</h3>
+      <p>
+        <strong>Authorship and authority.</strong> Which agent produced the change,
+        established from commit trailers, bot identity and pull request metadata, and what
+        token scope it held while doing so. A change written by an agent holding broader
+        authority than the task required is context a reviewer should have.
+      </p>
+      <p>
+        <strong>Blast radius.</strong> We compute the set of files a legitimate fix for
+        this finding would plausibly need to touch, and flag edits outside it. An injection
+        fix that also modifies <code>.github/workflows/</code>, agent rules files,
+        <code>Dockerfile</code>, or CI configuration is not a fix with a side effect. It is
+        two changes in one commit, and the second one needs its own review.
+      </p>
+      <p>
+        <strong>Self modification.</strong> Any change that alters the agent&rsquo;s own
+        configuration, permissions, tool definitions, or approval settings. This is the
+        pattern behind multiple published remote code execution flaws and it is treated as
+        high signal.
+      </p>
+      <p>
+        <strong>Capability additions.</strong> New credential access, new outbound network
+        calls, new subprocess execution, new dynamic evaluation, introduced in a change
+        presented as a security fix.
+      </p>
+      <p>
+        <strong>Hidden text.</strong> Bidirectional control characters, zero width
+        characters, and homoglyph substitution in the diff and in any file the agent read,
+        covering both the Trojan Source class and the hidden instruction class.
+      </p>
+
+      <h3>How we report it.</h3>
+      <p>
+        These are heuristics, not proof, and we present them as such. Check 04 produces
+        flagged evidence with file, line and reason, not an accusation of intent. A change
+        can fail Check 04 for entirely innocent reasons, and the verdict says so. What it
+        should never do is pass silently.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 6. The artifact -->
+  <Section id="artifact" tint>
+    <Eyebrow class="reveal">The artifact</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Every verdict is reproducible.</h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        A verdict you cannot reproduce is an opinion. Each one emits a signed artifact
+        containing everything needed to re run it.
+      </p>
+    </div>
+
+    <div class="reveal mt-9">
+      <CodePanel html={artifactHtml} label="verdict.json" />
+    </div>
+
+    <div class="longform reveal mt-9">
+      <p>
+        For work on your own repositories the artifact includes the held-out cases
+        themselves, so your engineers can run them by hand. For the public Index the case
+        sets are referenced by identifier and withheld, for the reason given in the next
+        section.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 7. The Index -->
+  <Section id="index-rules">
+    <Eyebrow class="reveal">The Index</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      How we test the fixers, and how we stop ourselves from cheating.
+    </h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        The Index applies this same method to every commercial fix agent, quarterly. These
+        are the rules we hold ourselves to.
+      </p>
+      <p>
+        <strong>Corpus.</strong> Real vulnerabilities with known ground truth fixes, drawn
+        from public reproducible sources including OSS-Fuzz reproductions and published
+        repair benchmarks, plus a set of weaknesses seeded into forks of real projects.
+        Every corpus entry is published by identifier so the selection can be audited.
+      </p>
+      <p>
+        <strong>Equal treatment.</strong> Each tool receives the identical finding in
+        whatever format it natively consumes. No tool is given extra context, a tuned
+        prompt, or a second attempt that another did not get. Configuration is left at each
+        vendor&rsquo;s documented defaults, and the configuration used is published.
+      </p>
+      <p>
+        <strong>No human editing.</strong> The fix each tool proposes is captured exactly
+        as produced. We do not repair a patch to make a tool look better, and we do not
+        degrade one.
+      </p>
+      <p>
+        <strong>Held-out cases are generated first</strong>, before any tool sees the
+        finding, and are never published in a form that could be trained against. Each
+        edition rotates a substantial portion of the corpus, so a tool that improves
+        between editions has improved at fixing rather than at our test set. We name the
+        rotation percentage in each edition.
+      </p>
+      <p>
+        <strong>We report the gap, not just the score.</strong> For every tool: fixes
+        attempted, alert-closed rate, verified-fix rate, insufficient-evidence rate, and
+        the distance between the first two. That distance is the entire point of the
+        exercise.
+      </p>
+      <p>
+        <strong>Right of reply.</strong> Every vendor sees its results and the underlying
+        artifacts before publication, with a window to respond. Responses are published
+        alongside the numbers, unedited. If a vendor demonstrates a methodological error we
+        correct it and say what changed.
+      </p>
+      <p>
+        <strong>We are not exempt.</strong> If Assay ever ships a fix generation product,
+        it will not appear in the Index. An index that ranks its own publisher is worth
+        nothing, which is the argument this whole company rests on.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 8. Assumptions -->
+  <Section id="assumptions" tint>
+    <Eyebrow class="reveal">Assumptions</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">What we take as given.</h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        Stated plainly, because unexamined assumptions are where verification quietly
+        fails.
+      </p>
+      <ul>
+        <li>
+          <strong>The repository is the source of truth.</strong> We verify the change as
+          it exists in version control. We cannot see changes applied outside it.
+        </li>
+        <li>
+          <strong>The original finding was real.</strong> We do not re litigate whether the
+          scanner was right to flag it, though if the reported finding appears to be a
+          false positive we say so rather than verifying a fix for a bug that does not
+          exist.
+        </li>
+        <li>
+          <strong>Execution is sandboxed.</strong> Held-out cases and differential runs
+          execute in an isolated environment with no network egress by default and no
+          access to your infrastructure or secrets.
+        </li>
+        <li>
+          <strong>We do not need write access.</strong> Assay reads the repository and
+          posts a status check. It cannot merge, cannot push, and cannot modify your code.
+          Given that our entire argument is about agents holding more authority than they
+          need, holding write access ourselves would be indefensible.
+        </li>
+        <li>
+          <strong>We do not train on your code.</strong> Customer repositories are never
+          used to train or tune models, and are not retained beyond the verification
+          window.
+        </li>
+      </ul>
+    </div>
+  </Section>
+
+  <!-- 9. Limitations -->
+  <Section id="limitations">
+    <Eyebrow class="reveal">Limitations</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Where this does not work.</h2>
+
+    <p class="lede reveal mt-6">
+      Read this section before you rely on us for anything.
+    </p>
+
+    <ol class="mt-11 space-y-px overflow-hidden rounded-[3px] border border-line bg-line">
+      {
+        limitations.map((item, i) => (
+          <li
+            class="reveal flex gap-5 bg-bg p-6 lg:gap-7 lg:p-7"
+            style={`--reveal-delay:${Math.min(i, 4) * 50}ms`}
+          >
+            <span class="mono shrink-0 pt-1 text-[12px] font-medium text-fail">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <h3 class="font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">
+                {item.title}
+              </h3>
+              <p class="mt-2.5 max-w-[66ch] text-[15px] leading-[1.65] text-fg-2">
+                {item.body}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <!-- 10. Disputes -->
+  <Section id="disputes" tint>
+    <Eyebrow class="reveal">Disputes</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">If we are wrong.</h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        We will be wrong sometimes. The useful question is what happens next.
+      </p>
+      <p>
+        <strong>Appeals.</strong> Every NOT_VERIFIED verdict carries a reproduction command
+        and the failing cases. If you can show the failing case is invalid, the appeal is
+        resolved in your favour and the case is removed from the generator for that class,
+        not just for your repository.
+      </p>
+      <p>
+        <strong>Disclosure.</strong> If you find a way to make Assay return VERIFIED on a
+        patch that does not fix the vulnerability, that is the most valuable bug you can
+        find in this product. Report it to{' '}
+        <a href="mailto:security@assay.dev">security@assay.dev</a>. We publish the class of
+        every confirmed bypass in the changelog, along with what we changed.
+      </p>
+      <p>
+        <strong>Changelog.</strong> Method changes are versioned. Every verdict records the
+        method version that produced it, so a verdict from March is interpretable in
+        November. Changes that could alter previously issued verdicts are called out
+        explicitly.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 11. Terms -->
+  <Section id="terms">
+    <Eyebrow class="reveal">Terms</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      Definitions, so nothing here is ambiguous.
+    </h2>
+
+    <dl class="mt-11 max-w-[80ch]">
+      {
+        terms.map((term, i) => (
+          <div
+            class="reveal grid grid-cols-1 gap-x-8 gap-y-1.5 border-t border-line py-5 sm:grid-cols-[minmax(0,180px)_minmax(0,1fr)]"
+            style={`--reveal-delay:${Math.min(i, 4) * 40}ms`}
+          >
+            <dt class="font-display text-[15.5px] font-bold tracking-[-0.008em]">
+              {term[0]}
+            </dt>
+            <dd class="text-[15px] leading-[1.62] text-fg-2">{term[1]}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </Section>
+
+  <!-- Page footer block -->
+  <Section id="method-version" tint>
+    <div class="reveal flex flex-col items-start gap-8">
+      <p class="micro">
+        Method version: {METHOD_VERSION} &middot; Last updated: {lastUpdated}
+      </p>
+
+      <div class="flex flex-wrap gap-3">
+        <a href="/the-index" class="btn btn-secondary">Read the Index</a>
+        <a href="https://github.com/assay-dev" class="btn btn-secondary">
+          Open the harness on GitHub
+        </a>
+      </div>
+    </div>
+
+    <p class="mono mt-14 text-center text-[12px] leading-relaxed text-fg-2">
+      Nullius in verba. Take nobody&rsquo;s word for it, including ours.
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* "The question:" lines. They set up every check section, so they get a
+     treatment of their own rather than sitting inside the prose. */
+  .question {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.6;
+    max-width: 62ch;
+    padding-left: 20px;
+    border-left: 2px solid var(--accent);
+    color: var(--fg);
+  }
+</style>

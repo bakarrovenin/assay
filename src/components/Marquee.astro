@@ -1,0 +1,94 @@
+---
+import Logo from './Logo.astro';
+
+// Eight repetitions: four fill a wide viewport, and the track is duplicated
+// so the -50% translate loops seamlessly.
+const units = Array.from({ length: 8 });
+---
+
+<div class="marquee border-y border-line py-7" aria-hidden="true">
+  <div class="marquee-track">
+    {
+      units.map(() => (
+        <span class="marquee-unit">
+          <Logo size={17} wordmark={false} />
+          <span class="marquee-text">Nullius in verba</span>
+        </span>
+      ))
+    }
+  </div>
+</div>
+
+<p class="mono mt-5 text-center text-[11px] text-fg-2">
+  Take nobody&rsquo;s word for it. Royal Society, 1660.
+</p>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    user-select: none;
+    /* Feather the ends so the loop seam never lands hard against the edge. */
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 7%,
+      #000 93%,
+      transparent
+    );
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    animation: marquee-scroll 40s linear infinite;
+  }
+
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  .marquee-unit {
+    display: inline-flex;
+    align-items: center;
+    gap: 26px;
+    padding-inline: 26px;
+    color: var(--fg);
+  }
+
+  .marquee-text {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 1024px) {
+    .marquee-text {
+      font-size: 19px;
+    }
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+      justify-content: center;
+      width: 100%;
+    }
+    /* Static state shows one instance, not a clipped row of eight. */
+    .marquee-unit:not(:first-child) {
+      display: none;
+    }
+  }
+</style>

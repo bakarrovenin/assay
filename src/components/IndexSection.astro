@@ -1,0 +1,26 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+import IndexTable from './IndexTable.astro';
+---
+
+<Section id="the-index" tint>
+  <Eyebrow class="reveal">The Index</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">Which AI fixers actually work?</h2>
+
+  <p class="lede reveal mt-6" style="--reveal-delay:120ms">
+    Nobody has independently tested them. Every published number comes from the vendor
+    that wrote the fix. We run the same harness against every commercial fixer,
+    quarterly, with the free DARPA systems as the baseline row, and we publish the
+    methodology.
+  </p>
+
+  <div class="mt-12 lg:mt-14">
+    <IndexTable />
+  </div>
+
+  <p class="reveal mt-9">
+    <a href="/methodology" class="link-inline text-[15px] font-medium">Read the methodology</a>
+  </p>
+</Section>

@@ -1,0 +1,43 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+
+const integrations = [
+  {
+    title: 'GitHub, GitLab, Bitbucket, Azure DevOps',
+    body: 'A status check on every pull request. Blocking or advisory.',
+  },
+  {
+    title: 'SARIF in, verdict out',
+    body: 'Works with whichever scanner you already run.',
+  },
+  {
+    title: 'Slack and Linear',
+    body: 'Verdicts where your team already triages.',
+  },
+  {
+    title: 'MCP and REST API',
+    body:
+      'Pull verdicts into Cursor, Claude Code or Codex so the agent sees its own score.',
+  },
+];
+---
+
+<Section id="integrations" tint>
+  <Eyebrow class="reveal">Integrations</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">Wherever the change already lands.</h2>
+
+  <ul class="mt-12 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-2 lg:mt-14 lg:gap-x-16">
+    {
+      integrations.map((item, i) => (
+        <li class="reveal border-t border-line pt-5" style={`--reveal-delay:${i * 60}ms`}>
+          <h3 class="font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">
+            {item.title}
+          </h3>
+          <p class="mt-2.5 text-[14.5px] leading-[1.6] text-fg-2">{item.body}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

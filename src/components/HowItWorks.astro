@@ -1,0 +1,68 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+
+const checks = [
+  {
+    n: '01',
+    title: 'Closed',
+    body:
+      'Re-scan after the patch. Is the original finding actually gone, or did it move somewhere else in the file?',
+  },
+  {
+    n: '02',
+    title: 'Behaviour held',
+    body:
+      'We generate test cases the agent never saw and run the patched code against those. Re-running the agent’s own suite is the overfitting trap, not a check. This is the hard part, and the reason the category exists.',
+  },
+  {
+    n: '03',
+    title: 'No regression',
+    body:
+      'Re-scan the change itself. Fixes routinely trade one finding for another.',
+  },
+  {
+    n: '04',
+    title: 'Provenance clean',
+    body:
+      'Which agent authored the change, under what token scope, and does the diff show injection markers: self-config edits, unexpected file touches, credential access.',
+  },
+];
+---
+
+<Section id="how-it-works" tint>
+  <Eyebrow class="reveal">How it works</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">Findings in. Verdict out.</h2>
+
+  <p class="lede reveal mt-6" style="--reveal-delay:120ms">
+    Four checks that nobody runs today, on every AI-authored change.
+  </p>
+
+  <ol class="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-[3px] border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+    {
+      checks.map((check, i) => (
+        <li
+          class="reveal flex flex-col bg-bg p-6 lg:p-7"
+          style={`--reveal-delay:${i * 60}ms`}
+        >
+          <span class="mono text-[10px] uppercase tracking-[0.16em] text-accent">
+            Check {check.n}
+          </span>
+          <h3 class="mt-4 font-display text-[20px] font-bold leading-tight tracking-[-0.015em]">
+            {check.title}
+          </h3>
+          <p class="mt-3.5 text-[14.5px] leading-[1.6] text-fg-2">{check.body}</p>
+        </li>
+      ))
+    }
+  </ol>
+
+  <p
+    class="mono reveal mt-8 border-l-2 border-accent pl-5 text-[13px] leading-[1.7] text-fg-2"
+    style="--reveal-delay:240ms;max-width:62ch"
+  >
+    If you let a student write their own exam, they will pass it. You test them on
+    questions they have not seen.
+  </p>
+</Section>

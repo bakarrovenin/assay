@@ -1,0 +1,145 @@
+---
+import { INDEX_SIGNUP_ENDPOINT, INDEX_SIGNUP_MAILTO } from '../lib/site';
+
+// No results yet. Every cell is an empty state on purpose: the first edition
+// has not published, and inventing numbers here would be the exact failure
+// this company was started to point at.
+const tools = [
+  'GitHub Copilot Autofix',
+  'Cursor',
+  'Claude Code',
+  'OpenAI Codex',
+  'Snyk',
+  'Pixee',
+  'Mobb',
+  'ZeroPath',
+  'DARPA AIxCC (open source)',
+];
+
+const EMPTY = '—';
+---
+
+<div class="reveal overflow-hidden rounded-[3px] border border-line bg-bg">
+  <div
+    class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5"
+  >
+    <span class="mono text-[10px] uppercase tracking-[0.16em] text-fg-2">
+      Quarterly · method v1.0
+    </span>
+    <span
+      class="mono inline-flex items-center gap-2 rounded-[2px] border border-accent px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-accent"
+    >
+      <span class="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>
+      First edition in progress
+    </span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[560px] border-collapse text-left">
+      <caption class="sr-only">
+        Assay Index results by tool. No results have been published yet: the first
+        edition is in progress, so every value is empty.
+      </caption>
+      <thead>
+        <tr class="border-b border-line">
+          <th
+            scope="col"
+            class="mono px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-5"
+          >
+            Tool
+          </th>
+          {
+            ['Fixes tested', 'Alert closed', 'Verified fix'].map((h) => (
+              <th
+                scope="col"
+                class="mono px-4 py-3 text-right text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-5"
+              >
+                {h}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          tools.map((tool, i) => (
+            <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
+              <th
+                scope="row"
+                class="px-4 py-3 text-[14px] font-medium sm:px-5"
+              >
+                {tool}
+              </th>
+              {[0, 1, 2].map(() => (
+                <td class="mono px-4 py-3 text-right text-[14px] text-fg-2 opacity-45 sm:px-5">
+                  {EMPTY}
+                </td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<form
+  class="reveal mt-8 max-w-[560px]"
+  data-index-signup
+  data-mailto={INDEX_SIGNUP_MAILTO}
+  action={INDEX_SIGNUP_ENDPOINT || undefined}
+  method="post"
+  style="--reveal-delay:60ms"
+>
+  <label for="index-email" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">
+    Get the first edition when it publishes
+  </label>
+
+  <div class="mt-3.5 flex flex-col gap-2.5 xs:flex-row">
+    <input
+      id="index-email"
+      name="email"
+      type="email"
+      required
+      autocomplete="email"
+      placeholder="you@company.com"
+      class="min-w-0 flex-1 rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+    />
+    <button type="submit" class="btn btn-primary shrink-0">Notify me</button>
+  </div>
+
+  <p
+    class="mono mt-3 text-[11px] leading-relaxed text-fg-2"
+    data-signup-status
+    role="status"
+  >
+    One message when the edition lands. Nothing else, ever.
+  </p>
+</form>
+
+<script>
+  // No list provider is wired up yet. Rather than swallow the address or
+  // pretend it was stored, compose the mail client-side and say so.
+  const form = document.querySelector<HTMLFormElement>('[data-index-signup]');
+
+  if (form && !form.getAttribute('action')) {
+    const status = form.querySelector<HTMLElement>('[data-signup-status]');
+    const to = form.dataset.mailto ?? '';
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = form.querySelector<HTMLInputElement>('#index-email');
+      if (!input?.value) return;
+
+      const subject = encodeURIComponent('Assay Index, first edition');
+      const body = encodeURIComponent(
+        `Please let me know when the first edition of the Index publishes.\n\n${input.value}\n`,
+      );
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+
+      if (status) {
+        status.textContent = `Opening a message to ${to}. Send it and you are on the list.`;
+      }
+    });
+  }
+</script>

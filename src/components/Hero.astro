@@ -1,0 +1,42 @@
+---
+import Stamp from './Stamp.astro';
+---
+
+<section class="pt-16 pb-14 lg:pt-24 lg:pb-20">
+  <div class="shell">
+    <p class="eyebrow reveal">Independent verification for AI-authored code</p>
+
+    <h1 class="h1 reveal mt-5" style="--reveal-delay:60ms">
+      Your AI fixed it.<br />We check whether<br class="hidden lg:inline" /> it actually did.
+    </h1>
+
+    <div
+      class="mt-11 grid grid-cols-1 gap-12 lg:mt-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-20"
+    >
+      <div>
+        <p class="lede reveal" style="--reveal-delay:120ms">
+          Every AI security tool now writes its own patches and certifies its own work.
+          Assay is the third party that checks. One verdict on every AI-authored change,
+          before it merges.
+        </p>
+
+        <div class="reveal mt-8 flex flex-wrap gap-3" style="--reveal-delay:180ms">
+          <a href="#cta" class="btn btn-primary">Verify a pull request</a>
+          <a href="/the-index" class="btn btn-secondary">Read the Index</a>
+        </div>
+
+        <p class="mono reveal mt-5 text-[12px] text-fg-2" style="--reveal-delay:240ms">
+          Free forever on public repositories &middot; Installs in under a minute
+        </p>
+      </div>
+
+      <div class="reveal lg:pb-2 lg:pr-4" style="--reveal-delay:300ms">
+        <Stamp
+          verdict="Verified"
+          note="Closed · Behaviour held · No regression"
+          state="verified"
+        />
+      </div>
+    </div>
+  </div>
+</section>

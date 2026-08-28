@@ -1,0 +1,84 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { nav } from '../lib/site';
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-line bg-[color-mix(in_srgb,var(--bg)_84%,transparent)] backdrop-blur-[10px] backdrop-saturate-150"
+>
+  <div class="shell flex h-[60px] items-center justify-between gap-6">
+    <a href="/" class="shrink-0" aria-label="Assay, home">
+      <Logo />
+    </a>
+
+    <nav aria-label="Primary" class="hidden items-center gap-7 lg:flex">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class="text-[13.5px] font-medium text-fg-2 transition-colors hover:text-fg"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2.5">
+      <ThemeToggle />
+      <a href="/#cta" class="btn btn-primary btn-sm">Verify a pull request</a>
+      <button
+        type="button"
+        id="nav-toggle"
+        class="grid h-[34px] w-[34px] place-items-center rounded-[3px] border border-line text-fg-2 lg:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="nav-mobile"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6.5h18M3 12h18M3 17.5h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    id="nav-mobile"
+    aria-label="Primary, mobile"
+    class="hidden border-t border-line bg-bg lg:hidden"
+  >
+    <div class="shell flex flex-col py-2">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class="border-b border-line py-3.5 text-[15px] font-medium last:border-b-0"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('nav-mobile');
+
+  toggle?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden') === false;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+
+  // Any tap on a link closes the sheet.
+  menu?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      menu.classList.add('hidden');
+      toggle?.setAttribute('aria-expanded', 'false');
+      toggle?.setAttribute('aria-label', 'Open menu');
+    }),
+  );
+</script>

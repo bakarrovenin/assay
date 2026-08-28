@@ -1,0 +1,108 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+import Stamp from './Stamp.astro';
+import CodePanel from './CodePanel.astro';
+
+// Tokenised by hand. No runtime highlighter ships to the browser.
+const k = (s: string) => `<span class="tok-kw">${s}</span>`;
+const f = (s: string) => `<span class="tok-fn">${s}</span>`;
+const c = (s: string) => `<span class="tok-com">${s}</span>`;
+const str = (s: string) => `<span class="tok-str">${s}</span>`;
+const bad = (s: string) => `<span class="tok-bad">${s}</span>`;
+
+const code = [
+  c('// the agent&#39;s &quot;fix&quot;'),
+  `${k('def')} ${f('get_customer')}(customer_id):`,
+  `  ${k('if')} ${str('&quot;OR &#39;1&#39;=&#39;1&quot;')} ${k('in')} customer_id:`,
+  `    ${k('raise')} ${f('ValueError')}(...)`,
+  `  ${k('return')} db.${f('query')}(${str('f&quot;... id = &#39;{customer_id}&#39;&quot;')})`,
+  '',
+  c('// still works:'),
+  `  ${bad('1&#39; OR &#39;a&#39;=&#39;a')}`,
+  `  ${bad('1&#39;; DROP TABLE customers; --')}`,
+  `  ${bad('1&#39; UNION SELECT password FROM users --')}`,
+].join('\n');
+---
+
+<Section id="worked-example" tint>
+  <Eyebrow class="reveal">Anatomy of an overfitted patch</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">It fixed the test, not the bug.</h2>
+
+  <div class="mt-14 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+    <div class="min-w-0">
+      <div class="reveal prose-body space-y-5 text-[17px] leading-[1.6]">
+        <p>
+          A bug report says an attacker gets in using the text{' '}
+          <code
+            class="mono whitespace-nowrap rounded-[2px] border border-line bg-bg px-1.5 py-0.5 text-[14px]"
+            >1&#39; OR &#39;1&#39;=&#39;1</code
+          >. The agent writes a fix that rejects exactly that string. The scanner
+          re-runs, the finding closes, CI goes green.
+        </p>
+        <p class="font-semibold text-fg">The injection is untouched.</p>
+      </div>
+
+      <div class="reveal mt-11" style="--reveal-delay:120ms">
+        <Stamp
+          verdict="Not fixed"
+          note="Tests passing · Vuln reachable"
+          state="failed"
+        />
+      </div>
+
+      <details
+        class="reveal group mt-12 border-t border-line pt-5"
+        style="--reveal-delay:180ms"
+      >
+        <summary
+          class="mono flex cursor-pointer list-none items-center gap-2.5 text-[12px] uppercase tracking-[0.14em] text-fg-2 transition-colors hover:text-fg"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            class="shrink-0 transition-transform duration-200 group-open:rotate-90"
+          >
+            <path
+              d="M9 5l7 7-7 7"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+          Why the correct fix looks different
+        </summary>
+
+        <div class="prose-body mt-5 space-y-4 text-[15.5px] text-fg-2">
+          <p>
+            The real fix never inspects the payload at all. It stops building the query
+            by string concatenation:{' '}
+            <code
+              class="mono rounded-[2px] border border-line bg-bg px-1.5 py-0.5 text-[13.5px] text-fg"
+              >db.query(&quot;... id = %s&quot;, [customer_id])</code
+            >.
+          </p>
+          <p>
+            Any check that asks &ldquo;is the reported finding gone&rdquo; approves the
+            wrong patch. Only a check that asks &ldquo;is this class of injection still
+            reachable&rdquo; catches it.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="reveal min-w-0 lg:pt-1" style="--reveal-delay:60ms">
+      <CodePanel html={code} label="app/db.py · patched" />
+    </div>
+  </div>
+</Section>
+
+<style>
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

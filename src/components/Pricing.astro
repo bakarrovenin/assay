@@ -1,0 +1,85 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+
+const tiers = [
+  {
+    name: 'Open source',
+    price: 'Free forever',
+    priceNote: 'Public repositories',
+    body: 'Unlimited verdicts on public repositories. Every verdict is public.',
+    cta: { label: 'Verify a pull request', href: '#cta' },
+    featured: false,
+    state: null,
+  },
+  {
+    name: 'Team',
+    price: 'Per repository',
+    priceNote: 'Monthly',
+    body:
+      'Private repos, blocking policy, held-out test generation, dashboards.',
+    cta: { label: 'Talk to us', href: 'mailto:hello@assay.dev' },
+    featured: true,
+    state: 'Pricing in progress · talk to us',
+  },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    priceNote: 'Priced per agent under governance',
+    body:
+      'Signed attestation, audit export, SSO, org-wide policy, priced per agent under governance.',
+    cta: { label: 'Talk to us', href: 'mailto:hello@assay.dev' },
+    featured: false,
+    state: null,
+  },
+];
+---
+
+<Section id="pricing">
+  <Eyebrow class="reveal">Pricing</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">Free where the work is public.</h2>
+
+  <ul class="mt-12 grid grid-cols-1 gap-4 lg:mt-14 lg:grid-cols-3">
+    {
+      tiers.map((tier, i) => (
+        <li
+          class={`reveal flex flex-col rounded-[3px] border p-6 lg:p-7 ${
+            tier.featured ? 'border-accent bg-accent-tint' : 'border-line'
+          }`}
+          style={`--reveal-delay:${i * 60}ms`}
+        >
+          <h3 class="font-display text-[19px] font-bold leading-tight tracking-[-0.015em]">
+            {tier.name}
+          </h3>
+
+          <p class="mt-5 font-display text-[26px] font-bold leading-none tracking-[-0.02em]">
+            {tier.price}
+          </p>
+          <p class="micro mt-2.5">{tier.priceNote}</p>
+
+          <p class="mt-6 text-[14.5px] leading-[1.6] text-fg-2">{tier.body}</p>
+
+          {tier.state && (
+            <p class="mono mt-5 text-[10px] uppercase tracking-[0.14em] text-accent">
+              {tier.state}
+            </p>
+          )}
+
+          <div class="mt-auto pt-8">
+            <a
+              href={tier.cta.href}
+              class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              {tier.cta.label}
+            </a>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mono reveal mt-7 text-[11px] text-fg-2">
+    We have no customers yet. These are the terms we intend to hold to.
+  </p>
+</Section>

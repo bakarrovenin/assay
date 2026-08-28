@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Section from '../../components/Section.astro';
+
+interface PostFrontmatter {
+  title: string;
+  description: string;
+  date: string;
+  author: string;
+  readingTime: string;
+}
+
+interface PostModule {
+  frontmatter: PostFrontmatter;
+  url?: string;
+}
+
+const modules = import.meta.glob<PostModule>('./*.md', { eager: true });
+
+const posts = Object.values(modules)
+  .filter((post) => Boolean(post.url))
+  .sort(
+    (a, b) =>
+      new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime(),
+  );
+
+const formatDate = (value: string) =>
+  new Date(value).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+---
+
+<BaseLayout
+  title="Research"
+  description="Writing on autonomous remediation governance, overfitted patches, and what independent verification of AI-authored code actually requires."
+  path="/research/"
+>
+  <PageHeader
+    eyebrow="Research"
+    title="Notes on verifying what the machines did."
+    lede="Working notes on autonomous remediation governance: what overfitted patches look like in practice, where held-out testing holds and where it does not, and what the record has to contain to be worth anything."
+  />
+
+  <Section id="posts" rule={false}>
+    <ul class="max-w-[80ch]">
+      {
+        posts.map((post, i) => (
+          <li class="reveal border-b border-line" style={`--reveal-delay:${i * 60}ms`}>
+            <a href={post.url} class="group block py-8 lg:py-10">
+              <p class="micro">
+                <time datetime={post.frontmatter.date}>
+                  {formatDate(post.frontmatter.date)}
+                </time>
+                {' · '}
+                {post.frontmatter.readingTime}
+              </p>
+
+              <h2 class="mt-3.5 font-display text-[24px] font-bold leading-tight tracking-[-0.02em] transition-colors group-hover:text-accent lg:text-[30px]">
+                {post.frontmatter.title}
+              </h2>
+
+              <p class="mt-3.5 max-w-[62ch] text-[15.5px] leading-[1.6] text-fg-2">
+                {post.frontmatter.description}
+              </p>
+
+              <span class="mono mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-accent">
+                Read
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  class="transition-transform duration-200 group-hover:translate-x-1"
+                >
+                  <path
+                    d="M4 12h15M13 6l6 6-6 6"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="mono reveal mt-10 text-[11px] text-fg-2">
+      More as the first edition of the Index comes together.
+    </p>
+  </Section>
+</BaseLayout>

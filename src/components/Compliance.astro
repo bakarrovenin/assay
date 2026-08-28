@@ -1,0 +1,37 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+
+const frameworks = [
+  'EU AI Act Art. 12 & 14',
+  'NIST AI agent standards',
+  'CSA agentic trust',
+];
+---
+
+<Section id="the-record">
+  <Eyebrow class="reveal">The record</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">Prove a human oversaw the machine.</h2>
+
+  <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-16">
+    <p class="reveal text-[17px] leading-[1.62]">
+      From December 2027 the EU AI Act requires logged, documented human oversight of
+      high-risk AI systems. Singapore&rsquo;s IMDA framework already requires an audit
+      trail of which agent acted under whose authority. Assay produces a signed
+      attestation for every AI-authored change: which agent wrote it, what authority it
+      held, what verified it, and who approved. Independence is the part nobody can
+      self-certify.
+    </p>
+
+    <ul class="reveal flex flex-wrap content-start gap-2.5 lg:pt-1" style="--reveal-delay:60ms">
+      {
+        frameworks.map((name) => (
+          <li>
+            <span class="chip uppercase tracking-[0.1em]">{name}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Section>

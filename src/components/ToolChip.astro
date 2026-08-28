@@ -1,0 +1,51 @@
+---
+export type Glyph =
+  | 'circle-curve'
+  | 'cube'
+  | 'asterisk'
+  | 'dot'
+  | 'rounded-square'
+  | 'diamond'
+  | 'triangle'
+  | 'notched-square';
+
+interface Props {
+  name: string;
+  glyph: Glyph;
+  class?: string;
+}
+
+const { name, glyph, class: className = '' } = Astro.props;
+
+// Deliberately abstract. These are not traced logos: a half-accurate trace
+// of somebody else's mark looks worse than an honest geometric one, and
+// carries trademark exposure we have no reason to take on.
+const paths: Record<Glyph, string> = {
+  'circle-curve':
+    '<circle cx="12" cy="12" r="8.6" /><path d="M9.2 20.2v-3.4c0-1 .5-1.7 1.1-2.1" stroke-linecap="round" />',
+  cube: '<path d="M12 3.2 20 7.8v8.4L12 20.8 4 16.2V7.8L12 3.2Z" stroke-linejoin="round" />',
+  asterisk:
+    '<path d="M12 3.4v17.2M4.55 7.7l14.9 8.6M19.45 7.7 4.55 16.3" stroke-linecap="round" />',
+  dot: '<circle cx="12" cy="12" r="8.6" /><circle cx="12" cy="12" r="2.9" fill="currentColor" stroke="none" />',
+  'rounded-square': '<rect x="3.7" y="3.7" width="16.6" height="16.6" rx="5" />',
+  diamond: '<path d="M12 3.3 20.7 12 12 20.7 3.3 12 12 3.3Z" stroke-linejoin="round" />',
+  triangle: '<path d="M12 3.9 21 19.6H3L12 3.9Z" stroke-linejoin="round" />',
+  'notched-square':
+    '<path d="M3.7 3.7h10.1l6.5 6.5v10.1H3.7V3.7Z" stroke-linejoin="round" />',
+};
+---
+
+<span class={`chip ${className}`}>
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.4"
+    aria-hidden="true"
+    class="shrink-0 opacity-70"
+    set:html={paths[glyph]}
+  />
+  <span>{name}</span>
+</span>

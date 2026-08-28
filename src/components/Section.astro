@@ -1,0 +1,21 @@
+---
+interface Props {
+  id?: string;
+  /** Draw a hairline along the top edge. */
+  rule?: boolean;
+  /** Raised surface, used to separate adjacent sections without a box. */
+  tint?: boolean;
+  class?: string;
+  label?: string;
+}
+
+const { id, rule = true, tint = false, class: className = '', label } = Astro.props;
+---
+
+<section
+  id={id}
+  aria-label={label}
+  class={`section ${rule ? 'rule-t' : ''} ${tint ? 'bg-bg-2/70' : ''} ${className}`}
+>
+  <div class="shell"><slot /></div>
+</section>

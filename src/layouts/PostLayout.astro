@@ -1,0 +1,90 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description: string;
+    date: string;
+    author: string;
+    readingTime: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+const { title, description, date, author, readingTime } = frontmatter;
+
+const formatted = new Date(date).toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout title={title} description={description}>
+  <article>
+    <header class="rule-b pt-16 pb-12 lg:pt-24 lg:pb-16">
+      <div class="shell">
+        <p class="eyebrow reveal">Research</p>
+
+        <h1
+          class="reveal mt-5 font-display text-[clamp(32px,5vw,52px)] font-extrabold leading-[1.06] tracking-[-0.026em]"
+          style="--reveal-delay:60ms;max-width:22ch"
+        >
+          {title}
+        </h1>
+
+        <p class="lede reveal mt-6" style="--reveal-delay:120ms">{description}</p>
+
+        <p class="micro reveal mt-8" style="--reveal-delay:180ms">
+          {author} &middot; <time datetime={date}>{formatted}</time> &middot; {readingTime}
+        </p>
+      </div>
+    </header>
+
+    <div class="section">
+      <div class="shell">
+        <div class="longform post-body reveal">
+          <slot />
+        </div>
+
+        <p class="mt-16 border-t border-line pt-8">
+          <a href="/research" class="link-inline text-[15px] font-medium">
+            &larr; All research
+          </a>
+        </p>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style is:global>
+  /* Markdown produces bare headings, so they need the display treatment the
+     hand-built pages get from utility classes. */
+  .post-body h2 {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+    margin-top: 2.2em;
+    max-width: 24ch;
+  }
+
+  .post-body h2 + * {
+    margin-top: 0.75em;
+  }
+
+  .post-body blockquote {
+    border-left: 2px solid var(--accent);
+    padding-left: 22px;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--fg);
+    margin-block: 1.8em;
+  }
+
+  .post-body hr {
+    margin-block: 2.4em;
+  }
+</style>

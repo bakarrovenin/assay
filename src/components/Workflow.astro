@@ -1,0 +1,44 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+import PRPanel from './PRPanel.astro';
+
+const points = [
+  {
+    title: 'Vendor neutral.',
+    body: 'Verifies fixes from any agent, including the free DARPA systems.',
+  },
+  {
+    title: 'Blocking or advisory.',
+    body: 'Your policy, per repository.',
+  },
+  {
+    title: 'Signed record.',
+    body:
+      'Every verdict is an attestation naming the agent, the authority it held, and who approved.',
+  },
+];
+---
+
+<Section id="workflow">
+  <Eyebrow class="reveal">In your workflow</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">One status check on the pull request.</h2>
+
+  <div class="mt-14 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
+    <PRPanel />
+
+    <ul class="space-y-8 lg:pt-2">
+      {
+        points.map((point, i) => (
+          <li class="reveal border-t border-line pt-5" style={`--reveal-delay:${i * 60}ms`}>
+            <h3 class="font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">
+              {point.title}
+            </h3>
+            <p class="mt-2 text-[14.5px] leading-[1.6] text-fg-2">{point.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Section>

@@ -1,0 +1,41 @@
+---
+const roles = [
+  { n: '01', title: 'Writes the fix', by: 'the same vendor' },
+  { n: '02', title: 'Reviews the fix', by: 'the same vendor' },
+  { n: '03', title: 'Certifies the fix', by: 'the same vendor' },
+] as const;
+---
+
+<ol class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  {
+    roles.map((role, i) => (
+      <li
+        class="reveal flex min-h-[152px] flex-col border border-line p-5 rounded-[3px]"
+        style={`--reveal-delay:${i * 60}ms`}
+      >
+        <span class="mono text-[10px] uppercase tracking-[0.16em] text-fg-2">
+          Role {role.n}
+        </span>
+        <span class="mt-auto block font-display text-[19px] font-bold leading-tight tracking-[-0.015em] text-fg-2">
+          {role.title}
+        </span>
+        <span class="mono mt-2.5 text-[11px] text-fg-2 opacity-70">{role.by}</span>
+      </li>
+    ))
+  }
+
+  <li
+    class="reveal flex min-h-[152px] flex-col rounded-[3px] border border-accent bg-accent-tint p-5"
+    style="--reveal-delay:180ms"
+  >
+    <span class="mono text-[10px] uppercase tracking-[0.16em] text-accent">
+      Role 04, vacant
+    </span>
+    <span
+      class="mt-auto block font-display text-[19px] font-bold leading-tight tracking-[-0.015em] text-accent"
+    >
+      Independently verifies the fix
+    </span>
+    <span class="mono mt-2.5 text-[11px] text-accent opacity-80">nobody</span>
+  </li>
+</ol>

@@ -1,0 +1,117 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+import StatCard from './StatCard.astro';
+import VerificationChart from './VerificationChart.astro';
+
+const bars = [
+  {
+    label: 'Classic repair tool (GenProg)',
+    value: 2,
+    display: '2%',
+    note: '98% were overfitting',
+  },
+  {
+    label: 'Strong 2024 frontier method (D4C)',
+    value: 50,
+    display: '~50%',
+    note: 'roughly a coin flip',
+  },
+  {
+    label: 'Five frontier models on 20 real CVEs, 2026',
+    value: 50,
+    display: '50%',
+    note: 'best solve rate',
+  },
+];
+
+const stats = [
+  {
+    value: '45%',
+    label:
+      'of AI-generated code introduces an OWASP-class vulnerability, and the rate is flat across model generations.',
+    source: 'Veracode, 100+ LLMs, 2025',
+  },
+  {
+    value: '42%',
+    label: 'of committed code is now AI-generated.',
+    source: 'Sonar, 1,100+ developers, 2026',
+  },
+  {
+    value: '24%',
+    label: 'of developers merge AI code without reviewing it at all.',
+    source: 'Qodo, 2025',
+  },
+  {
+    value: '43%',
+    label: 'of AI code changes need debugging in production.',
+    source: 'Lightrun, 2026',
+  },
+];
+---
+
+<Section id="verification-gap">
+  <Eyebrow class="reveal">The verification gap</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">
+    A patch can pass every test and leave the hole wide open.
+  </h2>
+
+  <div class="mt-14 grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,1fr)] lg:gap-16">
+    <div class="space-y-7">
+      <p class="reveal text-[17px] leading-[1.6]">
+        Software is checked by tests. A test is a handful of examples of what the code
+        should do. It is{' '}
+        <strong class="font-semibold text-fg">a sample, not a specification</strong>.
+      </p>
+
+      <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:60ms">
+        When you tell an AI to make the tests pass, it{' '}
+        <strong class="font-semibold text-fg">optimises for the sample</strong>. Passing the
+        tests tells you the sample is satisfied and very little else.
+      </p>
+
+      <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:120ms">
+        Researchers have studied this for over a decade and named it{' '}
+        <strong class="font-semibold text-fg">overfitting</strong>.
+      </p>
+
+      <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:180ms">
+        The industry checks AI fixes by re-running the scanner. The AI was optimising to
+        make that scanner go quiet.{' '}
+        <strong class="font-semibold text-fg">It is a circular test.</strong>
+      </p>
+    </div>
+
+    <VerificationChart
+      title="Test-passing patches that were actually correct"
+      caption="Sources: Qi et al. via Invalidator (arXiv 2301.01113) · D4C 2024 · independent CVE study, May 2026"
+      bars={bars}
+      class="lg:pt-1"
+    />
+  </div>
+
+  <div class="mt-20 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-24 lg:grid-cols-4">
+    {
+      stats.map((stat, i) => (
+        <div class="reveal flex" style={`--reveal-delay:${i * 60}ms`}>
+          <StatCard
+            value={stat.value}
+            label={stat.label}
+            source={stat.source}
+            class="flex-1"
+          />
+        </div>
+      ))
+    }
+  </div>
+
+  <blockquote
+    class="reveal mt-20 border-l-2 border-accent pl-6 lg:mt-24 lg:pl-8"
+  >
+    <p class="font-display text-[22px] font-bold leading-[1.3] tracking-[-0.018em] lg:text-[27px]" style="max-width:28ch">
+      &ldquo;The alert turning green and the bug being fixed are two different events.
+      The industry measures the first one.&rdquo;
+    </p>
+  </blockquote>
+</Section>

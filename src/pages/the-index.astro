@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import IndexTable from '../components/IndexTable.astro';
+
+const columns = [
+  {
+    name: 'Fixes tested',
+    body:
+      'How many findings the tool was given. Every tool gets the identical finding, in whatever format it natively consumes, at its documented defaults.',
+  },
+  {
+    name: 'Alert closed',
+    body:
+      'How often the scanner went quiet afterwards. This is the number the industry currently reports, and it is the number every vendor can produce about itself.',
+  },
+  {
+    name: 'Verified fix',
+    body:
+      'How often the vulnerability was actually gone, measured on cases the tool never saw. This is the number nobody publishes.',
+  },
+];
+
+const rules = [
+  ['Corpus', 'Real vulnerabilities with known ground truth fixes, published by identifier so the selection can be audited.'],
+  ['Equal treatment', 'No tool gets extra context, a tuned prompt, or a second attempt another did not get.'],
+  ['No human editing', 'The proposed fix is captured exactly as produced. We do not repair a patch to flatter a tool.'],
+  ['Held-out first', 'Cases are generated before any tool sees the finding, and are never published in a form that could be trained against.'],
+  ['Right of reply', 'Every vendor sees its results before publication and its response is published unedited.'],
+  ['We are not exempt', 'If Assay ever ships a fix generation product, it will not appear in the Index.'],
+] as const;
+---
+
+<BaseLayout
+  title="The Index"
+  description="An independent, quarterly comparison of every commercial AI fix agent, run on the same harness, with the free DARPA systems as the baseline. First edition in progress."
+  path="/the-index"
+>
+  <PageHeader
+    eyebrow="The Index"
+    title="Which AI fixers actually work?"
+    lede="Nobody has independently tested them. Every published number comes from the vendor that wrote the fix. We run the same harness against every commercial fixer, quarterly, with the free DARPA systems as the baseline row, and we publish the methodology."
+    subLede="The first edition has not published. Until it does, every cell below is empty, because the alternative is inventing numbers, which is the exact thing this Index exists to catch."
+  />
+
+  <Section id="results" rule={false}>
+    <Eyebrow class="reveal">Results</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">First edition in progress.</h2>
+
+    <div class="mt-11">
+      <IndexTable />
+    </div>
+  </Section>
+
+  <Section id="what-verified-means" tint>
+    <Eyebrow class="reveal">In plain English</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">What a verified fix means.</h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        A scanner finds a problem. Something writes a patch. The scanner runs again and
+        the warning is gone. Almost everybody stops there and calls it fixed.
+      </p>
+      <p>
+        The trouble is that the patch was written specifically to make that warning go
+        away. Checking it by running the same scanner is like marking your own exam using
+        the answers you wrote. It tells you the patch did what it set out to do. It tells
+        you nothing about whether the underlying hole is still there.
+      </p>
+      <p>
+        So we do something different. Before the fixing tool ever sees the problem, we
+        write a set of tests it will never be shown: other ways of exploiting the same
+        weakness, and ordinary everyday inputs that ought to keep working. We lock those
+        away. After the patch lands, we run them.
+      </p>
+      <p>
+        <strong>A verified fix is one where the hole is closed on attacks the tool was
+        never shown, the software still behaves the way it used to for everybody else, the
+        patch did not quietly introduce a new problem, and nothing about the change
+        suggests the tool was manipulated into writing it.</strong>
+      </p>
+      <p>
+        It is a narrow claim, deliberately. It does not mean your code is secure. It means
+        this specific hole, on the paths we could test, is genuinely shut. Anyone offering
+        you a broader guarantee than that is offering you something we do not think can be
+        honestly given.
+      </p>
+    </div>
+  </Section>
+
+  <Section id="columns">
+    <Eyebrow class="reveal">Reading the table</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">The gap is the finding.</h2>
+
+    <p class="lede reveal mt-6">
+      Two of these three columns already exist in vendor marketing. The third is the one
+      that has never been measured, and the distance between the second and the third is
+      the entire point of the exercise.
+    </p>
+
+    <ol class="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-[3px] border border-line bg-line lg:grid-cols-3">
+      {
+        columns.map((col, i) => (
+          <li class="reveal flex flex-col bg-bg p-6 lg:p-7" style={`--reveal-delay:${i * 60}ms`}>
+            <span class="mono text-[10px] uppercase tracking-[0.16em] text-accent">
+              Column {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3 class="mt-4 font-display text-[18px] font-bold leading-tight tracking-[-0.014em]">
+              {col.name}
+            </h3>
+            <p class="mt-3 text-[14.5px] leading-[1.6] text-fg-2">{col.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section id="rules" tint>
+    <Eyebrow class="reveal">Rules we hold ourselves to</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      How we stop ourselves from cheating.
+    </h2>
+
+    <dl class="mt-11 max-w-[80ch]">
+      {
+        rules.map((rule, i) => (
+          <div
+            class="reveal grid grid-cols-1 gap-x-8 gap-y-1.5 border-t border-line py-5 sm:grid-cols-[minmax(0,190px)_minmax(0,1fr)]"
+            style={`--reveal-delay:${Math.min(i, 4) * 40}ms`}
+          >
+            <dt class="font-display text-[15.5px] font-bold tracking-[-0.008em]">
+              {rule[0]}
+            </dt>
+            <dd class="text-[15px] leading-[1.62] text-fg-2">{rule[1]}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="reveal mt-10">
+      <a href="/methodology#index-rules" class="link-inline text-[15px] font-medium">
+        Read the full methodology
+      </a>
+    </p>
+  </Section>
+</BaseLayout>

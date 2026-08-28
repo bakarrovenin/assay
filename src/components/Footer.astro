@@ -1,0 +1,54 @@
+---
+import Logo from './Logo.astro';
+import Marquee from './Marquee.astro';
+import Diagnostics from './Diagnostics.astro';
+import { footerColumns } from '../lib/site';
+
+const year = new Date().getFullYear();
+---
+
+<Marquee />
+
+<footer class="mt-16 border-t border-line pt-14 pb-12">
+  <div class="shell">
+    <div class="grid grid-cols-1 gap-10 md:grid-cols-[1.2fr_2.4fr]">
+      <div>
+        <Logo />
+        <p class="mt-4 max-w-[30ch] text-[14px] leading-[1.6] text-fg-2">
+          Independent verification for AI-authored code. We do not write fixes.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-4">
+        {
+          footerColumns.map((col) => (
+            <div>
+              <h2 class="micro mb-3.5 !opacity-100 text-fg-2">{col.title}</h2>
+              <ul class="space-y-2.5">
+                {col.links.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      class="text-[13.5px] text-fg-2 transition-colors hover:text-fg"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="mt-14 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-[1.2fr_2.4fr] md:items-start">
+      <p class="micro">
+        &copy; {year} Assay. Nullius in verba.
+      </p>
+      <div class="max-w-[520px]">
+        <Diagnostics />
+      </div>
+    </div>
+  </div>
+</footer>

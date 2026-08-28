@@ -1,0 +1,161 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path only, e.g. "/methodology". Used to build the canonical URL. */
+  path?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  path = Astro.url.pathname,
+  ogImage = '/og.png',
+} = Astro.props;
+
+// Astro emits directory-style output, so every page is served at a trailing
+// slash and the sitemap lists it that way. Normalise here so the canonical
+// never disagrees with the sitemap about which URL is the real one.
+const normalisedPath = path.endsWith('/') ? path : `${path}/`;
+const isHome = normalisedPath === '/';
+
+const canonical = new URL(normalisedPath, site.url).href;
+const ogUrl = new URL(ogImage, site.url).href;
+const fullTitle = isHome ? `${site.name} · ${site.tagline}` : `${title} · ${site.name}`;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: site.name,
+    url: site.url,
+    description: site.description,
+    email: site.email,
+    slogan: 'Nullius in verba. Take nobody’s word for it.',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: site.name,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Web',
+    url: site.url,
+    description: site.description,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Free forever on public repositories.',
+    },
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#E9E5DC" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl} />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* Preload the faces that paint above the fold. */}
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/archivo-latin-800-normal.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/inter-latin-400-normal.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/ibm-plex-mono-latin-400-normal.woff2"
+      crossorigin
+    />
+
+    <script is:inline>
+      // Set the theme before first paint. Stored choice wins; otherwise
+      // leave the attribute off and let prefers-color-scheme decide in CSS.
+      (function () {
+        try {
+          var stored = localStorage.getItem('assay-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // Scroll reveal. One observer for the whole document; elements opt in
+      // with .reveal and set their own stagger through --reveal-delay.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const targets = document.querySelectorAll<HTMLElement>('.reveal');
+
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-in'));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        targets.forEach((el) => io.observe(el));
+      }
+    </script>
+  </body>
+</html>

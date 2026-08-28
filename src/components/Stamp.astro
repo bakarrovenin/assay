@@ -1,0 +1,65 @@
+---
+interface Props {
+  /** The single uppercase word, e.g. VERIFIED. */
+  verdict: string;
+  /** Monospace sub-line beneath it. */
+  note: string;
+  state?: 'verified' | 'failed';
+  class?: string;
+}
+
+const { verdict, note, state = 'verified', class: className = '' } = Astro.props;
+const failed = state === 'failed';
+---
+
+<div
+  class={`stamp ${failed ? 'stamp-failed' : 'stamp-verified'} ${className}`}
+  role="img"
+  aria-label={`Stamp: ${verdict}. ${note}.`}
+>
+  <span class="stamp-verdict">{verdict}</span>
+  <span class="stamp-note">{note}</span>
+</div>
+
+<style>
+  .stamp {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 22px 12px;
+    border: 2.5px solid currentColor;
+    border-radius: 3px;
+    transform: rotate(-2.6deg);
+    max-width: 100%;
+  }
+
+  .stamp-verified {
+    color: var(--accent);
+    background: var(--accent-tint);
+  }
+
+  .stamp-failed {
+    color: var(--fail);
+    background: var(--fail-tint);
+  }
+
+  .stamp-verdict {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(24px, 4.4vw, 34px);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .stamp-note {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 1.35;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+    opacity: 0.85;
+  }
+</style>

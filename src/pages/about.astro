@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Stamp from '../components/Stamp.astro';
+---
+
+<BaseLayout
+  title="About"
+  description="Assay is an independent check on AI-authored security fixes. What the company is for, where the credo comes from, and who is building it."
+  path="/about"
+>
+  <PageHeader
+    eyebrow="About"
+    title="An independent check, and nothing else."
+    lede="Assay exists to answer one question that currently has no impartial answer: when an AI writes a security fix, did the fix actually work? We do not write patches, we do not sell a scanner, and we do not intend to. The moment we do, our answer stops being worth anything."
+  />
+
+  <Section id="what-for" rule={false}>
+    <Eyebrow class="reveal">What the company is for</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      One job, held deliberately narrow.
+    </h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        Software agents now write security patches, attach them to pull requests, mark
+        their own work as passing, and watch automation merge them. That authority arrived
+        in increments and nobody ever had a meeting about granting it. The check that
+        should sit beside it, the one that establishes independently what the agent
+        actually did, was never built.
+      </p>
+      <p>
+        Every other field that lets somebody make safety-critical changes has that check.
+        Accounts get audited by people who did not prepare them. Trials get reviewed by
+        somebody other than the sponsor. Not because authors are dishonest, but because the
+        assumptions that produced the work also produce the check on the work, and the
+        blind spot is shared.
+      </p>
+      <p>
+        So we do four things and refuse to do a fifth. We establish that the reported hole
+        is genuinely gone rather than merely quiet. We test the patch on cases written
+        before the agent was invoked and kept out of everything it could read. We check
+        that nothing was broken or newly introduced. And we look at whether the agent wrote
+        what it meant to write, or what somebody planted in a file it read.
+      </p>
+      <p>
+        The fifth thing, the one we will not do, is write the fix. Independence is not a
+        feature you add to a roadmap. It is a property of who is doing the looking, and it
+        is the only thing here that an author genuinely cannot sell you.
+      </p>
+    </div>
+  </Section>
+
+  <Section id="credo" tint>
+    <Eyebrow class="reveal">The credo</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Nullius in verba.</h2>
+
+    <div class="mt-11 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
+      <div class="longform reveal">
+        <p>
+          The Royal Society took <em>nullius in verba</em> as its motto in 1660. It
+          translates roughly as <strong>take nobody&rsquo;s word for it</strong>, and it
+          was a deliberate break with a tradition of settling questions by citing an
+          authority. The Society&rsquo;s position was that a claim is worth what its
+          evidence is worth, and that the evidence has to be something another person can
+          go and check.
+        </p>
+        <p>
+          That is the whole argument of this company, stated three and a half centuries
+          early. A vendor telling you its patch worked is an authority citing itself. The
+          useful version is a result somebody else produced, by a method you can read, on
+          cases you can re-run.
+        </p>
+        <p>
+          Which is why the harness is open source, the Index corpus is published by
+          identifier, every verdict ships with the command that reproduces it, and the
+          methodology page spends as much room on where the method fails as on where it
+          works. If you find a way to make Assay approve a patch that does not fix the
+          vulnerability, that is the most valuable bug in the product, and we would like to
+          hear about it at{' '}
+          <a href="mailto:security@assay.dev">security@assay.dev</a>.
+        </p>
+        <p>
+          Including ours. Especially ours.
+        </p>
+      </div>
+
+      <div class="reveal flex justify-start lg:justify-center lg:pt-4" style="--reveal-delay:60ms">
+        <Stamp
+          verdict="Verified"
+          note="Closed · Behaviour held · No regression"
+          state="verified"
+        />
+      </div>
+    </div>
+  </Section>
+
+  <Section id="who">
+    <Eyebrow class="reveal">Who is building it</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Early, and saying so.</h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        Assay is early. There is no customer list on this site because there are no
+        customers yet, no logos because there are no logos, and no results in the Index
+        because the first edition has not published. Putting placeholders in any of those
+        places would be the exact failure this company was started to point at.
+      </p>
+      <p>
+        What exists is the method, published in full, and a harness being built in the
+        open. The founder&rsquo;s background is in application security and in the
+        automated program repair literature that named overfitting long before the current
+        generation of tools existed, which is the whole reason this looked like a gap
+        rather than a novelty.
+      </p>
+      <p>
+        If you run security for a team shipping AI-authored code, or you build one of the
+        fix agents the Index will cover, we would rather hear from you now than after the
+        first edition publishes. Vendors get their results and the underlying artifacts
+        before anything goes out, with a window to respond, and responses are published
+        unedited.
+      </p>
+    </div>
+
+    <div class="reveal mt-11 flex flex-wrap gap-3">
+      <a href="mailto:hello@assay.dev" class="btn btn-primary">Get in touch</a>
+      <a href="/methodology" class="btn btn-secondary">Read the methodology</a>
+    </div>
+  </Section>
+</BaseLayout>

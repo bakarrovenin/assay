@@ -1,0 +1,104 @@
+---
+// Client assay. Reads only this browser, makes no network calls, stores
+// nothing. Decorative, so it is hidden from assistive technology.
+const rows = [
+  ['User agent', 'ua'],
+  ['Viewport', 'viewport'],
+  ['Colour scheme', 'scheme'],
+  ['Cores', 'cores'],
+  ['Memory', 'memory'],
+  ['Timezone', 'tz'],
+  ['JavaScript', 'js'],
+  ['Cookies', 'cookies'],
+  ['Local storage', 'storage'],
+] as const;
+---
+
+<div
+  aria-hidden="true"
+  class="mono rounded-[3px] border border-line bg-bg-2/40 p-4 text-[11px] leading-[1.9]"
+  data-diagnostics
+>
+  <div class="mb-3 border-b border-line pb-2 uppercase tracking-[0.18em] text-fg-2">
+    Client assay
+  </div>
+
+  {
+    rows.map(([label, key]) => (
+      <div class="flex gap-3">
+        <span class="w-[110px] shrink-0 uppercase tracking-[0.1em] text-fg-2 sm:w-[130px]">
+          {label}
+        </span>
+        <span class="min-w-0 flex-1 truncate" data-field={key}>
+          &mdash;
+        </span>
+      </div>
+    ))
+  }
+
+  <div class="mt-3 flex gap-3 border-t border-line pt-2">
+    <span class="w-[110px] shrink-0 uppercase tracking-[0.1em] text-fg-2 sm:w-[130px]">
+      Verdict
+    </span>
+    <span class="font-medium text-fail">UNVERIFIED</span>
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector('[data-diagnostics]');
+
+  if (root) {
+    // Every read is guarded: any of these can be absent or throw depending
+    // on the browser and its privacy settings.
+    const read = (fn: () => string | null | undefined): string => {
+      try {
+        const v = fn();
+        return v == null || v === '' ? '—' : v;
+      } catch {
+        return '—';
+      }
+    };
+
+    const values: Record<string, string> = {
+      ua: read(() => navigator.userAgent),
+      viewport: read(
+        () => `${window.innerWidth} × ${window.innerHeight}`,
+      ),
+      scheme: read(() =>
+        window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      ),
+      cores: read(() => {
+        const n = navigator.hardwareConcurrency;
+        return typeof n === 'number' ? String(n) : null;
+      }),
+      memory: read(() => {
+        const gb = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+        return typeof gb === 'number' ? `${gb} GB` : null;
+      }),
+      tz: read(() => Intl.DateTimeFormat().resolvedOptions().timeZone),
+      js: 'enabled',
+      cookies: read(() => (navigator.cookieEnabled ? 'enabled' : 'disabled')),
+      storage: read(() => {
+        const k = '__assay_probe__';
+        localStorage.setItem(k, '1');
+        localStorage.removeItem(k);
+        return 'available';
+      }),
+    };
+
+    for (const [key, value] of Object.entries(values)) {
+      const cell = root.querySelector(`[data-field="${key}"]`);
+      if (cell) cell.textContent = value;
+    }
+
+    // The viewport line is the one value that changes under the reader.
+    let frame = 0;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const cell = root.querySelector('[data-field="viewport"]');
+        if (cell) cell.textContent = `${window.innerWidth} × ${window.innerHeight}`;
+      });
+    });
+  }
+</script>

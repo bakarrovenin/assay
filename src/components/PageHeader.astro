@@ -1,0 +1,36 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  lede: string;
+  subLede?: string;
+}
+
+const { eyebrow, title, lede, subLede } = Astro.props;
+---
+
+<header class="rule-b pt-16 pb-14 lg:pt-24 lg:pb-20">
+  <div class="shell">
+    <p class="eyebrow reveal">{eyebrow}</p>
+
+    <h1
+      class="reveal mt-5 font-display text-[clamp(34px,5.4vw,58px)] font-extrabold leading-[1.05] tracking-[-0.026em]"
+      style="--reveal-delay:60ms;max-width:22ch"
+    >
+      {title}
+    </h1>
+
+    <p class="lede reveal mt-7" style="--reveal-delay:120ms">{lede}</p>
+
+    {
+      subLede && (
+        <p
+          class="reveal mt-5 max-w-[58ch] text-[15px] leading-[1.6] text-fg-2"
+          style="--reveal-delay:180ms"
+        >
+          {subLede}
+        </p>
+      )
+    }
+  </div>
+</header>
