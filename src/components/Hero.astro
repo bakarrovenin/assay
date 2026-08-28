@@ -1,5 +1,5 @@
 ---
-import Stamp from './Stamp.astro';
+import HeroVerdictPanel from './HeroVerdictPanel.astro';
 ---
 
 <section class="pt-16 pb-14 lg:pt-24 lg:pb-20">
@@ -11,7 +11,7 @@ import Stamp from './Stamp.astro';
     </h1>
 
     <div
-      class="mt-11 grid grid-cols-1 gap-12 lg:mt-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-20"
+      class="mt-11 grid grid-cols-1 gap-12 lg:mt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:items-start lg:gap-16"
     >
       <div>
         <p class="lede reveal" style="--reveal-delay:120ms">
@@ -30,12 +30,8 @@ import Stamp from './Stamp.astro';
         </p>
       </div>
 
-      <div class="reveal lg:pb-2 lg:pr-4" style="--reveal-delay:300ms">
-        <Stamp
-          verdict="Verified"
-          note="Closed · Behaviour held · No regression"
-          state="verified"
-        />
+      <div class="reveal" style="--reveal-delay:300ms">
+        <HeroVerdictPanel />
       </div>
     </div>
   </div>
