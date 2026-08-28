@@ -1,5 +1,5 @@
 ---
-import { INDEX_SIGNUP_ENDPOINT, INDEX_SIGNUP_MAILTO } from '../lib/site';
+import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
 
 // No results yet. Every cell is an empty state on purpose: the first edition
 // has not published, and inventing numbers here would be the exact failure
@@ -86,7 +86,6 @@ const EMPTY = '—';
 <form
   class="reveal mt-8 max-w-[560px]"
   data-index-signup
-  data-mailto={INDEX_SIGNUP_MAILTO}
   action={INDEX_SIGNUP_ENDPOINT || undefined}
   method="post"
   style="--reveal-delay:60ms"
@@ -118,27 +117,18 @@ const EMPTY = '—';
 </form>
 
 <script>
-  // No list provider is wired up yet. Rather than swallow the address or
-  // pretend it was stored, compose the mail client-side and say so.
+  // No list provider is wired up yet, and there is no mail fallback. Say so
+  // rather than accepting an address we have nowhere to put.
   const form = document.querySelector<HTMLFormElement>('[data-index-signup]');
 
   if (form && !form.getAttribute('action')) {
     const status = form.querySelector<HTMLElement>('[data-signup-status]');
-    const to = form.dataset.mailto ?? '';
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      const input = form.querySelector<HTMLInputElement>('#index-email');
-      if (!input?.value) return;
-
-      const subject = encodeURIComponent('Assay Index, first edition');
-      const body = encodeURIComponent(
-        `Please let me know when the first edition of the Index publishes.\n\n${input.value}\n`,
-      );
-      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-
       if (status) {
-        status.textContent = `Opening a message to ${to}. Send it and you are on the list.`;
+        status.textContent =
+          'Signup is not connected yet. Watch the repository for the first edition.';
       }
     });
   }

@@ -18,7 +18,7 @@ const tiers = [
     priceNote: 'Monthly',
     body:
       'Private repos, blocking policy, held-out test generation, dashboards.',
-    cta: { label: 'Talk to us', href: 'mailto:hello@assay.dev' },
+    cta: { label: 'Talk to us', href: null },
     featured: true,
     state: 'Pricing in progress · talk to us',
   },
@@ -28,7 +28,7 @@ const tiers = [
     priceNote: 'Priced per agent under governance',
     body:
       'Signed attestation, audit export, SSO, org-wide policy, priced per agent under governance.',
-    cta: { label: 'Talk to us', href: 'mailto:hello@assay.dev' },
+    cta: { label: 'Talk to us', href: null },
     featured: false,
     state: null,
   },
@@ -67,12 +67,23 @@ const tiers = [
           )}
 
           <div class="mt-auto pt-8">
-            <a
-              href={tier.cta.href}
-              class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}
-            >
-              {tier.cta.label}
-            </a>
+            {tier.cta.href ? (
+              <a
+                href={tier.cta.href}
+                class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}
+              >
+                {tier.cta.label}
+              </a>
+            ) : (
+              <span
+                class={`btn w-full cursor-default opacity-60 ${
+                  tier.featured ? 'btn-primary' : 'btn-secondary'
+                }`}
+                aria-disabled="true"
+              >
+                {tier.cta.label}
+              </span>
+            )}
           </div>
         </li>
       ))

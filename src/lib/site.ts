@@ -5,8 +5,11 @@ export const site = {
   tagline: 'Independent verification for AI-authored code',
   description:
     'Every AI security tool writes its own patches and certifies its own work. Assay is the third party that checks. One verdict on every AI-authored change, before it merges.',
-  email: 'security@assay.dev',
 } as const;
+
+/** Where security bypass reports go. GitHub private vulnerability reporting. */
+export const SECURITY_ADVISORY_URL =
+  'https://github.com/bakarrovenin/assay/security/advisories/new';
 
 export const nav = [
   { label: 'Product', href: '/#how-it-works' },
@@ -38,7 +41,7 @@ export const footerColumns = [
     title: 'Company',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Contact', href: 'mailto:hello@assay.dev' },
+      { label: 'Contact', href: 'https://linkedin.com/company/assaydev' },
     ],
   },
   {
@@ -56,9 +59,8 @@ export const METHOD_VERSION = '1.0';
 /**
  * Where the Index email capture posts.
  *
- * Empty until a list provider is wired up. While it is empty the form falls
- * back to composing a mail message client-side, so the control is never a
- * dead end and no address is collected anywhere we cannot honour.
+ * Empty until a list provider is wired up. There is no mail fallback any more,
+ * so while this is empty the form stays visible but tells the reader it is not
+ * connected rather than pretending to have stored the address.
  */
 export const INDEX_SIGNUP_ENDPOINT = '';
-export const INDEX_SIGNUP_MAILTO = 'index@assay.dev';

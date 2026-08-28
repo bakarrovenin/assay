@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Stamp from '../components/Stamp.astro';
+import { SECURITY_ADVISORY_URL } from '../lib/site';
 ---
 
 <BaseLayout
@@ -79,8 +80,10 @@ import Stamp from '../components/Stamp.astro';
           methodology page spends as much room on where the method fails as on where it
           works. If you find a way to make Assay approve a patch that does not fix the
           vulnerability, that is the most valuable bug in the product, and we would like to
-          hear about it at{' '}
-          <a href="mailto:security@assay.dev">security@assay.dev</a>.
+          hear about it.{' '}
+          <a href={SECURITY_ADVISORY_URL} rel="noopener">
+            Report a bypass via GitHub private vulnerability reporting
+          </a>.
         </p>
         <p>
           Including ours. Especially ours.
@@ -125,7 +128,9 @@ import Stamp from '../components/Stamp.astro';
     </div>
 
     <div class="reveal mt-11 flex flex-wrap gap-3">
-      <a href="mailto:hello@assay.dev" class="btn btn-primary">Get in touch</a>
+      <span class="btn btn-primary cursor-default opacity-60" aria-disabled="true"
+        >Get in touch</span
+      >
       <a href="/methodology" class="btn btn-secondary">Read the methodology</a>
     </div>
   </Section>
