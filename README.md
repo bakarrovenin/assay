@@ -17,8 +17,12 @@ npm run preview  # serve dist/ exactly as a static host would
 npm run check    # astro check, must stay at 0 errors
 ```
 
-Deploy target is Vercel. No `vercel.json` is needed: the output is plain
-static files and the defaults serve them correctly.
+Deploy target is Vercel, live at <https://assay.website>. No `vercel.json` is
+needed: the output is plain static files and the defaults serve them correctly.
+
+Commits must be authored by an email on the Vercel team, or Vercel blocks the
+deployment with "Git author ... must have access to the team". The repo-local
+git identity is set accordingly.
 
 ## Before launch
 
@@ -26,9 +30,16 @@ One thing is deliberately unwired:
 
 - **`INDEX_SIGNUP_ENDPOINT` in `src/lib/site.ts` is empty.** The Index email
   capture is a real, labelled, validating form, but there is no list provider
-  behind it. While the constant is empty the form composes a mail message
-  client-side rather than silently swallowing the address. Point it at a
-  provider and the fallback turns itself off.
+  behind it. While the constant is empty the form stays visible and says it is
+  not connected, rather than accepting an address there is nowhere to put.
+  Point it at a provider and it starts working.
+
+There is no contact email anywhere on the site, by choice. Security reports go
+to GitHub private vulnerability reporting via `SECURITY_ADVISORY_URL` in
+`src/lib/site.ts`, which requires **Private vulnerability reporting** to be
+enabled under Settings > Code security or the link 404s. Three controls have no
+target as a result and are deliberately left visible but `aria-disabled`: the
+two pricing "Talk to us" buttons and "Get in touch" on /about.
 
 Everything else on the site is either real or an explicit empty state. There
 are no fabricated customers, logos, testimonials or Index results anywhere,
