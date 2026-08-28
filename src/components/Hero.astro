@@ -2,37 +2,102 @@
 import HeroVerdictPanel from './HeroVerdictPanel.astro';
 ---
 
-<section class="pt-16 pb-14 lg:pt-24 lg:pb-20">
-  <div class="shell">
-    <p class="eyebrow reveal">Independent verification for AI-authored code</p>
+<section class="hero">
+  <div class="shell hero-grid">
+    <div class="hero-text">
+      <p class="eyebrow reveal">Independent verification for AI-authored code</p>
 
-    <h1 class="h1 reveal mt-5" style="--reveal-delay:60ms">
-      Your AI fixed it.<br />We check whether<br class="hidden lg:inline" /> it actually did.
-    </h1>
+      <h1 class="h1 reveal mt-5" style="--reveal-delay:60ms">
+        Your AI fixed it.<br />We check whether<br /> it actually did.
+      </h1>
 
-    <div
-      class="mt-11 grid grid-cols-1 gap-12 lg:mt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:items-start lg:gap-16"
-    >
-      <div>
-        <p class="lede reveal" style="--reveal-delay:120ms">
-          Every AI security tool now writes its own patches and certifies its own work.
-          Assay is the third party that checks. One verdict on every AI-authored change,
-          before it merges.
-        </p>
+      <p class="lede reveal mt-7" style="--reveal-delay:120ms">
+        Every AI security tool now writes its own patches and certifies its own work.
+        Assay is the third party that checks. One verdict on every AI-authored change,
+        before it merges.
+      </p>
 
-        <div class="reveal mt-8 flex flex-wrap gap-3" style="--reveal-delay:180ms">
-          <a href="#cta" class="btn btn-primary">Verify a pull request</a>
-          <a href="/the-index" class="btn btn-secondary">Read the Index</a>
-        </div>
-
-        <p class="mono reveal mt-5 text-[12px] text-fg-2" style="--reveal-delay:240ms">
-          Free forever on public repositories &middot; Installs in under a minute
-        </p>
+      <div class="reveal mt-8 flex flex-wrap gap-3" style="--reveal-delay:180ms">
+        <a href="#cta" class="btn btn-primary">Verify a pull request</a>
+        <a href="/the-index" class="btn btn-secondary">Read the Index</a>
       </div>
 
-      <div class="reveal" style="--reveal-delay:300ms">
-        <HeroVerdictPanel />
-      </div>
+      <p class="mono reveal mt-5 text-[12px] text-fg-2" style="--reveal-delay:240ms">
+        Free forever on public repositories &middot; Installs in under a minute
+      </p>
+    </div>
+
+    <div class="hero-panel reveal" style="--reveal-delay:300ms">
+      <HeroVerdictPanel />
     </div>
   </div>
 </section>
+
+<style>
+  .hero {
+    display: flex;
+    align-items: center;
+    padding-block: 48px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+
+  /* Text column gets a tighter measure than the shell, so the headline sets to
+     three lines instead of spanning the page. */
+  .hero-text {
+    max-width: 580px;
+  }
+
+  /* One column below 900px: text first, then the panel, centred. */
+  .hero-panel {
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (min-width: 960px) {
+    .hero {
+      /* The whole hero occupies exactly one screen under the 61px nav, with
+         the two columns centred against each other. svh rather than vh so a
+         mobile browser's collapsing chrome cannot clip the panel. */
+      min-height: calc(100svh - 61px);
+      padding-block: 56px;
+    }
+
+    .hero-grid {
+      /* Fluid panel track. A fixed 520px starves the text column between
+         900 and 1300px, which breaks the headline onto a fourth line. */
+      grid-template-columns: minmax(0, 1fr) clamp(360px, 40vw, 520px);
+      align-items: center;
+      gap: 48px;
+      width: 100%;
+    }
+
+    .hero-panel {
+      justify-content: flex-end;
+    }
+  }
+
+  @media (min-width: 1180px) {
+    .hero-grid {
+      gap: 56px;
+    }
+  }
+
+  /* Short laptop screens: keep the whole hero on one screen by tightening the
+     outer padding rather than by shrinking or clipping the panel. */
+  @media (min-width: 960px) and (max-height: 840px) {
+    .hero {
+      padding-block: 36px;
+    }
+  }
+
+  @media (min-width: 960px) and (max-height: 730px) {
+    .hero {
+      padding-block: 24px;
+    }
+  }
+</style>

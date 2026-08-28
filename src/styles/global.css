@@ -310,8 +310,10 @@
   .h1 {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(40px, 6.6vw, 76px);
-    line-height: 1.02;
+    /* Sized for the 580px hero text column, not the full shell. Any larger
+       and "We check whether" spills to a fourth line. */
+    font-size: clamp(34px, 4.2vw, 50px);
+    line-height: 1.04;
     letter-spacing: -0.028em;
   }
 

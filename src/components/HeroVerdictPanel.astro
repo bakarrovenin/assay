@@ -94,18 +94,22 @@ const label = [
 </div>
 
 <style>
-  /* Fixed palette: this panel stays dark whichever theme the page is in, so it
-     cannot use the semantic tokens, which flip. The values are the site's own
-     dark-theme colours. */
+  /* Token driven, so the panel follows the theme rather than pinning itself
+     to dark. In dark mode these resolve to very nearly the original values:
+     --bg is #14161A and --bg-2 is #1B1E24, against the #14161A and #1A1D22 the
+     panel was hardcoded to. */
   .assay-panel {
-    --p-ink: #14161a;
-    --p-panel: #1a1d22;
-    --p-bone: #f5f3ee;
-    --p-graphite: #9aa1ab;
-    --p-graphite-dim: #858c96;
-    --p-line: #2a2e35;
-    --p-blue: #5b9bff;
-    --p-red: #e5615b;
+    --p-ink: var(--bg);
+    --p-panel: var(--bg-2);
+    --p-bone: var(--fg);
+    --p-graphite: var(--fg-2);
+    /* 86% dipped the bot pill and PR number to 4.45:1 on paper, just under
+       AA. 93% keeps the hierarchy and clears the bar in both themes. */
+    --p-graphite-dim: color-mix(in srgb, var(--fg-2) 93%, var(--bg));
+    --p-line: var(--line);
+    --p-blue: var(--accent);
+    --p-red: var(--fail);
+    --p-red-dim: color-mix(in srgb, var(--fail) 76%, var(--fg));
 
     width: 100%;
     max-width: 520px;
@@ -118,7 +122,7 @@ const label = [
 
   /* Incoming PR: the thing being checked */
   .pr {
-    padding: 18px 20px 16px;
+    padding: 15px 20px 14px;
     border-bottom: 1px solid var(--p-line);
     background: var(--p-ink);
   }
@@ -182,7 +186,7 @@ const label = [
 
   /* Assay verdict */
   .assay {
-    padding: 18px 20px 20px;
+    padding: 15px 20px 16px;
   }
   .eyebrow {
     display: flex;
@@ -193,7 +197,7 @@ const label = [
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--p-graphite);
-    margin-bottom: 16px;
+    margin-bottom: 13px;
   }
   .eyebrow .mark {
     width: 15px;
@@ -219,7 +223,7 @@ const label = [
     display: grid;
     grid-template-columns: 20px 1fr;
     gap: 12px;
-    padding: 11px 0;
+    padding: 9px 0;
     border-top: 1px solid var(--p-line);
     align-items: start;
   }
@@ -255,14 +259,14 @@ const label = [
     color: var(--p-graphite);
   }
   .check.failed .c-detail {
-    color: #dda29e;
+    color: var(--p-red-dim);
   }
 
   /* Verdict stamp */
   .verdict {
     display: flex;
     justify-content: center;
-    padding: 26px 0 20px;
+    padding: 20px 0 14px;
   }
   .stamp {
     font-family: var(--font-mono);
@@ -287,7 +291,7 @@ const label = [
   .foot {
     display: flex;
     justify-content: flex-end;
-    padding: 16px 20px 0;
+    padding: 12px 20px 0;
   }
   .evidence {
     font-family: var(--font-mono);
