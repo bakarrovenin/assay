@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import EmailModal from '../components/EmailModal.astro';
 import { site } from '../lib/site';
 
 interface Props {
@@ -133,6 +134,7 @@ const jsonLd = [
       <slot />
     </main>
     <Footer />
+    <EmailModal />
 
     <script>
       // Scroll reveal. One observer for the whole document; elements opt in

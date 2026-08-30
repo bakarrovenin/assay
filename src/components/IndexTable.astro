@@ -90,6 +90,8 @@ const EMPTY = '—';
   method="post"
   style="--reveal-delay:60ms"
 >
+  <input type="hidden" name="source" value="index" />
+
   <label for="index-email" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">
     Get the first edition when it publishes
   </label>
@@ -117,19 +119,51 @@ const EMPTY = '—';
 </form>
 
 <script>
-  // No list provider is wired up yet, and there is no mail fallback. Say so
-  // rather than accepting an address we have nowhere to put.
+  import { submitSignup } from '../lib/signup';
+
   const form = document.querySelector<HTMLFormElement>('[data-index-signup]');
+  const status = form?.querySelector<HTMLElement>('[data-signup-status]');
+  const input = form?.querySelector<HTMLInputElement>('#index-email');
+  const button = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
 
-  if (form && !form.getAttribute('action')) {
-    const status = form.querySelector<HTMLElement>('[data-signup-status]');
+  const RESTING = status?.textContent ?? '';
 
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
+  form?.addEventListener('submit', async (event) => {
+    // Handled here rather than by a native POST, so the reader stays on the
+    // page and gets the result inline.
+    event.preventDefault();
+
+    const email = input?.value.trim();
+    if (!email) return;
+
+    const label = button?.textContent ?? 'Notify me';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Please wait';
+    }
+    if (status) status.textContent = 'Sending, please wait.';
+
+    const result = await submitSignup(email, 'index');
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = label;
+    }
+
+    if (result.ok) {
+      form.reset();
       if (status) {
         status.textContent =
-          'Signup is not connected yet. Watch the repository for the first edition.';
+          'You are on the list. One message when the edition lands.';
       }
-    });
-  }
+      return;
+    }
+
+    if (status) status.textContent = result.message;
+  });
+
+  // Put the resting line back once the reader starts typing again.
+  input?.addEventListener('input', () => {
+    if (status && status.textContent !== RESTING) status.textContent = RESTING;
+  });
 </script>

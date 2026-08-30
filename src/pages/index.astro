@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroGovernance from '../components/HeroGovernance.astro';
 import Hero from '../components/Hero.astro';
 import EcosystemBar from '../components/EcosystemBar.astro';
 import VerificationGap from '../components/VerificationGap.astro';
@@ -16,6 +17,8 @@ import { site } from '../lib/site';
 ---
 
 <BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
+  <HeroGovernance />
+  <span id="see-it-work" aria-hidden="true"></span>
   <Hero />
   <EcosystemBar />
   <VerificationGap />

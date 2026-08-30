@@ -57,10 +57,11 @@ export const footerColumns = [
 export const METHOD_VERSION = '1.0';
 
 /**
- * Where the Index email capture posts.
+ * Where the email captures post. Loops hosted newsletter form endpoint.
  *
- * Empty until a list provider is wired up. There is no mail fallback any more,
- * so while this is empty the form stays visible but tells the reader it is not
- * connected rather than pretending to have stored the address.
+ * Shared by the Index signup and the "Verify a pull request" modal. The two
+ * are told apart by the userGroup field they send, not by the URL. See
+ * submitSignup in ./signup.
  */
-export const INDEX_SIGNUP_ENDPOINT = '';
+export const INDEX_SIGNUP_ENDPOINT =
+  'https://app.loops.so/api/newsletter-form/cmtg0rra2024z0jzslh4couj3';

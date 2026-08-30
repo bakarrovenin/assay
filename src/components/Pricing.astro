@@ -8,7 +8,7 @@ const tiers = [
     price: 'Free forever',
     priceNote: 'Public repositories',
     body: 'Unlimited verdicts on public repositories. Every verdict is public.',
-    cta: { label: 'Verify a pull request', href: '#cta' },
+    cta: { label: 'Verify a pull request', href: null, modal: true },
     featured: false,
     state: null,
   },
@@ -67,7 +67,15 @@ const tiers = [
           )}
 
           <div class="mt-auto pt-8">
-            {tier.cta.href ? (
+            {tier.cta.modal ? (
+              <button
+                type="button"
+                data-verify-cta
+                class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}
+              >
+                {tier.cta.label}
+              </button>
+            ) : tier.cta.href ? (
               <a
                 href={tier.cta.href}
                 class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}

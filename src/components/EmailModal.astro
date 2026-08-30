@@ -1,0 +1,191 @@
+---
+import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
+
+// Same Loops endpoint as the Index signup, told apart by the userGroup the
+// submit sends ("verify-pr" here, "index" there). The action attribute is kept
+// as a no-JS fallback; the script below intercepts and posts it as fetch.
+---
+
+<dialog id="verify-modal" class="verify-modal" aria-labelledby="verify-modal-title">
+  <form
+    method="post"
+    action={INDEX_SIGNUP_ENDPOINT || undefined}
+    data-verify-form
+    class="verify-modal-panel"
+  >
+    <input type="hidden" name="source" value="verify-pr" />
+
+    <div class="flex items-start justify-between gap-6">
+      <h2 id="verify-modal-title" class="h3">Verify a pull request</h2>
+      <button
+        type="button"
+        class="verify-modal-close"
+        data-verify-close
+        aria-label="Close"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <p class="lede mt-3 text-[15px]">
+      Assay is onboarding repositories in batches. Leave an address and we will
+      send an install link when your slot opens.
+    </p>
+
+    <label
+      for="verify-email"
+      class="mono mt-7 block text-[11px] uppercase tracking-[0.14em] text-fg-2"
+    >
+      Get an install link when your slot opens
+    </label>
+
+    <div class="mt-3.5 flex flex-col gap-2.5 xs:flex-row">
+      <input
+        id="verify-email"
+        name="email"
+        type="email"
+        required
+        autocomplete="email"
+        placeholder="you@company.com"
+        class="min-w-0 flex-1 rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+      />
+      <button type="submit" class="btn btn-primary shrink-0">Notify me</button>
+    </div>
+
+    <p
+      class="mono mt-3 text-[11px] leading-relaxed text-fg-2"
+      data-verify-status
+      role="status"
+    >
+      One message when your slot opens. Nothing else, ever.
+    </p>
+  </form>
+</dialog>
+
+<style>
+  .verify-modal {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    /* The UA centres a modal dialog with margin:auto, but the Tailwind reset
+       zeroes margins on every element, which pins it to the top left. */
+    margin: auto;
+    max-width: min(520px, calc(100vw - 32px));
+    width: 100%;
+    color: var(--fg);
+  }
+
+  .verify-modal::backdrop {
+    background: rgba(10, 12, 15, 0.62);
+    backdrop-filter: blur(3px);
+  }
+
+  .verify-modal-panel {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px;
+    text-align: left;
+  }
+
+  @media (min-width: 30rem) {
+    .verify-modal-panel { padding: 32px; }
+  }
+
+  .verify-modal-close {
+    display: grid;
+    place-items: center;
+    height: 30px;
+    width: 30px;
+    flex-shrink: 0;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--fg-2);
+    background: transparent;
+    cursor: pointer;
+    transition: color 150ms ease-out, border-color 150ms ease-out;
+  }
+
+  .verify-modal-close:hover {
+    color: var(--fg);
+    border-color: color-mix(in srgb, var(--fg) 45%, transparent);
+  }
+</style>
+
+<script>
+  import { submitSignup } from '../lib/signup';
+
+  const modal = document.querySelector<HTMLDialogElement>('#verify-modal');
+  const form = modal?.querySelector<HTMLFormElement>('[data-verify-form]');
+  const status = modal?.querySelector<HTMLElement>('[data-verify-status]');
+  const input = modal?.querySelector<HTMLInputElement>('#verify-email');
+  const button = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+  const RESTING = status?.textContent ?? '';
+
+  // Every "Verify a pull request" control across the site opts in with
+  // data-verify-cta rather than each one wiring its own handler.
+  document.querySelectorAll('[data-verify-cta]').forEach((el) =>
+    el.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (status) status.textContent = RESTING;
+      modal?.showModal();
+      input?.focus();
+    }),
+  );
+
+  modal?.querySelector('[data-verify-close]')?.addEventListener('click', () =>
+    modal.close(),
+  );
+
+  // Click outside the panel closes. The dialog element itself fills the
+  // backdrop area, so a click landing on it and not on the form is outside.
+  modal?.addEventListener('click', (event) => {
+    if (event.target === modal) modal.close();
+  });
+
+  form?.addEventListener('submit', async (event) => {
+    // Handled here rather than by a native POST, so the modal stays open and
+    // reports the result in place instead of navigating away.
+    event.preventDefault();
+
+    const email = input?.value.trim();
+    if (!email) return;
+
+    const label = button?.textContent ?? 'Notify me';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Please wait';
+    }
+    if (status) status.textContent = 'Sending, please wait.';
+
+    const result = await submitSignup(email, 'verify-pr');
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = label;
+    }
+
+    if (result.ok) {
+      form.reset();
+      if (status) {
+        status.textContent =
+          'You are on the list. We will send an install link when your slot opens.';
+      }
+      return;
+    }
+
+    if (status) status.textContent = result.message;
+  });
+
+  input?.addEventListener('input', () => {
+    if (status && status.textContent !== RESTING) status.textContent = RESTING;
+  });
+</script>
