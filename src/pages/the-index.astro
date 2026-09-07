@@ -5,6 +5,7 @@ import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import IndexTable from '../components/IndexTable.astro';
 import IndexSignup from '../components/IndexSignup.astro';
+import ConditionList from '../components/ConditionList.astro';
 
 const columns = [
   {
@@ -23,6 +24,13 @@ const columns = [
       'How often the vulnerability was actually gone, measured on cases the tool never saw. This is the number nobody publishes.',
   },
 ];
+
+const conditions = [
+  'the hole is closed on attacks the tool was never shown',
+  'ordinary behaviour is unchanged',
+  'no new problem was introduced',
+  'nothing suggests the tool was manipulated into writing it',
+] as const;
 
 const rules = [
   ['Corpus', 'Real vulnerabilities with known ground truth fixes, published by identifier so the selection can be audited.'],
@@ -63,36 +71,38 @@ const rules = [
     <Eyebrow class="reveal">In plain English</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">What a verified fix means.</h2>
 
-    <div class="longform reveal mt-8">
-      <p>
-        A scanner finds a problem. Something writes a patch. The scanner runs again and
-        the warning is gone. Almost everybody stops there and calls it fixed.
-      </p>
-      <p>
-        The trouble is that the patch was written specifically to make that warning go
-        away. Checking it by running the same scanner is like marking your own exam using
-        the answers you wrote. It tells you the patch did what it set out to do. It tells
-        you nothing about whether the underlying hole is still there.
-      </p>
-      <p>
-        So we do something different. Before the fixing tool ever sees the problem, we
-        write a set of tests it will never be shown: other ways of exploiting the same
-        weakness, and ordinary everyday inputs that ought to keep working. We lock those
-        away. After the patch lands, we run them.
-      </p>
-      <p>
-        <strong>A verified fix is one where the hole is closed on attacks the tool was
-        never shown, the software still behaves the way it used to for everybody else, the
-        patch did not quietly introduce a new problem, and nothing about the change
-        suggests the tool was manipulated into writing it.</strong>
-      </p>
-      <p>
-        It is a narrow claim, deliberately. It does not mean your code is secure. It means
-        this specific hole, on the paths we could test, is genuinely shut. Anyone offering
-        you a broader guarantee than that is offering you something we do not think can be
-        honestly given.
-      </p>
+    <p class="reveal mt-9 text-[17px] leading-[1.62]" style="--reveal-delay:120ms;max-width:62ch">
+      A scanner finds a hole. Something writes a patch. The scanner runs again and the
+      warning is gone. Almost everyone stops there. The patch was written to make that
+      warning go away.
+    </p>
+
+    {/* The argument, standing on its own rather than closing a paragraph. */}
+    <p
+      class="reveal mt-9 font-display text-[22px] font-bold leading-[1.28] tracking-[-0.016em] lg:mt-10 lg:text-[27px]"
+      style="--reveal-delay:60ms;max-width:26ch"
+    >
+      Re-running the same scanner marks the exam using the answers the student wrote.
+    </p>
+
+    <p class="reveal mt-11 text-[17px] leading-[1.62] lg:mt-12" style="--reveal-delay:60ms;max-width:62ch">
+      So we write the test before the fixer sees the problem. Other ways to exploit the
+      same weakness, and ordinary inputs that should keep working. We lock them away.
+      After the patch lands, we run them.
+    </p>
+
+    <div class="reveal mt-11 lg:mt-12" style="--reveal-delay:60ms;max-width:74ch">
+      <ConditionList
+        label="A verified fix requires all four conditions"
+        conditions={conditions}
+      />
     </div>
+
+    <p class="reveal mt-9 text-[15.5px] leading-[1.65] text-fg-2" style="--reveal-delay:60ms;max-width:66ch">
+      It is a narrow claim, deliberately. It does not mean your code is secure. It means
+      this hole, on the paths we could test, is shut. Anyone offering more than that is
+      offering something we do not think can be honestly given.
+    </p>
   </Section>
 
   <Section id="columns">

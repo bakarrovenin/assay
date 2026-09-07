@@ -1,0 +1,88 @@
+---
+// A set of conditions that must all hold. Numbered in the accent so it reads
+// as a sibling of the four checks on /product rather than as a bullet list.
+// Theme-following, like VerdictBlock and DefinitionPair: this is a claim the
+// page makes, not a depiction of a tool.
+
+interface Props {
+  /** Mono header band. */
+  label: string;
+  conditions: readonly string[];
+  class?: string;
+}
+
+const { label, conditions, class: className = '' } = Astro.props;
+---
+
+<div class={`cl ${className}`}>
+  <p class="cl-head">{label}</p>
+
+  <ol class="cl-rows">
+    {
+      conditions.map((condition, i) => (
+        <li class="cl-row">
+          <span class="cl-n">{String(i + 1).padStart(2, '0')}</span>
+          <span class="cl-text">{condition}</span>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .cl {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .cl-head {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .cl-row {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: baseline;
+    padding: 14px 18px;
+  }
+
+  .cl-row + .cl-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .cl-n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+
+  .cl-text {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+
+  @media (min-width: 1024px) {
+    .cl-row {
+      padding: 15px 22px;
+      column-gap: 20px;
+    }
+
+    .cl-head { padding-inline: 22px; }
+    .cl-text { font-size: 17px; }
+  }
+
+  @media (max-width: 400px) {
+    .cl-head,
+    .cl-row { padding-inline: 14px; }
+  }
+</style>
