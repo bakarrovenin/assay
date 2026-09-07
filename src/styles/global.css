@@ -509,6 +509,17 @@
     color: var(--fg-2);
   }
 
+  /* Syntax tokens. Shared by every dark code surface: CodePanel, Diff and
+     Terminal. Tuned for contrast on --color-panel, not for a theme, because
+     those surfaces stay dark in both. */
+  .tok-com { color: #7C848F; font-style: italic; }
+  .tok-kw  { color: #C99BF0; }
+  .tok-fn  { color: #77B7FF; }
+  .tok-str { color: #9BD69B; }
+  .tok-var { color: var(--color-panel-fg); }
+  .tok-mut { color: #E8B978; }
+  .tok-bad { color: var(--color-panel-fail); }
+
   /* Panels that stay dark regardless of theme. */
   .panel-dark {
     /* Grid and flex children default to min-width:auto, which lets the widest

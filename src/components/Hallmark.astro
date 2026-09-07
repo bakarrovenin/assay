@@ -1,0 +1,122 @@
+---
+// The assay hallmark. On silver, four marks are struck into the metal, one
+// per party that vouched for it. Here: the agent that wrote the change, the
+// authority it held, the verifier, and the human approver. A mark that was
+// never struck is the whole point of the device, so unstruck reads as
+// absent rather than as a different style of present.
+
+export type Mark = {
+  /** Three letters, e.g. AGT. */
+  id: string;
+  /** Expanded for screen readers, e.g. "agent". */
+  title: string;
+  struck: boolean;
+};
+
+interface Props {
+  marks: readonly Mark[];
+  caption: string;
+  class?: string;
+}
+
+const { marks, caption, class: className = '' } = Astro.props;
+
+const description = `Hallmark. ${marks
+  .map((m) => `${m.title} ${m.struck ? 'struck' : 'not struck'}`)
+  .join(', ')}.`;
+---
+
+<div class={`hm ${className}`} role="img" aria-label={description}>
+  <div class="hm-marks">
+    {
+      marks.map((mark) => (
+        <span class={`hm-mark ${mark.struck ? 'is-struck' : ''}`}>{mark.id}</span>
+      ))
+    }
+  </div>
+
+  <span class="hm-rule" aria-hidden="true"></span>
+
+  <span class="hm-caption">{caption}</span>
+</div>
+
+<style>
+  .hm {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* Shared borders, like punches struck side by side on one plate. */
+  .hm-marks {
+    display: flex;
+    flex: none;
+  }
+
+  .hm-mark {
+    display: grid;
+    place-items: center;
+    min-width: 58px;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    margin-left: -1px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: color-mix(in srgb, var(--fg-2) 55%, transparent);
+  }
+
+  .hm-mark:first-child {
+    margin-left: 0;
+  }
+
+  .hm-mark.is-struck {
+    color: var(--fg-2);
+  }
+
+  .hm-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--line);
+    /* Below the caption breakpoint the rule would sit alone on its row. */
+    min-width: 0;
+  }
+
+  .hm-caption {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  /* On a phone the caption cannot share the row with four marks. */
+  @media (max-width: 700px) {
+    .hm {
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .hm-rule {
+      display: none;
+    }
+
+    .hm-caption {
+      flex-basis: 100%;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .hm-mark {
+      min-width: 0;
+      flex: 1 1 0;
+      padding-inline: 6px;
+      font-size: 11px;
+    }
+
+    .hm-marks {
+      width: 100%;
+    }
+  }
+</style>

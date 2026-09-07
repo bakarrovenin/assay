@@ -1,0 +1,195 @@
+---
+// A unified-diff frame. Dark in both themes, like every other code surface
+// on the site: it depicts a review tool rather than being page chrome.
+//
+// Line HTML is pre-tokenised by the caller with the .tok-* spans that
+// CodePanel already defines. No highlighter ships to the browser.
+
+export type DiffLine = {
+  /** Line number as displayed in the gutter. */
+  n: number;
+  /** Diff marker. Added lines also take the tint. */
+  mark?: '+' | '-';
+  /** Pre-tokenised HTML for the line. Empty string renders a blank row. */
+  html: string;
+};
+
+interface Props {
+  file: string;
+  /** Small caps tag beside the filename, e.g. PATCHED. */
+  tag?: string;
+  added: number;
+  removed: number;
+  lines: DiffLine[];
+  /** Mono footer note under the hunk. */
+  footer?: string;
+  class?: string;
+}
+
+const {
+  file,
+  tag,
+  added,
+  removed,
+  lines,
+  footer,
+  class: className = '',
+} = Astro.props;
+
+const label = [
+  `Diff of ${file}, ${added} lines added, ${removed} removed.`,
+  ...lines
+    .filter((l) => l.mark === '+')
+    .map((l) => `Added line ${l.n}.`),
+  footer ?? '',
+].join(' ');
+---
+
+<div class={`diff ${className}`} role="img" aria-label={label}>
+  <div class="diff-head">
+    <span class="diff-file">{file}</span>
+    {tag && <span class="diff-tag">{tag}</span>}
+    <span class="diff-count">
+      <b>+{added}</b>
+      <span>&minus;{removed}</span>
+    </span>
+  </div>
+
+  <div class="diff-body">
+    <table class="diff-table">
+      <tbody>
+        {
+          lines.map((line) => (
+            <tr class={line.mark === '+' ? 'is-add' : line.mark === '-' ? 'is-del' : ''}>
+              <td class="diff-n">{line.n}</td>
+              <td class="diff-mark">{line.mark ?? ''}</td>
+              <td class="diff-code"><code set:html={line.html || '&nbsp;'} /></td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {footer && <div class="diff-foot">{footer}</div>}
+</div>
+
+<style>
+  .diff {
+    min-width: 0;
+    background: var(--color-panel);
+    border: 1px solid var(--color-panel-line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .diff-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--color-panel-line);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .diff-file {
+    color: var(--color-panel-fg);
+  }
+
+  .diff-tag {
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-panel-fg-2);
+  }
+
+  .diff-count {
+    margin-left: auto;
+    display: flex;
+    gap: 12px;
+    font-size: 12.5px;
+    color: var(--color-panel-fg-2);
+    white-space: nowrap;
+  }
+
+  .diff-count b {
+    font-weight: 400;
+    color: var(--color-panel-accent);
+  }
+
+  /* The hunk scrolls inside the frame rather than widening the page. */
+  .diff-body {
+    overflow-x: auto;
+  }
+
+  .diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.9;
+    tab-size: 2;
+  }
+
+  @media (min-width: 640px) {
+    .diff-table { font-size: 13px; }
+  }
+
+  .diff-table tr.is-add {
+    background: #19212E;
+  }
+
+  .diff-table tr.is-del {
+    background: #2A1A1D;
+  }
+
+  .diff-n {
+    width: 1%;
+    padding: 0 14px 0 18px;
+    text-align: right;
+    vertical-align: top;
+    color: var(--color-panel-fg-2);
+    /* The gutter is decoration for a sighted reader; a screen reader gets
+       the aria-label on the frame instead. */
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .diff-mark {
+    width: 1%;
+    padding: 0 10px 0 0;
+    text-align: left;
+    vertical-align: top;
+    user-select: none;
+    color: var(--color-panel-accent);
+  }
+
+  .diff-table tr.is-del .diff-mark {
+    color: var(--color-panel-fail);
+  }
+
+  .diff-code {
+    padding: 0 18px 0 0;
+    vertical-align: top;
+    color: var(--color-panel-fg);
+    white-space: pre;
+  }
+
+  .diff-foot {
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-panel-line);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-panel-fg-2);
+  }
+
+  @media (max-width: 400px) {
+    .diff-head,
+    .diff-foot { padding-inline: 14px; }
+    .diff-n { padding-left: 14px; }
+    .diff-code { padding-right: 14px; }
+  }
+</style>

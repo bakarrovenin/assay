@@ -1,0 +1,133 @@
+---
+// A transcript frame: header band, then command and output rows.
+// Dark in both themes, same as Diff, because it depicts a shell.
+
+export type TerminalLine =
+  /** A command. Rendered with a $ prompt; html is the argument text. */
+  | { kind: 'cmd'; html: string }
+  /** Ordinary output. */
+  | { kind: 'out'; html: string }
+  /** Output that proves the failure. Rendered in the failure colour. */
+  | { kind: 'bad'; html: string }
+  /** Spacer between blocks. */
+  | { kind: 'gap' };
+
+interface Props {
+  label: string;
+  lines: TerminalLine[];
+  /** Mono summary under the transcript. */
+  footer?: string;
+  class?: string;
+}
+
+const { label, lines, footer, class: className = '' } = Astro.props;
+
+const strip = (s: string) => s.replace(/<[^>]+>/g, '');
+const description = [
+  `${label}.`,
+  ...lines.map((l) =>
+    l.kind === 'gap'
+      ? ''
+      : l.kind === 'cmd'
+        ? `Command: ${strip(l.html)}.`
+        : `${l.kind === 'bad' ? 'Result, leaked data: ' : 'Result: '}${strip(l.html)}.`,
+  ),
+  footer ?? '',
+].join(' ');
+---
+
+<div class={`term ${className}`} role="img" aria-label={description}>
+  <div class="term-head">{label}</div>
+
+  <div class="term-body">
+    <pre class="term-pre">{lines.map((line) =>
+      line.kind === 'gap' ? (
+        <div class="term-gap"></div>
+      ) : (
+        <div class={`term-line term-${line.kind}`}>
+          {line.kind === 'cmd' && <span class="term-prompt">$</span>}
+          <code set:html={line.html} />
+        </div>
+      ),
+    )}</pre>
+  </div>
+
+  {footer && <div class="term-foot">{footer}</div>}
+</div>
+
+<style>
+  .term {
+    min-width: 0;
+    background: var(--color-panel-2);
+    border: 1px solid var(--color-panel-line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .term-head {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--color-panel-line);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-panel-fg-2);
+  }
+
+  .term-body {
+    overflow-x: auto;
+  }
+
+  .term-pre {
+    padding: 18px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.75;
+  }
+
+  @media (min-width: 640px) {
+    .term-pre { font-size: 13px; }
+  }
+
+  .term-line {
+    display: flex;
+    gap: 10px;
+    white-space: pre;
+  }
+
+  .term-gap {
+    height: 0.95em;
+  }
+
+  .term-prompt {
+    color: var(--color-panel-fg-2);
+    user-select: none;
+    flex: none;
+  }
+
+  .term-cmd code {
+    color: var(--color-panel-fg);
+  }
+
+  .term-out code {
+    color: var(--color-panel-fg-2);
+  }
+
+  .term-bad code {
+    color: var(--color-panel-fail);
+  }
+
+  .term-foot {
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-panel-line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-panel-fg-2);
+  }
+
+  @media (max-width: 400px) {
+    .term-head,
+    .term-foot { padding-inline: 14px; }
+    .term-pre { padding-inline: 14px; }
+  }
+</style>

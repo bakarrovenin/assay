@@ -1,108 +1,202 @@
 ---
 import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
-import Stamp from './Stamp.astro';
-import CodePanel from './CodePanel.astro';
+import Diff from './Diff.astro';
+import type { DiffLine } from './Diff.astro';
+import VerdictBlock from './VerdictBlock.astro';
+import Terminal from './Terminal.astro';
+import type { TerminalLine } from './Terminal.astro';
+import Hallmark from './Hallmark.astro';
 
-// Tokenised by hand. No runtime highlighter ships to the browser.
+// Tokenised by hand with the .tok-* spans CodePanel defines. No runtime
+// highlighter ships to the browser.
 const k = (s: string) => `<span class="tok-kw">${s}</span>`;
 const f = (s: string) => `<span class="tok-fn">${s}</span>`;
 const c = (s: string) => `<span class="tok-com">${s}</span>`;
-const str = (s: string) => `<span class="tok-str">${s}</span>`;
-const bad = (s: string) => `<span class="tok-bad">${s}</span>`;
+const s = (s: string) => `<span class="tok-str">${s}</span>`;
 
-const code = [
-  c('// the agent&#39;s &quot;fix&quot;'),
-  `${k('def')} ${f('get_customer')}(customer_id):`,
-  `  ${k('if')} ${str('&quot;OR &#39;1&#39;=&#39;1&quot;')} ${k('in')} customer_id:`,
-  `    ${k('raise')} ${f('ValueError')}(...)`,
-  `  ${k('return')} db.${f('query')}(${str('f&quot;... id = &#39;{customer_id}&#39;&quot;')})`,
-  '',
-  c('// still works:'),
-  `  ${bad('1&#39; OR &#39;a&#39;=&#39;a')}`,
-  `  ${bad('1&#39;; DROP TABLE customers; --')}`,
-  `  ${bad('1&#39; UNION SELECT password FROM users --')}`,
-].join('\n');
+const Q = '&quot;';
+const A = '&#39;';
+
+const meta = [
+  ['Ticket', `SEC-1042 &middot; SQL injection`],
+  ['Patch by', 'agent, autonomous'],
+  ['Scanner', 'finding closed'],
+  ['CI', '3 / 3 passing'],
+] as const;
+
+const lines: DiffLine[] = [
+  { n: 11, html: c('# app/db.py') },
+  { n: 12, html: `${k('def')} ${f('get_customer')}(customer_id):` },
+  {
+    n: 13,
+    mark: '+',
+    html: `${k('if')} ${s(`${Q}OR ${A}1${A}=${A}1${A}${Q}`)} ${k('in')} customer_id:`,
+  },
+  {
+    n: 14,
+    mark: '+',
+    html: `${k('raise')} ${f('ValueError')}(${s(`${Q}blocked: sql injection attempt${Q}`)})`,
+  },
+  { n: 15, mark: '+', html: `${k('if')} ${s(`${Q}${A}${Q}`)} ${k('in')} customer_id:` },
+  {
+    n: 16,
+    mark: '+',
+    html: `        customer_id = customer_id.${f('replace')}(${s(`${Q}${A}${Q}`)}, ${s(`${Q}${A}${A}${Q}`)})`,
+  },
+  { n: 17, html: '' },
+  { n: 18, html: `${k('return')} db.${f('query')}(` },
+  {
+    n: 19,
+    html: `${s(`f${Q}SELECT * FROM customers WHERE id = ${A}{customer_id}${A}${Q}`)}`,
+  },
+  { n: 20, html: '    )' },
+];
+
+const verdictRows = [
+  ['Vuln', 'reachable, numeric context'],
+  ['CWE', '89'],
+  ['Method', 'assay/1.0 · held-out'],
+  ['Run', '2026-09-05T11:02Z'],
+] as const;
+
+const probe: TerminalLine[] = [
+  { kind: 'cmd', html: `curl -s ${s(`${A}https://acme.internal/customers?id=42${A}`)}` },
+  { kind: 'out', html: `{${Q}id${Q}:42,${Q}email${Q}:${Q}j.okafor@acme.io${Q},${Q}plan${Q}:${Q}team${Q}}` },
+  { kind: 'gap' },
+  {
+    kind: 'cmd',
+    html: `curl -s ${s(`${Q}https://acme.internal/customers?id=1${A} OR ${A}1${A}=${A}1${A}${Q}`)}`,
+  },
+  {
+    kind: 'out',
+    html: `{${Q}error${Q}:${Q}blocked: sql injection attempt${Q}}  ${c('# the reported payload')}`,
+  },
+  { kind: 'gap' },
+  {
+    kind: 'cmd',
+    html: `curl -s ${s(`${A}https://acme.internal/customers?id=42 OR 1=1${A}`)} | head -3`,
+  },
+  { kind: 'bad', html: `{${Q}id${Q}:1,${Q}email${Q}:${Q}a.mensah@acme.io${Q},${Q}plan${Q}:${Q}enterprise${Q}}` },
+  { kind: 'bad', html: `{${Q}id${Q}:2,${Q}email${Q}:${Q}m.reyes@acme.io${Q},${Q}plan${Q}:${Q}enterprise${Q}}` },
+  { kind: 'bad', html: `{${Q}id${Q}:3,${Q}email${Q}:${Q}t.lindqvist@acme.io${Q},${Q}plan${Q}:${Q}free${Q}}` },
+  { kind: 'gap' },
+  {
+    kind: 'cmd',
+    html: `curl -s ${s(`${A}https://acme.internal/customers?id=42 UNION SELECT pw,1,1 FROM users${A}`)}`,
+  },
+  { kind: 'bad', html: `{${Q}id${Q}:${Q}$2b$12$K7fQ1r&hellip;${Q},${Q}email${Q}:null,${Q}plan${Q}:null}` },
+];
+
+const marks = [
+  { id: 'AGT', title: 'agent', struck: true },
+  { id: 'AUT', title: 'authority', struck: true },
+  { id: 'VER', title: 'verifier', struck: true },
+  { id: 'APR', title: 'approver', struck: false },
+] as const;
 ---
 
 <Section id="worked-example" tint>
   <Eyebrow class="reveal">Anatomy of an overfitted patch</Eyebrow>
 
-  <h2 class="h2 reveal" style="--reveal-delay:60ms">It fixed the test, not the bug.</h2>
+  <div class="head">
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">It fixed the test, not the bug.</h2>
 
-  <div class="mt-14 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-    <div class="min-w-0">
-      <div class="reveal prose-body space-y-5 text-[17px] leading-[1.6]">
-        <p>
-          A bug report says an attacker gets in using the text{' '}
-          <code
-            class="mono whitespace-nowrap rounded-[2px] border border-line bg-bg px-1.5 py-0.5 text-[14px]"
-            >1&#39; OR &#39;1&#39;=&#39;1</code
-          >. The agent writes a fix that rejects exactly that string. The scanner
-          re-runs, the finding closes, CI goes green.
-        </p>
-        <p class="font-semibold text-fg">The injection is untouched.</p>
-      </div>
+    <dl class="meta reveal" style="--reveal-delay:120ms">
+      {
+        meta.map(([label, value]) => (
+          <div class="meta-row">
+            <dt>{label}</dt>
+            <dd set:html={value} />
+          </div>
+        ))
+      }
+    </dl>
+  </div>
 
-      <div class="reveal mt-11" style="--reveal-delay:120ms">
-        <Stamp
-          verdict="Not fixed"
-          note="Tests passing · Vuln reachable"
-          state="failed"
-        />
-      </div>
+  <div class="reveal mt-10 border-t border-line pt-10 lg:mt-12 lg:pt-12" style="--reveal-delay:60ms">
+    <Diff
+      file="app/db.py"
+      tag="Patched"
+      added={4}
+      removed={0}
+      lines={lines}
+      footer="Concatenation unchanged, line 19"
+    />
+  </div>
 
-      <details
-        class="reveal group mt-12 border-t border-line pt-5"
-        style="--reveal-delay:180ms"
-      >
-        <summary
-          class="mono flex cursor-pointer list-none items-center gap-2.5 text-[12px] uppercase tracking-[0.14em] text-fg-2 transition-colors hover:text-fg"
-        >
-          <svg
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            class="shrink-0 transition-transform duration-200 group-open:rotate-90"
-          >
-            <path
-              d="M9 5l7 7-7 7"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"></path>
-          </svg>
-          Why the correct fix looks different
-        </summary>
+  <p class="reveal mt-10 text-[17px] leading-[1.6] lg:text-[18px]" style="--reveal-delay:60ms">
+    The ticket quoted one payload. The patch rejects that payload.{' '}
+    <span class="text-fg-2">Numeric context never needed a quote.</span>
+  </p>
 
-        <div class="prose-body mt-5 space-y-4 text-[15.5px] text-fg-2">
-          <p>
-            The real fix never inspects the payload at all. It stops building the query
-            by string concatenation:{' '}
-            <code
-              class="mono rounded-[2px] border border-line bg-bg px-1.5 py-0.5 text-[13.5px] text-fg"
-              >db.query(&quot;... id = %s&quot;, [customer_id])</code
-            >.
-          </p>
-          <p>
-            Any check that asks &ldquo;is the reported finding gone&rdquo; approves the
-            wrong patch. Only a check that asks &ldquo;is this class of injection still
-            reachable&rdquo; catches it.
-          </p>
-        </div>
-      </details>
-    </div>
+  <div class="reveal mt-10" style="--reveal-delay:60ms">
+    <VerdictBlock verdict="Not verified" state="failed" rows={verdictRows} />
+  </div>
 
-    <div class="reveal min-w-0 lg:pt-1" style="--reveal-delay:60ms">
-      <CodePanel html={code} label="app/db.py · patched" />
-    </div>
+  <div class="reveal mt-12 border-t border-line pt-8 lg:mt-14" style="--reveal-delay:60ms">
+    <p class="mono text-[13px] leading-[1.8] text-fg-2">
+      The correct fix never inspects the payload:
+    </p>
+    <p class="mono mt-1 text-[13px] leading-[1.8]">
+      db.query(&quot;... id = %s&quot;, [customer_id])
+    </p>
+  </div>
+
+  <div class="reveal mt-8" style="--reveal-delay:60ms">
+    <Terminal
+      label="Held-out probe · against the patched build"
+      lines={probe}
+      footer="2 of 3 held-out payloads returned data. No quote required."
+    />
+  </div>
+
+  <div class="reveal mt-14 lg:mt-16" style="--reveal-delay:60ms">
+    <Hallmark marks={marks} caption="Hallmark · approver unstruck" />
   </div>
 </Section>
 
 <style>
-  details summary::-webkit-details-marker {
-    display: none;
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  /* The metadata column sits beside the headline only when there is room
+     for both without crushing the measure. */
+  @media (min-width: 900px) {
+    .head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+      gap: 48px;
+      align-items: start;
+    }
+
+    .meta {
+      /* Optical alignment with the cap height of the headline. */
+      padding-top: 8px;
+    }
+  }
+
+  .meta-row {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .meta-row dt {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    padding-top: 3px;
+  }
+
+  .meta-row dd {
+    color: var(--fg);
+    overflow-wrap: anywhere;
   }
 </style>

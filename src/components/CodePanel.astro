@@ -33,13 +33,4 @@ const { html, label, class: className = '' } = Astro.props;
   @media (min-width: 640px) {
     .code-pre { font-size: 13px; }
   }
-
-  /* #6E7681 read 4.08:1 on the panel, under AA. #7C848F is 4.96:1. */
-  .code-pre .tok-com { color: #7C848F; font-style: italic; }
-  .code-pre .tok-kw  { color: #C99BF0; }
-  .code-pre .tok-fn  { color: #77B7FF; }
-  .code-pre .tok-str { color: #9BD69B; }
-  .code-pre .tok-var { color: var(--color-panel-fg); }
-  .code-pre .tok-mut { color: #E8B978; }
-  .code-pre .tok-bad { color: var(--color-panel-fail); }
 </style>

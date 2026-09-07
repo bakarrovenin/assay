@@ -1,0 +1,109 @@
+---
+// The verdict card: one word, a rule, then the evidence rows.
+// Follows the theme rather than pinning itself dark, because it is a
+// statement Assay makes rather than a depiction of somebody's tool.
+
+interface Props {
+  /** The single line, e.g. NOT VERIFIED. */
+  verdict: string;
+  state?: 'verified' | 'failed';
+  /** Label and value pairs shown beneath the rule. */
+  rows: readonly (readonly [string, string])[];
+  class?: string;
+}
+
+const { verdict, state = 'failed', rows, class: className = '' } = Astro.props;
+---
+
+<div
+  class={`vb ${state === 'failed' ? 'vb-failed' : 'vb-verified'} ${className}`}
+  role="img"
+  aria-label={`Verdict: ${verdict}. ${rows.map(([k, v]) => `${k}: ${v}`).join('. ')}.`}
+>
+  <p class="vb-verdict">{verdict}</p>
+
+  <dl class="vb-rows">
+    {
+      rows.map(([label, value]) => (
+        <div class="vb-row">
+          <dt>{label}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .vb {
+    background: var(--bg);
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 26px 28px 24px;
+  }
+
+  .vb-failed {
+    border-color: var(--fail);
+  }
+
+  .vb-verified {
+    border-color: var(--accent);
+  }
+
+  .vb-verdict {
+    font-family: var(--font-mono);
+    font-size: clamp(21px, 3.2vw, 27px);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .vb-failed .vb-verdict {
+    color: var(--fail);
+  }
+
+  .vb-verified .vb-verdict {
+    color: var(--accent);
+  }
+
+  .vb-rows {
+    padding-top: 20px;
+  }
+
+  .vb-row {
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .vb-row dt {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    /* The label is smaller than the value, so nudge it onto the same
+       baseline rather than letting it ride high. */
+    padding-top: 2px;
+  }
+
+  .vb-row dd {
+    color: var(--fg);
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 640px) {
+    .vb {
+      padding: 30px 32px 28px;
+    }
+
+    .vb-row {
+      grid-template-columns: 92px minmax(0, 1fr);
+    }
+  }
+</style>
