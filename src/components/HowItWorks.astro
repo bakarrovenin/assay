@@ -1,6 +1,7 @@
 ---
 import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
+import HarnessPipeline from './HarnessPipeline.astro';
 
 const checks = [
   {
@@ -65,6 +66,16 @@ const checks = [
     If you let a student write their own exam, they will pass it. You test them on
     questions they have not seen.
   </p>
+
+  <div class="reveal mt-16 border-t border-line pt-7 lg:mt-20">
+    <p class="micro mb-3">Inside the harness</p>
+
+    <p class="text-[16px] leading-[1.62]" style="max-width:62ch">
+      Where the cases the agent never saw actually come from.
+    </p>
+
+    <HarnessPipeline />
+  </div>
 
   <div class="reveal mt-16 border-t border-line pt-7 lg:mt-20" style="max-width:76ch">
     <p class="micro mb-3">The second failure mode, and why check 04 exists</p>

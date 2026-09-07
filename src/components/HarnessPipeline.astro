@@ -1,0 +1,286 @@
+---
+// What happens between a diff arriving and a verdict leaving. Drawn in the
+// same flat engraved language as the depth plate: hairline rules, monospace
+// annotation, tokens throughout, no gradients or shadows.
+//
+// The device is a left rail with the stages hung off it. The coverage gate
+// is the only dashed box, because it is the only node that can send the run
+// somewhere other than a verdict.
+
+type Node = {
+  /** Stage numeral, shown in the accent like the four checks. */
+  n?: string;
+  label: string;
+  line: string;
+  kind: 'proc' | 'gate' | 'out';
+};
+
+const spine: Node[] = [
+  { n: '01', label: 'Fingerprint', line: 'the sink by shape, not by file and line', kind: 'proc' },
+  {
+    n: '02',
+    label: 'Expand',
+    line: 'the class into cases. The reported payload is held out.',
+    kind: 'proc',
+  },
+  { label: 'Coverage', line: 'enough cases, and a build we can run?', kind: 'gate' },
+  {
+    n: '03',
+    label: 'Execute',
+    line: 'the patched build in a sandbox, on cases it never saw',
+    kind: 'proc',
+  },
+  {
+    n: '04',
+    label: 'Differential',
+    line: 'the same benign inputs against the pre-patch build',
+    kind: 'proc',
+  },
+  {
+    n: '05',
+    label: 'Score',
+    line: 'closed, behaviour held, no regression, provenance clean',
+    kind: 'proc',
+  },
+  { label: 'Verdict out', line: 'verified, or not, with the evidence attached', kind: 'out' },
+];
+
+const branch = {
+  label: 'Insufficient evidence',
+  line: 'not a pass. We say we could not check.',
+};
+
+const BOX_H = 48;
+const GAP = 26;
+const RAIL = 30;
+const TOP = 34;
+
+type Variant = {
+  key: string;
+  width: number;
+  boxW: number;
+  /** Branch sits on its own row below the gate rather than beside it. */
+  branchBelow: boolean;
+  branchX: number;
+  branchW: number;
+};
+
+const variants: Variant[] = [
+  { key: 'wide', width: 880, boxW: 420, branchBelow: false, branchX: 490, branchW: 390 },
+  { key: 'narrow', width: 360, boxW: 360, branchBelow: true, branchX: 100, branchW: 260 },
+];
+
+const place = (v: Variant) => {
+  let y = TOP;
+  let branchY = 0;
+  const nodes = spine.map((node) => {
+    const placed = { ...node, y };
+    if (node.kind === 'gate') {
+      if (v.branchBelow) {
+        branchY = y + BOX_H + GAP;
+        y = branchY + BOX_H + GAP;
+      } else {
+        branchY = y;
+        y += BOX_H + GAP;
+      }
+    } else {
+      y += BOX_H + GAP;
+    }
+    return placed;
+  });
+  return { nodes, branchY, height: y - GAP + 8 };
+};
+
+const description = [
+  'The Assay harness, from a diff arriving to a verdict leaving.',
+  'Diff in.',
+  ...spine.map((s) => `${s.label}: ${s.line}`),
+  `If coverage is not enough, the run branches to ${branch.label}: ${branch.line}`,
+].join(' ');
+---
+
+<div class="reveal figure" role="img" aria-label={description} style="--reveal-delay:60ms">
+  {
+    variants.map((v) => {
+      const { nodes, branchY, height } = place(v);
+      return (
+        <svg viewBox={`0 0 ${v.width} ${height}`} class={`hp hp-${v.key}`} aria-hidden="true">
+          <text x={RAIL - 6} y="14" class="terminal">
+            Diff in
+          </text>
+
+          {/* Rail: every stage hangs off one line. */}
+          {nodes.map((node, i) => {
+            const prevBottom = i === 0 ? 20 : nodes[i - 1].y + BOX_H;
+            return (
+              <g class="link">
+                <line x1={RAIL} y1={prevBottom} x2={RAIL} y2={node.y - 7} />
+                <path d={`M${RAIL} ${node.y - 1} l-4 -7 h8 Z`} class="link-head" />
+              </g>
+            );
+          })}
+
+          {/* Branch: the only exit that is not a verdict. */}
+          <g class="link link-branch">
+            {v.branchBelow ? (
+              <line x1={RAIL} y1={branchY + BOX_H / 2} x2={v.branchX - 8} y2={branchY + BOX_H / 2} />
+            ) : (
+              <line
+                x1={v.boxW}
+                y1={branchY + BOX_H / 2}
+                x2={v.branchX - 8}
+                y2={branchY + BOX_H / 2}
+              />
+            )}
+            <path
+              d={`M${v.branchX - 2} ${branchY + BOX_H / 2} l-7 -4 v8 Z`}
+              class="link-head link-head-branch"
+            />
+            <text
+              x={v.branchBelow ? RAIL + 8 : v.boxW + 8}
+              y={branchY + BOX_H / 2 - 8}
+              class="cond"
+            >
+              if not
+            </text>
+          </g>
+
+          {nodes.map((node) => (
+            <g class={`node node-${node.kind}`}>
+              <rect x="0" y={node.y} width={v.boxW} height={BOX_H} class="box" />
+              {node.n && (
+                <text x="14" y={node.y + 19} class="num">
+                  {node.n}
+                </text>
+              )}
+              <text x={node.n ? 40 : 14} y={node.y + 19} class="lab">
+                {node.label}
+              </text>
+              <text x="14" y={node.y + 37} class="note">
+                {node.line}
+              </text>
+            </g>
+          ))}
+
+          <g class="node node-branch">
+            <rect x={v.branchX} y={branchY} width={v.branchW} height={BOX_H} class="box" />
+            <text x={v.branchX + 14} y={branchY + 19} class="lab">
+              {branch.label}
+            </text>
+            <text x={v.branchX + 14} y={branchY + 37} class="note">
+              {branch.line}
+            </text>
+          </g>
+        </svg>
+      );
+    })
+  }
+</div>
+
+<style>
+  .figure {
+    margin-top: 30px;
+  }
+
+  .hp {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hp-wide {
+    display: none;
+    max-width: 880px;
+  }
+
+  @media (min-width: 760px) {
+    .hp-wide { display: block; }
+    .hp-narrow { display: none; }
+  }
+
+  .box {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  /* The gate is the only node that can end the run early, so it is the only
+     one drawn open. */
+  .node-gate .box {
+    stroke: var(--fg-2);
+    stroke-dasharray: 4 3;
+  }
+
+  .node-out .box {
+    stroke: var(--accent);
+  }
+
+  .node-branch .box {
+    stroke: var(--fg-2);
+  }
+
+  .link line {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .link-head {
+    fill: var(--line);
+  }
+
+  .link-branch line {
+    stroke: var(--fg-2);
+    stroke-dasharray: 4 3;
+  }
+
+  .link-head-branch {
+    fill: var(--fg-2);
+  }
+
+  .num {
+    font-family: var(--font-mono);
+    letter-spacing: 0.14em;
+    fill: var(--accent);
+  }
+
+  .lab {
+    font-family: var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    fill: var(--fg);
+  }
+
+  .node-out .lab {
+    fill: var(--accent);
+  }
+
+  .node-gate .lab,
+  .node-branch .lab {
+    fill: var(--fg-2);
+  }
+
+  .note {
+    font-family: var(--font-mono);
+    fill: var(--fg-2);
+  }
+
+  .terminal,
+  .cond {
+    font-family: var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    fill: var(--fg-2);
+  }
+
+  .hp-wide .num,
+  .hp-wide .lab { font-size: 11px; }
+  .hp-wide .note { font-size: 11.5px; }
+  .hp-wide .terminal,
+  .hp-wide .cond { font-size: 10px; }
+
+  .hp-narrow .num,
+  .hp-narrow .lab { font-size: 10px; }
+  .hp-narrow .note { font-size: 10px; }
+  .hp-narrow .terminal,
+  .hp-narrow .cond { font-size: 9px; }
+</style>
