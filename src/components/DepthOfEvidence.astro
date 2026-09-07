@@ -10,6 +10,11 @@ import Eyebrow from './Eyebrow.astro';
 // the text it re-reads; Assay's points down at behaviour. The rule between
 // them is where reading stops and execution starts.
 //
+// The struck layer takes the accent, not the failure colour. Red means a
+// failed verdict everywhere else on the site, and a reader arriving from a
+// NOT VERIFIED block would read a red plane as the broken layer rather than
+// the deep one.
+//
 // Two variants share one set of coordinates on the vertical axis and differ
 // only in horizontal measure, so the narrow one is the same drawing at a
 // smaller plate rather than the wide one scrolled off the page.
@@ -201,7 +206,7 @@ const description = [
   }
 
   .hatch-struck {
-    stroke: var(--fail);
+    stroke: var(--accent);
     opacity: 0.42;
   }
 
@@ -211,7 +216,7 @@ const description = [
   }
 
   .is-struck .plane {
-    stroke: var(--fail);
+    stroke: var(--accent);
   }
 
   .leader,
@@ -221,7 +226,7 @@ const description = [
   }
 
   .is-struck .leader {
-    stroke: var(--fail);
+    stroke: var(--accent);
   }
 
   .conn line {
@@ -235,12 +240,12 @@ const description = [
   }
 
   .conn-struck line {
-    stroke: var(--fail);
+    stroke: var(--accent);
     opacity: 1;
   }
 
   .conn-head-struck {
-    fill: var(--fail);
+    fill: var(--accent);
     opacity: 1;
   }
 
@@ -252,7 +257,7 @@ const description = [
   }
 
   .is-struck .lab {
-    fill: var(--fail);
+    fill: var(--accent);
   }
 
   .note {
