@@ -59,11 +59,6 @@ const groups: {
         name: 'Linear',
         body: 'On the issue that tracks the fix, not in a separate console.',
       },
-    ],
-  },
-  {
-    label: 'Back to the agent',
-    items: [
       {
         brand: 'cursor',
         name: 'Cursor',
@@ -83,7 +78,6 @@ const groups: {
   },
 ];
 
-let tick = 0;
 ---
 
 <Section id="integrations" tint>
@@ -91,51 +85,99 @@ let tick = 0;
 
   <h2 class="h2 reveal" style="--reveal-delay:60ms">Wherever the change already lands.</h2>
 
-  <div class="mt-12 space-y-12 lg:mt-14 lg:space-y-14">
+  <div class="mt-10">
     {
       groups.map((group) => (
-        <div>
+        <section class="group">
           <p class="micro reveal">{group.label}</p>
 
-          <ul class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {group.items.map((item) => (
-              <li
-                class="reveal flex flex-col rounded-[3px] border border-line bg-bg p-6 lg:p-7"
-                style={`--reveal-delay:${(tick++ % 4) * 60}ms`}
-              >
-                <span class="mark">
-                  <BrandMark name={item.brand} size={22} />
+          <ul class="rows">
+            {group.items.map((item, i) => (
+              <li class="row reveal" style={`--reveal-delay:${Math.min(i, 3) * 45}ms`}>
+                <span class="row-mark">
+                  <BrandMark name={item.brand} size={19} />
                 </span>
-
-                <h3 class="mt-4 font-display text-[16.5px] font-bold leading-tight tracking-[-0.012em]">
-                  {item.name}
-                </h3>
-                <p class="mt-2.5 text-[14px] leading-[1.6] text-fg-2">{item.body}</p>
+                <span class="row-name">{item.name}</span>
+                <span class="row-body">{item.body}</span>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       ))
     }
   </div>
 
-  <p class="mono reveal mt-10 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+  <p class="mono reveal mt-9 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
     Marks belong to their owners. They are not endorsements, and no tool the Index
     grades is shown with its mark anywhere we publish a score.
   </p>
 </Section>
 
 <style>
-  /* The marks arrive at wildly different optical weights, so they sit in a
-     fixed box at a common colour rather than being trusted to match. */
-  .mark {
+  .group + .group {
+    margin-top: 22px;
+  }
+
+  .rows {
+    margin-top: 8px;
+  }
+
+  /* Ruled, not boxed. One hairline per row, including above the first, so the
+     group label reads as a table head rather than a floating caption. */
+  .row {
+    display: grid;
+    grid-template-columns: 19px minmax(0, 1fr);
+    column-gap: 14px;
+    row-gap: 2px;
+    align-items: start;
+    padding-block: 9px;
+    border-top: 1px solid var(--line);
+  }
+
+  .row-mark {
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
     color: var(--fg);
-    flex: none;
+    /* Optical: the marks sit on the cap height of the name beside them. */
+    padding-top: 2px;
+  }
+
+  .row-name {
+    font-size: 14.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--fg);
+  }
+
+  .row-body {
+    grid-column: 2;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--fg-2);
+  }
+
+  /* One line per integration once there is room for a name column. */
+  @media (min-width: 760px) {
+    .row {
+      grid-template-columns: 19px minmax(0, 210px) minmax(0, 1fr);
+      column-gap: 18px;
+      align-items: baseline;
+      padding-block: 8px;
+    }
+
+    .row-mark {
+      align-self: center;
+      padding-top: 0;
+    }
+
+    .row-body {
+      grid-column: 3;
+    }
+  }
+
+  @media (min-width: 1180px) {
+    .row {
+      grid-template-columns: 19px minmax(0, 240px) minmax(0, 1fr);
+    }
   }
 </style>
