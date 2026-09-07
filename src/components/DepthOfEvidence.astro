@@ -1,0 +1,284 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+
+// A measured drawing, not a render: four planes in flat elevation, hatched,
+// with hairline leaders out to monospace annotations. Every colour is a
+// design token, so the drawing follows the theme like everything else.
+//
+// The geometry carries the argument. The scanner's connector points up at
+// the text it re-reads; Assay's points down at behaviour. The rule between
+// them is where reading stops and execution starts.
+//
+// Two variants share one set of coordinates on the vertical axis and differ
+// only in horizontal measure, so the narrow one is the same drawing at a
+// smaller plate rather than the wide one scrolled off the page.
+
+type Layer = {
+  y: number;
+  label: string;
+  lines: [string, string];
+  struck?: boolean;
+};
+
+const PLANE_H = 44;
+const RULE_Y = 168;
+
+const layers: Layer[] = [
+  {
+    y: 20,
+    label: 'The change',
+    lines: ['the diff the agent wrote,', 'and the claim attached to it'],
+  },
+  {
+    y: 88,
+    label: 'The scanner',
+    lines: ['re-reads the same file the agent was', 'optimising against. Static. Text.'],
+  },
+  {
+    y: 214,
+    label: 'Assay',
+    lines: ['executes the patched build against', 'inputs the agent never saw'],
+    struck: true,
+  },
+  {
+    y: 282,
+    label: 'Behaviour',
+    lines: ['what the code actually does.', 'Ground truth.'],
+  },
+];
+
+const CAPTION = 'Everything above this line reads the patch. Below it, something runs it.';
+
+const variants = [
+  {
+    key: 'wide',
+    width: 880,
+    planeW: 360,
+    leadX: 404,
+    noteX: 418,
+    connX: 40,
+    caption: [CAPTION],
+  },
+  {
+    key: 'narrow',
+    width: 360,
+    planeW: 90,
+    leadX: 104,
+    noteX: 112,
+    connX: 14,
+    caption: ['Everything above this line reads the patch.', 'Below it, something runs it.'],
+  },
+] as const;
+
+const mid = (l: Layer) => l.y + PLANE_H / 2;
+
+const description = [
+  'Cross-section of what observes an AI-authored change, from the surface down.',
+  ...layers.map(
+    (l) =>
+      `${l.label}: ${l.lines.join(' ')}${l.struck ? ' This is the layer Assay reaches.' : ''}`,
+  ),
+  CAPTION,
+].join(' ');
+---
+
+<Section id="depth-of-evidence">
+  <Eyebrow class="reveal">Depth of evidence</Eyebrow>
+
+  <h2 class="h2 reveal" style="--reveal-delay:60ms">
+    Four layers sit between a patch and what the code does.
+  </h2>
+
+  <div class="reveal figure" role="img" aria-label={description} style="--reveal-delay:120ms">
+    {
+      variants.map((v) => (
+        <svg viewBox={`0 0 ${v.width} 360`} class={`dep dep-${v.key}`} aria-hidden="true">
+          <defs>
+            <pattern
+              id={`hatch-${v.key}`}
+              width="7"
+              height="7"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <line x1="0" y1="0" x2="0" y2="7" class="hatch" stroke-width="1" />
+            </pattern>
+            <pattern
+              id={`hatch-struck-${v.key}`}
+              width="5"
+              height="5"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <line x1="0" y1="0" x2="0" y2="5" class="hatch-struck" stroke-width="1" />
+            </pattern>
+          </defs>
+
+          {/* The scanner only reaches up, into the text. */}
+          <g class="conn">
+            <line x1={v.connX} y1="86" x2={v.connX} y2="66" />
+            <path d={`M${v.connX} 64 l-4 7 h8 Z`} class="conn-head" />
+          </g>
+
+          {/* Assay reaches down, into behaviour. */}
+          <g class="conn conn-struck">
+            <line x1={v.connX} y1="260" x2={v.connX} y2="280" />
+            <path d={`M${v.connX} 282 l-4 -7 h8 Z`} class="conn-head conn-head-struck" />
+          </g>
+
+          {layers.map((layer) => (
+            <g class={layer.struck ? 'layer is-struck' : 'layer'}>
+              <rect
+                x="0"
+                y={layer.y}
+                width={v.planeW}
+                height={PLANE_H}
+                fill={`url(#${layer.struck ? 'hatch-struck-' : 'hatch-'}${v.key})`}
+                class="plane"
+              />
+              <line x1={v.planeW} y1={mid(layer)} x2={v.leadX} y2={mid(layer)} class="leader" />
+              <text x={v.noteX} y={mid(layer) - 12} class="lab">
+                {layer.label}
+              </text>
+              <text x={v.noteX} y={mid(layer) + 7} class="note">
+                {layer.lines[0]}
+              </text>
+              <text x={v.noteX} y={mid(layer) + 24} class="note">
+                {layer.lines[1]}
+              </text>
+            </g>
+          ))}
+
+          {/* The argument. */}
+          <line x1="0" y1={RULE_Y} x2={v.width} y2={RULE_Y} class="divide" />
+          {v.caption.map((line, i) => (
+            <text x="0" y={RULE_Y + 22 + i * 17} class="divide-cap">
+              {line}
+            </text>
+          ))}
+        </svg>
+      ))
+    }
+  </div>
+
+  <p class="reveal mt-9 text-[17px] leading-[1.62] lg:mt-10" style="--reveal-delay:60ms">
+    Everything that stops above the line is grading text.
+  </p>
+</Section>
+
+<style>
+  .figure {
+    margin-top: 44px;
+  }
+
+  @media (min-width: 1024px) {
+    .figure { margin-top: 52px; }
+  }
+
+  .dep {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .dep-wide {
+    display: none;
+    max-width: 880px;
+  }
+
+  /* The narrow plate holds down to 320px without scrolling. Above 760px
+     there is room for the wide one, which sets the annotations beside the
+     stack instead of cramping them. */
+  @media (min-width: 760px) {
+    .dep-wide { display: block; }
+    .dep-narrow { display: none; }
+  }
+
+  .hatch {
+    stroke: var(--fg-2);
+    opacity: 0.34;
+  }
+
+  .hatch-struck {
+    stroke: var(--fail);
+    opacity: 0.42;
+  }
+
+  .plane {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .is-struck .plane {
+    stroke: var(--fail);
+  }
+
+  .leader,
+  .conn line {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .is-struck .leader {
+    stroke: var(--fail);
+  }
+
+  .conn line {
+    stroke: var(--fg-2);
+    opacity: 0.7;
+  }
+
+  .conn-head {
+    fill: var(--fg-2);
+    opacity: 0.7;
+  }
+
+  .conn-struck line {
+    stroke: var(--fail);
+    opacity: 1;
+  }
+
+  .conn-head-struck {
+    fill: var(--fail);
+    opacity: 1;
+  }
+
+  .lab {
+    font-family: var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    fill: var(--fg);
+  }
+
+  .is-struck .lab {
+    fill: var(--fail);
+  }
+
+  .note {
+    font-family: var(--font-mono);
+    fill: var(--fg-2);
+  }
+
+  .divide {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+
+  .divide-cap {
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--fg);
+  }
+
+  /* Type is sized per plate so it lands at roughly the same rendered size
+     in both, rather than scaling with the viewBox. */
+  .dep-wide .lab { font-size: 11px; }
+  .dep-wide .note { font-size: 11.5px; }
+  .dep-wide .divide-cap { font-size: 11.5px; }
+
+  .dep-narrow .lab { font-size: 10px; }
+  .dep-narrow .note { font-size: 10.5px; }
+  .dep-narrow .divide-cap { font-size: 9.5px; letter-spacing: 0.08em; }
+</style>
