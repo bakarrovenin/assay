@@ -15,19 +15,27 @@ import RoleDiagram from './RoleDiagram.astro';
 
   <div class="mt-14 grid grid-cols-1 gap-12 lg:mt-16 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-16">
     <p class="reveal text-[17px] leading-[1.62]">
-      OpenAI&rsquo;s Aardvark writes the patch with Codex, then scans its own patch.
-      Google&rsquo;s CodeMender runs its own validation framework, and Google still puts a
-      human researcher on every patch before it ships. Snyk, Pixee, Mobb and ZeroPath all
-      certify their own work. It is a structural gap, and it is the
-      one thing an author can never sell you.
+      Aardvark writes the patch with Codex, then scans its own patch. CodeMender runs its
+      own validation. Snyk, Pixee, Mobb and ZeroPath all certify their own work. Google
+      still puts a human researcher on every CodeMender patch before it ships. The best
+      resourced team on earth does not trust its own fixer.
     </p>
 
     <div class="reveal border-t border-line pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0" style="--reveal-delay:60ms">
       <p class="micro mb-3">Second beat</p>
       <p class="text-[15px] leading-[1.6] text-fg-2">
         The human backstop broke too. Developers using AI ship three to four times more
-        code. Review capacity did not move.
+        code. Review capacity did not.
       </p>
     </div>
   </div>
+
+  {/* The conclusion the diagram and the vendor list both arrive at, standing
+      on its own rather than trailing the paragraph. */}
+  <p
+    class="reveal mt-14 font-display text-[24px] font-bold leading-[1.25] tracking-[-0.018em] lg:mt-16 lg:text-[30px]"
+    style="--reveal-delay:60ms;max-width:26ch"
+  >
+    Independence is the one thing an author can never sell you.
+  </p>
 </Section>

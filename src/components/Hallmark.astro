@@ -11,6 +11,12 @@ export type Mark = {
   /** Expanded for screen readers, e.g. "agent". */
   title: string;
   struck: boolean;
+  /**
+   * What this punch stands for, printed under it. Supplying a gloss on any
+   * mark switches the device from the inline strip to a block, where the
+   * marks are the anchor of a section rather than a footnote to one.
+   */
+  gloss?: string;
 };
 
 interface Props {
@@ -21,24 +27,41 @@ interface Props {
 
 const { marks, caption, class: className = '' } = Astro.props;
 
+const glossed = marks.some((m) => m.gloss);
+
 const description = `Hallmark. ${marks
   .map((m) => `${m.title} ${m.struck ? 'struck' : 'not struck'}`)
   .join(', ')}.`;
 ---
 
-<div class={`hm ${className}`} role="img" aria-label={description}>
-  <div class="hm-marks">
-    {
-      marks.map((mark) => (
-        <span class={`hm-mark ${mark.struck ? 'is-struck' : ''}`}>{mark.id}</span>
-      ))
-    }
-  </div>
+{
+  glossed ? (
+    <div class={`hm hm-block ${className}`} role="img" aria-label={description}>
+      <div class="hm-grid">
+        {marks.map((mark) => (
+          <div class="hm-cell">
+            <span class={`hm-mark ${mark.struck ? 'is-struck' : ''}`}>{mark.id}</span>
+            <span class="hm-gloss">{mark.gloss}</span>
+          </div>
+        ))}
+      </div>
 
-  <span class="hm-rule" aria-hidden="true"></span>
+      <p class="hm-caption hm-caption-block">{caption}</p>
+    </div>
+  ) : (
+    <div class={`hm ${className}`} role="img" aria-label={description}>
+      <div class="hm-marks">
+        {marks.map((mark) => (
+          <span class={`hm-mark ${mark.struck ? 'is-struck' : ''}`}>{mark.id}</span>
+        ))}
+      </div>
 
-  <span class="hm-caption">{caption}</span>
-</div>
+      <span class="hm-rule" aria-hidden="true"></span>
+
+      <span class="hm-caption">{caption}</span>
+    </div>
+  )
+}
 
 <style>
   .hm {
@@ -118,5 +141,59 @@ const description = `Hallmark. ${marks
     .hm-marks {
       width: 100%;
     }
+  }
+  /* --- block variant: the marks carry a section rather than close one --- */
+  .hm-block {
+    display: block;
+  }
+
+  .hm-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 720px) {
+    .hm-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .hm-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 18px 20px;
+    border: 1px solid var(--line);
+    /* Shared edges, like punches struck side by side on one plate. */
+    margin-left: -1px;
+    margin-top: -1px;
+  }
+
+  .hm-block .hm-mark {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    margin-left: 0;
+    display: block;
+    text-align: left;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    /* Carrying the section, so the punch outranks its gloss. In the strip
+       the marks are a footnote and stay at --fg-2. */
+    color: color-mix(in srgb, var(--fg-2) 55%, transparent);
+  }
+
+  .hm-block .hm-mark.is-struck {
+    color: var(--fg);
+  }
+
+  .hm-gloss {
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--fg-2);
+  }
+
+  .hm-caption-block {
+    margin-top: 14px;
   }
 </style>

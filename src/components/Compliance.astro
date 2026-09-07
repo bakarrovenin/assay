@@ -1,6 +1,17 @@
 ---
 import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
+import Hallmark from './Hallmark.astro';
+
+// The four punches map one to one onto the four fields a verdict records.
+// This is the section the hallmark metaphor was built for, so it is the
+// anchor here rather than the footnote it is on /product.
+const marks = [
+  { id: 'AGT', title: 'agent', struck: true, gloss: 'which agent wrote it' },
+  { id: 'AUT', title: 'authority', struck: true, gloss: 'what authority it held' },
+  { id: 'VER', title: 'verifier', struck: true, gloss: 'what verified it' },
+  { id: 'APR', title: 'approver', struck: true, gloss: 'who approved' },
+] as const;
 
 const frameworks = [
   'EU AI Act Art. 12 & 14',
@@ -14,24 +25,43 @@ const frameworks = [
 
   <h2 class="h2 reveal" style="--reveal-delay:60ms">Prove a human oversaw the machine.</h2>
 
-  <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-16">
-    <p class="reveal text-[17px] leading-[1.62]">
-      From December 2027 the EU AI Act requires logged, documented human oversight of
-      high-risk AI systems. Singapore&rsquo;s IMDA framework already requires an audit
-      trail of which agent acted under whose authority. Assay produces a signed
-      attestation for every AI-authored change: which agent wrote it, what authority it
-      held, what verified it, and who approved. Independence is the part nobody can
-      self-certify.
-    </p>
+  <p class="reveal mt-10 text-[17px] leading-[1.62]" style="--reveal-delay:120ms;max-width:64ch">
+    December 2027: the EU AI Act requires logged, documented human oversight of high-risk
+    AI systems. Singapore&rsquo;s IMDA framework already calls for an audit trail of which
+    agent acted under whose authority.
+  </p>
 
-    <ul class="reveal flex flex-wrap content-start gap-2.5 lg:pt-1" style="--reveal-delay:60ms">
-      {
-        frameworks.map((name) => (
-          <li>
-            <span class="chip uppercase tracking-[0.1em]">{name}</span>
-          </li>
-        ))
-      }
-    </ul>
+  <p class="reveal mt-7 text-[17px] leading-[1.62]" style="--reveal-delay:60ms;max-width:64ch">
+    Every Assay verdict is a signed attestation. Which agent wrote it, what authority it
+    held, what verified it, who approved.
+  </p>
+
+  <div class="reveal mt-11 lg:mt-12" style="--reveal-delay:60ms">
+    <Hallmark marks={marks} caption="Hallmark · struck on every verdict" />
   </div>
+
+  <p class="reveal mt-11 text-[17px] leading-[1.62]" style="--reveal-delay:60ms">
+    Independence is the part nobody can self-certify.
+  </p>
+
+  <ul class="reveal mt-12 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5 lg:mt-14" style="--reveal-delay:60ms">
+    {
+      frameworks.map((name) => (
+        <li class="framework">{name}</li>
+      ))
+    }
+  </ul>
 </Section>
+
+<style>
+  /* Quieter than the chips they replace: these are context for the section
+     above, not claims of their own. */
+  .framework {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    opacity: 0.72;
+  }
+</style>
