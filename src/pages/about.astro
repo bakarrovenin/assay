@@ -3,8 +3,60 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
-import Stamp from '../components/Stamp.astro';
+import ConditionList from '../components/ConditionList.astro';
+import DefinitionPair from '../components/DefinitionPair.astro';
+import RuledRows from '../components/RuledRows.astro';
+import type { Row } from '../components/RuledRows.astro';
 import { SECURITY_ADVISORY_URL } from '../lib/site';
+
+const checks = [
+  'the reported hole is genuinely gone, not merely quiet',
+  'the patch holds on cases written before the agent was invoked, and kept out of everything it could read',
+  'nothing was broken, and nothing new was introduced',
+  'the agent wrote what it meant to write, not what somebody planted in a file it read',
+] as const;
+
+// Every field that lets somebody make safety-critical changes separates the
+// maker from the checker. One does not.
+const fields: Row[] = [
+  { lead: 'Finance', body: 'the auditor did not prepare the accounts' },
+  { lead: 'Clinical trials', body: 'the reviewer is not the sponsor' },
+  {
+    lead: 'AI security fixes',
+    body: 'the checker is the fixer',
+    tag: 'the gap',
+    mark: true,
+  },
+];
+
+const terms = [
+  {
+    term: 'Authority',
+    definition: 'a vendor telling you its patch worked. It is citing itself.',
+  },
+  {
+    term: 'Evidence',
+    definition:
+      'a result somebody else produced, by a method you can read, on cases you can re-run.',
+  },
+] as const;
+
+const commitments: Row[] = [
+  { lead: 'Harness', body: 'open source' },
+  { lead: 'Index corpus', body: 'published by identifier' },
+  { lead: 'Every verdict', body: 'ships the command that reproduces it' },
+  { lead: 'Methodology', body: 'spends as much room on where the method fails as on where it works' },
+  {
+    lead: 'Bypasses',
+    body: 'wanted. A patch we approve that does not fix the vulnerability is the most valuable bug in the product.',
+  },
+];
+
+const status: Row[] = [
+  { lead: 'Customers', body: 'none yet' },
+  { lead: 'Logos', body: 'none' },
+  { lead: 'Index results', body: 'none. The first edition has not published.' },
+];
 ---
 
 <BaseLayout
@@ -15,124 +67,159 @@ import { SECURITY_ADVISORY_URL } from '../lib/site';
   <PageHeader
     eyebrow="About"
     title="Nullius in verba."
-    titleNote="Take nobody&rsquo;s word for it."
+    titleNote={`Take nobody’s word for it.`}
     lede="Assay exists to answer one question that currently has no impartial answer: when an AI writes a security fix, did the fix actually work? We do not write patches, we do not sell a scanner, and we do not intend to. The moment we do, our answer stops being worth anything."
   />
 
   <Section id="what-for" rule={false}>
     <Eyebrow class="reveal">What the company is for</Eyebrow>
-    <h2 class="h2 reveal" style="--reveal-delay:60ms">
-      One job, held deliberately narrow.
-    </h2>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">One job, held deliberately narrow.</h2>
 
-    <div class="longform reveal mt-8">
-      <p>
-        Software agents now write security patches, attach them to pull requests, mark
-        their own work as passing, and watch automation merge them. That authority arrived
-        in increments and nobody ever had a meeting about granting it. The check that
-        should sit beside it, the one that establishes independently what the agent
-        actually did, was never built.
-      </p>
-      <p>
-        Every other field that lets somebody make safety-critical changes has that check.
-        Accounts get audited by people who did not prepare them. Trials get reviewed by
-        somebody other than the sponsor. Not because authors are dishonest, but because the
-        assumptions that produced the work also produce the check on the work, and the
-        blind spot is shared.
-      </p>
-      <p>
-        So we do four things and refuse to do a fifth. We establish that the reported hole
-        is genuinely gone rather than merely quiet. We test the patch on cases written
-        before the agent was invoked and kept out of everything it could read. We check
-        that nothing was broken or newly introduced. And we look at whether the agent wrote
-        what it meant to write, or what somebody planted in a file it read.
-      </p>
-      <p>
-        The fifth thing, the one we will not do, is write the fix. Independence is not a
-        feature you add to a roadmap. It is a property of who is doing the looking, and it
-        is the only thing here that an author genuinely cannot sell you.
-      </p>
+    <div class="reveal mt-10 lg:mt-11" style="--reveal-delay:120ms;max-width:76ch">
+      <ConditionList label="What we establish, on every AI-authored change" conditions={checks} />
     </div>
+
+    {/* The fifth is the one that matters, so it is set outside the set. */}
+    <div class="reveal refused mt-4" style="--reveal-delay:60ms;max-width:76ch">
+      <span class="refused-n">05</span>
+      <div>
+        <p class="refused-lab">Refused</p>
+        <p class="refused-body">Write the fix.</p>
+      </div>
+    </div>
+
+    <p class="reveal mt-8 text-[17px] leading-[1.62]" style="--reveal-delay:60ms;max-width:60ch">
+      Independence is not a feature you add to a roadmap. It is a property of who is doing
+      the looking.
+    </p>
+
+    <div class="reveal mt-14 lg:mt-16" style="--reveal-delay:60ms;max-width:76ch">
+      <RuledRows label="Who checks the work" rows={fields} />
+    </div>
+
+    <p class="reveal mt-7 text-[16px] leading-[1.62] text-fg-2" style="--reveal-delay:60ms;max-width:62ch">
+      Not because authors are dishonest. The assumptions that produced the work also
+      produce the check on the work, and the blind spot is shared.
+    </p>
   </Section>
 
   <Section id="credo" tint>
     <Eyebrow class="reveal">The credo</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Where the motto comes from.</h2>
 
-    <div class="mt-11 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
-      <div class="longform reveal">
-        <p>
-          The Royal Society took <em>nullius in verba</em> as its motto in 1660. It
-          translates roughly as <strong>take nobody&rsquo;s word for it</strong>, and it
-          was a deliberate break with a tradition of settling questions by citing an
-          authority. The Society&rsquo;s position was that a claim is worth what its
-          evidence is worth, and that the evidence has to be something another person can
-          go and check.
-        </p>
-        <p>
-          That is the whole argument of this company, stated three and a half centuries
-          early. A vendor telling you its patch worked is an authority citing itself. The
-          useful version is a result somebody else produced, by a method you can read, on
-          cases you can re-run.
-        </p>
-        <p>
-          Which is why the harness is open source, the Index corpus is published by
-          identifier, every verdict ships with the command that reproduces it, and the
-          methodology page spends as much room on where the method fails as on where it
-          works. If you find a way to make Assay approve a patch that does not fix the
-          vulnerability, that is the most valuable bug in the product, and we would like to
-          hear about it.{' '}
-          <a href={SECURITY_ADVISORY_URL} rel="noopener">
-            Report a bypass via GitHub private vulnerability reporting
-          </a>.
-        </p>
-        <p>
-          Including ours. Especially ours.
-        </p>
-      </div>
+    <p class="reveal mt-9 text-[17px] leading-[1.62]" style="--reveal-delay:120ms;max-width:66ch">
+      The Royal Society took it in 1660, breaking with a tradition of settling questions by
+      citing an authority.
+    </p>
 
-      <div class="reveal flex justify-start lg:justify-center lg:pt-4" style="--reveal-delay:60ms">
-        <Stamp
-          verdict="Verified"
-          note="Closed · Behaviour held · No regression"
-          state="verified"
-        />
-      </div>
+    <div class="reveal mt-10 lg:mt-11" style="--reveal-delay:60ms">
+      <DefinitionPair
+        label="Two ways to settle a question"
+        terms={terms}
+        footer="The Society chose "
+        footerTerm="evidence"
+      />
     </div>
+
+    <div class="reveal mt-12 lg:mt-14" style="--reveal-delay:60ms;max-width:76ch">
+      <RuledRows label="Which is why" rows={commitments} />
+    </div>
+
+    <p class="reveal mt-7" style="--reveal-delay:60ms">
+      <a href={SECURITY_ADVISORY_URL} rel="noopener" class="link-inline text-[15px] font-medium">
+        Report a bypass via GitHub private vulnerability reporting
+      </a>
+    </p>
+
+    <p
+      class="reveal mt-11 font-display text-[22px] font-bold leading-[1.25] tracking-[-0.016em] lg:text-[26px]"
+      style="--reveal-delay:60ms"
+    >
+      Including ours. Especially ours.
+    </p>
   </Section>
 
   <Section id="who">
     <Eyebrow class="reveal">Who is building it</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Early, and saying so.</h2>
 
-    <div class="longform reveal mt-8">
-      <p>
-        Assay is early. There is no customer list on this site because there are no
-        customers yet, no logos because there are no logos, and no results in the Index
-        because the first edition has not published. Putting placeholders in any of those
-        places would be the exact failure this company was started to point at.
-      </p>
-      <p>
-        What exists is the method, published in full, and a harness being built in the
-        open. The founder&rsquo;s background is in application security and in the
-        automated program repair literature that named overfitting long before the current
-        generation of tools existed, which is the whole reason this looked like a gap
-        rather than a novelty.
-      </p>
-      <p>
-        If you run security for a team shipping AI-authored code, or you build one of the
-        fix agents the Index will cover, we would rather hear from you now than after the
-        first edition publishes. Vendors get their results and the underlying artifacts
-        before anything goes out, with a window to respond, and responses are published
-        unedited.
-      </p>
+    <div class="reveal mt-10 lg:mt-11" style="--reveal-delay:120ms;max-width:76ch">
+      <RuledRows label="Status" rows={status} />
     </div>
 
+    <p class="reveal mt-7 text-[16px] leading-[1.62] text-fg-2" style="--reveal-delay:60ms;max-width:62ch">
+      Putting placeholders in any of those would be the exact failure this company was
+      started to point at.
+    </p>
+
+    <p class="reveal mt-12 text-[17px] leading-[1.62] lg:mt-14" style="--reveal-delay:60ms;max-width:66ch">
+      <span class="micro mb-3 block">Founder background</span>
+      Application security, plus the automated program repair literature that named
+      overfitting long before the current generation of tools existed, which is why this
+      looked like a gap and not a novelty.
+    </p>
+
+    <p class="reveal mt-10 text-[16px] leading-[1.62] text-fg-2" style="--reveal-delay:60ms;max-width:66ch">
+      Vendors get their results and the underlying artifacts before anything publishes,
+      with a window to respond. Responses go out unedited.
+    </p>
+
     <div class="reveal mt-11 flex flex-wrap gap-3">
-      <span class="btn btn-primary cursor-default opacity-60" aria-disabled="true"
-        >Get in touch</span
-      >
+      <span class="btn btn-primary cursor-default opacity-60" aria-disabled="true">
+        Get in touch
+      </span>
       <a href="/methodology" class="btn btn-secondary">Read the methodology</a>
     </div>
   </Section>
 </BaseLayout>
+
+<style>
+  /* Deliberately not a ConditionList row: the fifth sits outside the frame
+     that holds the four, and its numeral is unstruck, like the approver's
+     punch in the hallmark. */
+  .refused {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+    padding: 14px 18px;
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+  }
+
+  .refused-n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: color-mix(in srgb, var(--fg-2) 55%, transparent);
+    padding-top: 3px;
+  }
+
+  .refused-lab {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .refused-body {
+    margin-top: 3px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+
+  @media (min-width: 1024px) {
+    .refused {
+      padding: 15px 22px;
+      column-gap: 20px;
+    }
+
+    .refused-body { font-size: 17px; }
+  }
+
+  @media (max-width: 400px) {
+    .refused { padding-inline: 14px; }
+  }
+</style>

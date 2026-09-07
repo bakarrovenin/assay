@@ -1,0 +1,123 @@
+---
+// Lead and value on hairline-ruled rows. The same frame vocabulary as
+// ConditionList and DefinitionPair: mono header band, ruled body, theme
+// following. Used where the content is a set of pointers or a comparison
+// rather than a sequence of conditions.
+
+export type Row = {
+  lead: string;
+  body: string;
+  /** Mono tag set after the body, in the accent. Marks the row that matters. */
+  tag?: string;
+  /** Lift the row out of the set. */
+  mark?: boolean;
+};
+
+interface Props {
+  /** Mono header band. */
+  label: string;
+  rows: readonly Row[];
+  class?: string;
+}
+
+const { label, rows, class: className = '' } = Astro.props;
+---
+
+<div class={`rr ${className}`}>
+  <p class="rr-head">{label}</p>
+
+  <dl class="rr-rows">
+    {
+      rows.map((row) => (
+        <div class={`rr-row ${row.mark ? 'is-mark' : ''}`}>
+          <dt class="rr-lead">{row.lead}</dt>
+          <dd class="rr-body">
+            {row.body}
+            {row.tag && <span class="rr-tag">{row.tag}</span>}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .rr {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .rr-head {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .rr-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding: 14px 18px;
+  }
+
+  .rr-row + .rr-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .rr-lead {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    padding-top: 2px;
+  }
+
+  .is-mark .rr-lead {
+    color: var(--accent);
+  }
+
+  .rr-body {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+
+  .rr-tag {
+    margin-left: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 660px) {
+    .rr-row {
+      grid-template-columns: minmax(0, 186px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: baseline;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .rr-row {
+      padding: 15px 22px;
+      grid-template-columns: minmax(0, 208px) minmax(0, 1fr);
+    }
+
+    .rr-head { padding-inline: 22px; }
+    .rr-body { font-size: 17px; }
+  }
+
+  @media (max-width: 400px) {
+    .rr-head,
+    .rr-row { padding-inline: 14px; }
+  }
+</style>
