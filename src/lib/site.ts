@@ -17,6 +17,7 @@ export const nav = [
   { label: 'Research', href: '/research' },
   { label: 'Docs', href: '/methodology' },
   { label: 'Pricing', href: '/pricing' },
+  { label: 'About', href: '/about' },
 ] as const;
 
 export const footerColumns = [
