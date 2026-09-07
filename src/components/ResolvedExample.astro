@@ -3,8 +3,11 @@ import PatchAnatomy from './PatchAnatomy.astro';
 import type { DiffLine } from './Diff.astro';
 import type { TerminalLine } from './Terminal.astro';
 
-// Tokenised by hand with the .tok-* spans CodePanel defines. No runtime
-// highlighter ships to the browser.
+// The counterpart to WorkedExample, same shape, same components, opposite
+// outcome. The metadata column is deliberately identical: the scanner and CI
+// report exactly what they reported on the patch that did not work, which is
+// the entire reason the fourth role exists.
+
 const k = (s: string) => `<span class="tok-kw">${s}</span>`;
 const f = (s: string) => `<span class="tok-fn">${s}</span>`;
 const c = (s: string) => `<span class="tok-com">${s}</span>`;
@@ -25,99 +28,103 @@ const lines: DiffLine[] = [
   { n: 12, html: `${k('def')} ${f('get_customer')}(customer_id):` },
   {
     n: 13,
-    mark: '+',
+    mark: '-',
     html: `${k('if')} ${s(`${Q}OR ${A}1${A}=${A}1${A}${Q}`)} ${k('in')} customer_id:`,
   },
   {
     n: 14,
-    mark: '+',
-    html: `${k('raise')} ${f('ValueError')}(${s(`${Q}blocked: sql injection attempt${Q}`)})`,
+    mark: '-',
+    html: `        ${k('raise')} ${f('ValueError')}(${s(`${Q}blocked: sql injection attempt${Q}`)})`,
   },
-  { n: 15, mark: '+', html: `${k('if')} ${s(`${Q}${A}${Q}`)} ${k('in')} customer_id:` },
+  { n: 15, mark: '-', html: `${k('if')} ${s(`${Q}${A}${Q}`)} ${k('in')} customer_id:` },
   {
     n: 16,
-    mark: '+',
+    mark: '-',
     html: `        customer_id = customer_id.${f('replace')}(${s(`${Q}${A}${Q}`)}, ${s(`${Q}${A}${A}${Q}`)})`,
   },
   { n: 17, html: '' },
   { n: 18, html: `${k('return')} db.${f('query')}(` },
   {
     n: 19,
+    mark: '-',
     html: `${s(`f${Q}SELECT * FROM customers WHERE id = ${A}{customer_id}${A}${Q}`)}`,
   },
-  { n: 20, html: '    )' },
+  {
+    n: 20,
+    mark: '+',
+    html: `${s(`${Q}SELECT * FROM customers WHERE id = %s${Q}`)},`,
+  },
+  { n: 21, mark: '+', html: '[customer_id]' },
+  { n: 22, html: '    )' },
 ];
 
 const verdictRows = [
-  ['Vuln', 'reachable, numeric context'],
+  ['Vuln', 'not reachable on tested paths'],
   ['CWE', '89'],
   ['Method', 'assay/1.0 · held-out'],
-  ['Run', '2026-09-05T11:02Z'],
+  ['Run', '2026-09-05T14:37Z'],
 ] as const;
 
 const probe: TerminalLine[] = [
   { kind: 'cmd', html: `curl -s ${s(`${A}https://acme.internal/customers?id=42${A}`)}` },
-  { kind: 'out', html: `{${Q}id${Q}:42,${Q}email${Q}:${Q}j.okafor@acme.io${Q},${Q}plan${Q}:${Q}team${Q}}` },
+  {
+    kind: 'out',
+    html: `{${Q}id${Q}:42,${Q}email${Q}:${Q}j.okafor@acme.io${Q},${Q}plan${Q}:${Q}team${Q}}  ${c('# unchanged')}`,
+  },
   { kind: 'gap' },
   {
     kind: 'cmd',
     html: `curl -s ${s(`${Q}https://acme.internal/customers?id=1${A} OR ${A}1${A}=${A}1${A}${Q}`)}`,
   },
-  {
-    kind: 'out',
-    html: `{${Q}error${Q}:${Q}blocked: sql injection attempt${Q}}  ${c('# the reported payload')}`,
-  },
+  { kind: 'out', html: '[]' },
   { kind: 'gap' },
   {
     kind: 'cmd',
     html: `curl -s ${s(`${A}https://acme.internal/customers?id=42 OR 1=1${A}`)} | head -3`,
   },
-  { kind: 'bad', html: `{${Q}id${Q}:1,${Q}email${Q}:${Q}a.mensah@acme.io${Q},${Q}plan${Q}:${Q}enterprise${Q}}` },
-  { kind: 'bad', html: `{${Q}id${Q}:2,${Q}email${Q}:${Q}m.reyes@acme.io${Q},${Q}plan${Q}:${Q}enterprise${Q}}` },
-  { kind: 'bad', html: `{${Q}id${Q}:3,${Q}email${Q}:${Q}t.lindqvist@acme.io${Q},${Q}plan${Q}:${Q}free${Q}}` },
+  { kind: 'out', html: '[]' },
   { kind: 'gap' },
   {
     kind: 'cmd',
     html: `curl -s ${s(`${A}https://acme.internal/customers?id=42 UNION SELECT pw,1,1 FROM users${A}`)}`,
   },
-  { kind: 'bad', html: `{${Q}id${Q}:${Q}$2b$12$K7fQ1r&hellip;${Q},${Q}email${Q}:null,${Q}plan${Q}:null}` },
+  { kind: 'out', html: '[]' },
 ];
 
 const marks = [
   { id: 'AGT', title: 'agent', struck: true },
   { id: 'AUT', title: 'authority', struck: true },
   { id: 'VER', title: 'verifier', struck: true },
-  { id: 'APR', title: 'approver', struck: false },
+  { id: 'APR', title: 'approver', struck: true },
 ] as const;
 ---
 
 <PatchAnatomy
-  id="worked-example"
-  eyebrow="Anatomy of an overfitted patch"
-  headline="It fixed the test, not the bug."
-  tint
+  id="resolved-example"
+  eyebrow="Anatomy of a correct fix"
+  headline="This one actually fixed it."
   meta={meta}
   diff={{
     file: 'app/db.py',
     tag: 'Patched',
-    added: 4,
-    removed: 0,
+    added: 2,
+    removed: 5,
     lines,
-    footer: 'Concatenation unchanged, line 19',
+    footer: 'Payload never inspected, line 20',
   }}
   prose={{
-    lead: 'The ticket quoted one payload. The patch rejects that payload.',
-    dim: 'Numeric context never needed a quote.',
+    lead: 'The ticket is the same. The scanner and the build say the same thing.',
+    dim: 'Only the held-out probe separates this patch from the last one.',
   }}
-  verdict={{ verdict: 'Not verified', state: 'failed', rows: verdictRows }}
+  verdict={{ verdict: 'Verified', state: 'verified', rows: verdictRows }}
   note={{
-    muted: 'The correct fix never inspects the payload:',
-    strong: 'db.query(&quot;... id = %s&quot;, [customer_id])',
+    muted: 'Verified is a scoped claim, not a guarantee:',
+    strong: 'this hole, on the paths we tested, is shut',
   }}
   terminal={{
-    label: 'Held-out probe · against the patched build',
+    label: 'Held-out probe · against the corrected build',
     lines: probe,
-    footer: '2 of 3 held-out payloads returned data. No quote required.',
+    footer: '0 of 3 held-out payloads returned data. Benign lookup unchanged.',
   }}
-  hallmark={{ marks, caption: 'Hallmark · approver unstruck' }}
+  hallmark={{ marks, caption: 'Hallmark · all four struck' }}
 />

@@ -1,0 +1,155 @@
+---
+import Section from './Section.astro';
+import Eyebrow from './Eyebrow.astro';
+import Diff from './Diff.astro';
+import type { DiffLine } from './Diff.astro';
+import VerdictBlock from './VerdictBlock.astro';
+import Terminal from './Terminal.astro';
+import type { TerminalLine } from './Terminal.astro';
+import Hallmark from './Hallmark.astro';
+import type { Mark } from './Hallmark.astro';
+
+// The shape of a patch post-mortem, used twice on /product: once on a patch
+// that overfits, once on the fix that actually closes the hole. The two
+// sections share this file rather than merely resembling each other, so the
+// reader recognises the shape and reads the differences instead of the layout.
+
+interface Props {
+  id: string;
+  eyebrow: string;
+  headline: string;
+  tint?: boolean;
+  /** Label and value pairs beside the headline. Values may carry entities. */
+  meta: readonly (readonly [string, string])[];
+  diff: {
+    file: string;
+    tag: string;
+    added: number;
+    removed: number;
+    lines: DiffLine[];
+    footer: string;
+  };
+  /** Two sentences at full strength, then one dimmed. */
+  prose: { lead: string; dim: string };
+  verdict: {
+    verdict: string;
+    state: 'verified' | 'failed';
+    rows: readonly (readonly [string, string])[];
+  };
+  /** Mono aside between the verdict and the probe: a muted line, then a plain one. */
+  note: { muted: string; strong: string };
+  terminal: { label: string; lines: TerminalLine[]; footer: string };
+  hallmark: { marks: readonly Mark[]; caption: string };
+}
+
+const {
+  id,
+  eyebrow,
+  headline,
+  tint = false,
+  meta,
+  diff,
+  prose,
+  verdict,
+  note,
+  terminal,
+  hallmark,
+} = Astro.props;
+---
+
+<Section id={id} tint={tint}>
+  <Eyebrow class="reveal">{eyebrow}</Eyebrow>
+
+  <div class="head">
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">{headline}</h2>
+
+    <dl class="meta reveal" style="--reveal-delay:120ms">
+      {
+        meta.map(([label, value]) => (
+          <div class="meta-row">
+            <dt>{label}</dt>
+            <dd set:html={value} />
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+
+  <div class="reveal mt-10 border-t border-line pt-10 lg:mt-12 lg:pt-12" style="--reveal-delay:60ms">
+    <Diff
+      file={diff.file}
+      tag={diff.tag}
+      added={diff.added}
+      removed={diff.removed}
+      lines={diff.lines}
+      footer={diff.footer}
+    />
+  </div>
+
+  <p class="reveal mt-10 text-[17px] leading-[1.6] lg:text-[18px]" style="--reveal-delay:60ms">
+    {prose.lead}{' '}
+    <span class="text-fg-2">{prose.dim}</span>
+  </p>
+
+  <div class="reveal mt-10" style="--reveal-delay:60ms">
+    <VerdictBlock verdict={verdict.verdict} state={verdict.state} rows={verdict.rows} />
+  </div>
+
+  <div class="reveal mt-12 border-t border-line pt-8 lg:mt-14" style="--reveal-delay:60ms">
+    <p class="mono text-[13px] leading-[1.8] text-fg-2">{note.muted}</p>
+    <p class="mono mt-1 text-[13px] leading-[1.8]" set:html={note.strong} />
+  </div>
+
+  <div class="reveal mt-8" style="--reveal-delay:60ms">
+    <Terminal label={terminal.label} lines={terminal.lines} footer={terminal.footer} />
+  </div>
+
+  <div class="reveal mt-14 lg:mt-16" style="--reveal-delay:60ms">
+    <Hallmark marks={hallmark.marks} caption={hallmark.caption} />
+  </div>
+</Section>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  /* The metadata column sits beside the headline only when there is room
+     for both without crushing the measure. */
+  @media (min-width: 900px) {
+    .head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+      gap: 48px;
+      align-items: start;
+    }
+
+    .meta {
+      /* Optical alignment with the cap height of the headline. */
+      padding-top: 8px;
+    }
+  }
+
+  .meta-row {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .meta-row dt {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    padding-top: 3px;
+  }
+
+  .meta-row dd {
+    color: var(--fg);
+    overflow-wrap: anywhere;
+  }
+</style>
