@@ -1,0 +1,131 @@
+---
+// Two terms of art set against each other, with the gap between them named
+// underneath. Same frame vocabulary as Diff and Terminal (header band, ruled
+// body, footer band) but theme-following like VerdictBlock, because this is
+// a definition the page is making rather than a depiction of a tool.
+
+interface Props {
+  /** Mono header band. */
+  label: string;
+  terms: readonly { term: string; definition: string }[];
+  /** Mono footer band. Rendered before the emphasised term. */
+  footer?: string;
+  /** The word the footer lands on, set in the accent. */
+  footerTerm?: string;
+  class?: string;
+}
+
+const { label, terms, footer, footerTerm, class: className = '' } = Astro.props;
+---
+
+<div class={`dp ${className}`}>
+  <p class="dp-head">{label}</p>
+
+  <dl class="dp-body">
+    {
+      terms.map((entry) => (
+        <div class="dp-cell">
+          <dt class="dp-term">{entry.term}</dt>
+          <dd class="dp-def">{entry.definition}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  {
+    (footer || footerTerm) && (
+      <p class="dp-foot">
+        {footer}
+        {footerTerm && <b>{footerTerm}</b>}
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .dp {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .dp-head,
+  .dp-foot {
+    padding: 13px 18px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .dp-head {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dp-foot {
+    border-top: 1px solid var(--line);
+  }
+
+  .dp-foot b {
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .dp-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dp-cell {
+    padding: 26px 18px 28px;
+  }
+
+  /* A hairline between the pair: horizontal when stacked, vertical when
+     side by side, so the two terms always read as set against each other. */
+  .dp-cell + .dp-cell {
+    border-top: 1px solid var(--line);
+  }
+
+  @media (min-width: 660px) {
+    .dp-body {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dp-cell {
+      padding: 30px 26px 32px;
+    }
+
+    .dp-cell + .dp-cell {
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  .dp-term {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(28px, 4.6vw, 40px);
+    line-height: 1;
+    letter-spacing: -0.022em;
+    color: var(--fg);
+  }
+
+  .dp-def {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--fg-2);
+    max-width: 30ch;
+  }
+
+  @media (min-width: 1024px) {
+    .dp-def { font-size: 17px; }
+  }
+
+  @media (max-width: 400px) {
+    .dp-head,
+    .dp-foot { padding-inline: 14px; }
+    .dp-cell { padding-inline: 14px; }
+  }
+</style>

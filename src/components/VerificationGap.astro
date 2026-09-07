@@ -3,6 +3,14 @@ import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
 import StatCard from './StatCard.astro';
 import VerificationChart from './VerificationChart.astro';
+import DefinitionPair from './DefinitionPair.astro';
+
+// The two terms of art the repair literature separates. Shown rather than
+// explained: the gap between the words is the argument.
+const terms = [
+  { term: 'Plausible', definition: 'Passes every test it was given.' },
+  { term: 'Correct', definition: 'Fixes the bug.' },
+] as const;
 
 const bars = [
   {
@@ -29,7 +37,8 @@ const stats = [
   {
     value: '45%',
     label:
-      'of AI-generated code introduces an OWASP-class vulnerability, and the rate is flat across model generations.',
+      'of AI-generated code ships an OWASP Top 10 vulnerability, and the rate is flat across model generations.',
+    emphasise: 'flat',
     source: 'Veracode, 100+ LLMs, 2025',
   },
   {
@@ -57,32 +66,37 @@ const stats = [
     A patch can pass every test and leave the hole wide open.
   </h2>
 
-  <div class="mt-14 grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,1fr)] lg:gap-16">
-    <div class="space-y-7">
+  <p class="reveal mt-10 text-[17px] leading-[1.6] lg:text-[18px]" style="--reveal-delay:120ms;max-width:74ch">
+    A test is{' '}
+    <strong class="font-semibold text-fg">a sample, not a specification</strong>. Automated
+    program repair has spent over a decade producing patches that satisfy the sample, and
+    the field has a word for them.
+  </p>
+
+  <div class="reveal mt-11" style="--reveal-delay:60ms">
+    <DefinitionPair
+      label="Automated program repair · terms of art"
+      terms={terms}
+      footer="The distance between them is called "
+      footerTerm="overfitting"
+    />
+  </div>
+
+  <div class="mt-14 grid grid-cols-1 gap-14 lg:mt-16 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,1fr)] lg:gap-16">
+    <div class="space-y-8">
       <p class="reveal text-[17px] leading-[1.6]">
-        A test is a handful of examples of what the code should do. It is{' '}
-        <strong class="font-semibold text-fg">a sample, not a specification</strong>.
+        That literature was explicit about the remedy: a human validates every candidate
+        before anyone trusts it.
       </p>
 
-      <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:60ms">
-        When you tell an AI to make the tests pass, it{' '}
-        <strong class="font-semibold text-fg">optimises for the sample</strong>.
-      </p>
-
-      <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:120ms">
-        Researchers have studied this for over a decade and named it{' '}
-        <strong class="font-semibold text-fg">overfitting</strong>. Automated program
-        repair always treated a plausible patch as unproven until a human validated it.
+      {/* The conclusion of the whole section, so it carries weight rather than
+          trailing off beside a full-height chart. */}
+      <p
+        class="reveal font-display text-[22px] font-bold leading-[1.25] tracking-[-0.016em] text-fg-2 lg:text-[26px]"
+        style="--reveal-delay:60ms;max-width:22ch"
+      >
         AI agents did not solve overfitting.{' '}
-        <strong class="font-semibold text-fg">
-          They industrialised it and deleted the validation step.
-        </strong>
-      </p>
-
-      <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:180ms">
-        The industry checks AI fixes by re-running the scanner. The AI was optimising to
-        make that scanner go quiet.{' '}
-        <strong class="font-semibold text-fg">It is a circular test.</strong>
+        <span class="text-fg">They industrialised it and deleted the validation step.</span>
       </p>
     </div>
 
@@ -101,6 +115,7 @@ const stats = [
           <StatCard
             value={stat.value}
             label={stat.label}
+            emphasise={stat.emphasise}
             source={stat.source}
             class="flex-1"
           />
@@ -115,7 +130,7 @@ const stats = [
   >
     <p class="micro mb-3">Why a better model does not fix this</p>
     <p class="text-[16.5px] leading-[1.62]">
-      You cannot wait this out. The lever is governance, not model capability.
+      You cannot wait this out: the lever is governance, not model capability.
     </p>
   </div>
 

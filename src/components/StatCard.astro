@@ -3,11 +3,24 @@ interface Props {
   /** The headline number as displayed, e.g. "45%" or "3 to 4x". */
   value: string;
   label: string;
+  /**
+   * A substring of `label` to set in the foreground weight. Used where the
+   * emphasis is the claim, not decoration: "the rate is flat" is the point
+   * of the Veracode number, not the 45%.
+   */
+  emphasise?: string;
   source: string;
   class?: string;
 }
 
-const { value, label, source, class: className = '' } = Astro.props;
+const { value, label, emphasise, source, class: className = '' } = Astro.props;
+
+// Split rather than interpolate HTML, so the label stays plain text.
+const i = emphasise ? label.indexOf(emphasise) : -1;
+const parts =
+  i >= 0
+    ? { before: label.slice(0, i), mark: emphasise!, after: label.slice(i + emphasise!.length) }
+    : null;
 
 // Only animate when the value is a plain number with optional prefix/suffix.
 const match = value.match(/^(\D*?)(\d+(?:\.\d+)?)(\D*)$/);
@@ -24,7 +37,19 @@ const countable = match !== null;
   >
     {value}
   </div>
-  <p class="mt-3.5 text-[14.5px] leading-[1.5] text-fg-2">{label}</p>
+  <p class="mt-3.5 text-[14.5px] leading-[1.5] text-fg-2">
+    {
+      parts ? (
+        <>
+          {parts.before}
+          <strong class="font-semibold text-fg">{parts.mark}</strong>
+          {parts.after}
+        </>
+      ) : (
+        label
+      )
+    }
+  </p>
   <p class="micro mt-auto pt-4">{source}</p>
 </div>
 
