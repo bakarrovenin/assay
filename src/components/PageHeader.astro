@@ -2,11 +2,16 @@
 interface Props {
   eyebrow: string;
   title: string;
+  /**
+   * A gloss set directly under the title, before the lede. Used where the
+   * title is a motto and the line beneath it is the translation.
+   */
+  titleNote?: string;
   lede: string;
   subLede?: string;
 }
 
-const { eyebrow, title, lede, subLede } = Astro.props;
+const { eyebrow, title, titleNote, lede, subLede } = Astro.props;
 ---
 
 <header class="rule-b pt-16 pb-14 lg:pt-24 lg:pb-20">
@@ -19,6 +24,17 @@ const { eyebrow, title, lede, subLede } = Astro.props;
     >
       {title}
     </h1>
+
+    {
+      titleNote && (
+        <p
+          class="mono reveal mt-4 text-[15px] leading-[1.5] text-fg-2"
+          style="--reveal-delay:90ms"
+        >
+          {titleNote}
+        </p>
+      )
+    }
 
     <p class="lede reveal mt-7" style="--reveal-delay:120ms">{lede}</p>
 

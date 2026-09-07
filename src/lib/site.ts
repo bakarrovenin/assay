@@ -27,7 +27,6 @@ export const footerColumns = [
       { label: 'Docs', href: '/methodology' },
       { label: 'Pricing', href: '/pricing' },
       { label: 'The Index', href: '/the-index' },
-      { label: 'Changelog', href: 'https://github.com/assay-dev/assay/releases' },
     ],
   },
   {
@@ -35,22 +34,12 @@ export const footerColumns = [
     links: [
       { label: 'Blog', href: '/research' },
       { label: 'Methodology', href: '/methodology' },
-      { label: 'Open source', href: 'https://github.com/assay-dev' },
     ],
   },
   {
     title: 'Company',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Contact', href: 'https://linkedin.com/company/assaydev' },
-    ],
-  },
-  {
-    title: 'Social',
-    links: [
-      { label: 'GitHub', href: 'https://github.com/assay-dev' },
-      { label: 'X', href: 'https://x.com/assaydev' },
-      { label: 'LinkedIn', href: 'https://linkedin.com/company/assaydev' },
     ],
   },
 ] as const;
