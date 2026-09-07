@@ -73,7 +73,12 @@ const stats = [
 
       <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:120ms">
         Researchers have studied this for over a decade and named it{' '}
-        <strong class="font-semibold text-fg">overfitting</strong>.
+        <strong class="font-semibold text-fg">overfitting</strong>. Automated program
+        repair always treated a plausible patch as unproven until a human validated it.
+        AI agents did not solve overfitting.{' '}
+        <strong class="font-semibold text-fg">
+          They industrialised it and deleted the validation step.
+        </strong>
       </p>
 
       <p class="reveal text-[17px] leading-[1.6] text-fg-2" style="--reveal-delay:180ms">
@@ -104,6 +109,19 @@ const stats = [
         </div>
       ))
     }
+  </div>
+
+  <div
+    class="reveal mt-14 border-t border-line pt-6 lg:mt-16"
+    style="max-width:76ch"
+  >
+    <p class="micro mb-3">Why a better model does not fix this</p>
+    <p class="text-[16.5px] leading-[1.62]">
+      You cannot wait this out. Veracode put an OWASP-class vulnerability in 45% of
+      AI-generated code and found the rate{' '}
+      <strong class="font-semibold text-fg">flat across model generations</strong>, and
+      Snyk&rsquo;s own number is 48%. The lever is governance, not model capability.
+    </p>
   </div>
 
   <blockquote

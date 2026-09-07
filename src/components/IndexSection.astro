@@ -1,7 +1,10 @@
 ---
 import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
-import IndexTable from './IndexTable.astro';
+import IndexSignup from './IndexSignup.astro';
+
+// Homepage teaser only. The results table lives on /the-index, where the
+// "first edition in progress" framing explains why every cell is empty.
 ---
 
 <Section id="the-index" tint>
@@ -11,16 +14,16 @@ import IndexTable from './IndexTable.astro';
 
   <p class="lede reveal mt-6" style="--reveal-delay:120ms">
     Nobody has independently tested them. Every published number comes from the vendor
-    that wrote the fix. We run the same harness against every commercial fixer,
-    quarterly, with the free DARPA systems as the baseline row, and we publish the
-    methodology.
+    that wrote the fix.
   </p>
 
-  <div class="mt-12 lg:mt-14">
-    <IndexTable />
+  <p class="reveal mt-7" style="--reveal-delay:180ms">
+    <a href="/the-index" class="link-inline text-[15px] font-medium">
+      Read the Index and how it is scored
+    </a>
+  </p>
+
+  <div class="mt-11">
+    <IndexSignup />
   </div>
-
-  <p class="reveal mt-9">
-    <a href="/methodology" class="link-inline text-[15px] font-medium">Read the methodology</a>
-  </p>
 </Section>

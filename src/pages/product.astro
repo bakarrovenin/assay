@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import WorkedExample from '../components/WorkedExample.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Workflow from '../components/Workflow.astro';
+import Integrations from '../components/Integrations.astro';
+---
+
+<BaseLayout
+  title="Product"
+  description="What Assay checks and how. The anatomy of an overfitted patch, the four checks, the pull request status check, and what it plugs into."
+  path="/product"
+>
+  <PageHeader
+    eyebrow="Product"
+    title="Independent verification for AI-authored code."
+    lede="What an overfitted patch actually looks like, the four checks we run on every AI-authored change, and where the verdict lands."
+  />
+
+  <WorkedExample />
+  <HowItWorks />
+  <Workflow />
+  <Integrations />
+</BaseLayout>

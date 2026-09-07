@@ -65,4 +65,25 @@ const checks = [
     If you let a student write their own exam, they will pass it. You test them on
     questions they have not seen.
   </p>
+
+  <div class="reveal mt-16 border-t border-line pt-7 lg:mt-20" style="max-width:76ch">
+    <p class="micro mb-3">The second failure mode, and why check 04 exists</p>
+
+    <h3 class="font-display text-[21px] font-bold leading-tight tracking-[-0.015em] lg:text-[24px]">
+      The fixer is itself an attack surface.
+    </h3>
+
+    <div class="prose-body mt-4 space-y-4 text-[16px] leading-[1.65] text-fg-2">
+      <p>
+        A flaw in the Claude Code GitHub Action meant a single opened issue could hand an
+        attacker write access to any repository running it. CVSS 7.8, fixed in v1.0.94.
+      </p>
+      <p>
+        Nothing about a patch like that looks wrong to a scanner, because the scanner is
+        not the thing being attacked. When the agent writing your fix can be instructed by
+        the code it is reading,{' '}
+        <strong class="font-semibold text-fg">provenance stops being paperwork</strong>.
+      </p>
+    </div>
+  </div>
 </Section>

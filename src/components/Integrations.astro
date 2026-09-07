@@ -1,26 +1,89 @@
 ---
 import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
+import BrandMark from './BrandMark.astro';
+import type { BrandName } from '../lib/logos';
 
-const integrations = [
+// Marks are used here, and only here, because these are things Assay plugs
+// into. The tools the Index grades keep the abstract ToolChip glyphs: a logo
+// sitting next to a score we are about to publish reads as endorsement.
+const groups: {
+  label: string;
+  items: { brand: BrandName; name: string; body: string }[];
+}[] = [
   {
-    title: 'GitHub, GitLab, Bitbucket, Azure DevOps',
-    body: 'A status check on every pull request. Blocking or advisory.',
+    label: 'Where the change lands',
+    items: [
+      {
+        brand: 'github',
+        name: 'GitHub',
+        body: 'A status check on every pull request. Blocking or advisory.',
+      },
+      {
+        brand: 'gitlab',
+        name: 'GitLab',
+        body: 'The same check, on merge requests.',
+      },
+      {
+        brand: 'bitbucket',
+        name: 'Bitbucket',
+        body: 'Reported through pipelines, on every pull request.',
+      },
+      {
+        brand: 'azuredevops',
+        name: 'Azure DevOps',
+        body: 'Wired to branch policy, so the gate holds before merge.',
+      },
+    ],
   },
   {
-    title: 'SARIF in, verdict out',
-    body: 'Works with whichever scanner you already run.',
+    label: 'What we read',
+    items: [
+      {
+        brand: 'snyk',
+        name: 'Snyk and any SARIF scanner',
+        body: 'SARIF in, verdict out. Works with whichever scanner you already run.',
+      },
+    ],
   },
   {
-    title: 'Slack and Linear',
-    body: 'Verdicts where your team already triages.',
+    label: 'Where the verdict goes',
+    items: [
+      {
+        brand: 'slack',
+        name: 'Slack',
+        body: 'Verdicts where your team already triages.',
+      },
+      {
+        brand: 'linear',
+        name: 'Linear',
+        body: 'On the issue that tracks the fix, not in a separate console.',
+      },
+    ],
   },
   {
-    title: 'MCP and REST API',
-    body:
-      'Pull verdicts into Cursor, Claude Code or Codex so the agent sees its own score.',
+    label: 'Back to the agent',
+    items: [
+      {
+        brand: 'cursor',
+        name: 'Cursor',
+        body: 'An MCP server, so the agent sees its own score.',
+      },
+      {
+        brand: 'claude',
+        name: 'Claude Code',
+        body: 'The same MCP server, in the terminal.',
+      },
+      {
+        brand: 'openai',
+        name: 'OpenAI Codex',
+        body: 'REST API for anything that does not speak MCP.',
+      },
+    ],
   },
 ];
+
+let tick = 0;
 ---
 
 <Section id="integrations" tint>
@@ -28,16 +91,52 @@ const integrations = [
 
   <h2 class="h2 reveal" style="--reveal-delay:60ms">Wherever the change already lands.</h2>
 
-  <ul class="mt-12 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-2 lg:mt-14 lg:gap-x-16">
+  <div class="mt-12 space-y-12 lg:mt-14 lg:space-y-14">
     {
-      integrations.map((item, i) => (
-        <li class="reveal border-t border-line pt-5" style={`--reveal-delay:${i * 60}ms`}>
-          <h3 class="font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">
-            {item.title}
-          </h3>
-          <p class="mt-2.5 text-[14.5px] leading-[1.6] text-fg-2">{item.body}</p>
-        </li>
+      groups.map((group) => (
+        <div>
+          <p class="micro reveal">{group.label}</p>
+
+          <ul class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {group.items.map((item) => (
+              <li
+                class="reveal flex flex-col rounded-[3px] border border-line bg-bg p-6 lg:p-7"
+                style={`--reveal-delay:${(tick++ % 4) * 60}ms`}
+              >
+                <span class="mark">
+                  <BrandMark name={item.brand} size={22} />
+                </span>
+
+                <h3 class="mt-4 font-display text-[16.5px] font-bold leading-tight tracking-[-0.012em]">
+                  {item.name}
+                </h3>
+                <p class="mt-2.5 text-[14px] leading-[1.6] text-fg-2">{item.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       ))
     }
-  </ul>
+  </div>
+
+  <p class="mono reveal mt-10 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+    Marks belong to their owners and appear here to say what Assay connects to.
+    They are not endorsements, and no tool the Index grades is shown with its mark
+    anywhere we publish a score.
+  </p>
 </Section>
+
+<style>
+  /* The marks arrive at wildly different optical weights, so they sit in a
+     fixed box at a common colour rather than being trusted to match. */
+  .mark {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--fg);
+    flex: none;
+  }
+</style>

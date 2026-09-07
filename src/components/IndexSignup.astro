@@ -1,0 +1,98 @@
+---
+import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
+
+// Split out of IndexTable so the homepage can carry the capture without the
+// empty results table. Posts to the same Loops endpoint as the verify modal
+// and is told apart by userGroup ("index" here, "verify-pr" there).
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<form
+  class={`reveal max-w-[560px] ${className}`}
+  data-index-signup
+  action={INDEX_SIGNUP_ENDPOINT || undefined}
+  method="post"
+  style="--reveal-delay:60ms"
+>
+  <input type="hidden" name="source" value="index" />
+
+  <label for="index-email" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">
+    Get the first edition when it publishes
+  </label>
+
+  <div class="mt-3.5 flex flex-col gap-2.5 xs:flex-row">
+    <input
+      id="index-email"
+      name="email"
+      type="email"
+      required
+      autocomplete="email"
+      placeholder="you@company.com"
+      class="min-w-0 flex-1 rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+    />
+    <button type="submit" class="btn btn-primary shrink-0">Notify me</button>
+  </div>
+
+  <p
+    class="mono mt-3 text-[11px] leading-relaxed text-fg-2"
+    data-signup-status
+    role="status"
+  >
+    One message when the edition lands. Nothing else, ever.
+  </p>
+</form>
+
+<script>
+  import { submitSignup } from '../lib/signup';
+
+  const form = document.querySelector<HTMLFormElement>('[data-index-signup]');
+  const status = form?.querySelector<HTMLElement>('[data-signup-status]');
+  const input = form?.querySelector<HTMLInputElement>('#index-email');
+  const button = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+  const RESTING = status?.textContent ?? '';
+
+  form?.addEventListener('submit', async (event) => {
+    // Handled here rather than by a native POST, so the reader stays on the
+    // page and gets the result inline.
+    event.preventDefault();
+
+    const email = input?.value.trim();
+    if (!email) return;
+
+    const label = button?.textContent ?? 'Notify me';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Please wait';
+    }
+    if (status) status.textContent = 'Sending, please wait.';
+
+    const result = await submitSignup(email, 'index');
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = label;
+    }
+
+    if (result.ok) {
+      form.reset();
+      if (status) {
+        status.textContent =
+          'You are on the list. One message when the edition lands.';
+      }
+      return;
+    }
+
+    if (status) status.textContent = result.message;
+  });
+
+  // Put the resting line back once the reader starts typing again.
+  input?.addEventListener('input', () => {
+    if (status && status.textContent !== RESTING) status.textContent = RESTING;
+  });
+</script>

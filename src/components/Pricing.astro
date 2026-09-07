@@ -1,6 +1,7 @@
 ---
 import Section from './Section.astro';
-import Eyebrow from './Eyebrow.astro';
+
+// Lives on /pricing only. The page header carries the eyebrow and headline.
 
 const tiers = [
   {
@@ -35,12 +36,8 @@ const tiers = [
 ];
 ---
 
-<Section id="pricing">
-  <Eyebrow class="reveal">Pricing</Eyebrow>
-
-  <h2 class="h2 reveal" style="--reveal-delay:60ms">Free where the work is public.</h2>
-
-  <ul class="mt-12 grid grid-cols-1 gap-4 lg:mt-14 lg:grid-cols-3">
+<Section id="pricing" rule={false}>
+  <ul class="grid grid-cols-1 gap-4 lg:grid-cols-3">
     {
       tiers.map((tier, i) => (
         <li

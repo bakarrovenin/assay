@@ -1,0 +1,23 @@
+---
+import { brandMarks, type BrandName } from '../lib/logos';
+
+interface Props {
+  name: BrandName;
+  /** Rendered box in px. The mark is scaled to fit whatever its source viewBox is. */
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 22, class: className = '' } = Astro.props;
+const mark = brandMarks[name];
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox={mark.viewBox}
+  fill="currentColor"
+  aria-hidden="true"
+  class={className}
+  set:html={mark.paths}
+/>

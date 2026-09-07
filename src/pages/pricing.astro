@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Pricing from '../components/Pricing.astro';
+---
+
+<BaseLayout
+  title="Pricing"
+  description="Free forever on public repositories. Per repository for private repos, priced per agent under governance for enterprise."
+  path="/pricing"
+>
+  <PageHeader
+    eyebrow="Pricing"
+    title="Free where the work is public."
+    lede="Verification is worth least when it is hidden. Every verdict on a public repository is free and public, forever."
+  />
+
+  <Pricing />
+</BaseLayout>

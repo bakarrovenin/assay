@@ -12,19 +12,20 @@ export const SECURITY_ADVISORY_URL =
   'https://github.com/bakarrovenin/assay/security/advisories/new';
 
 export const nav = [
-  { label: 'Product', href: '/#how-it-works' },
+  { label: 'Product', href: '/product' },
   { label: 'The Index', href: '/the-index' },
   { label: 'Research', href: '/research' },
   { label: 'Docs', href: '/methodology' },
-  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Pricing', href: '/pricing' },
 ] as const;
 
 export const footerColumns = [
   {
     title: 'Product',
     links: [
+      { label: 'Overview', href: '/product' },
       { label: 'Docs', href: '/methodology' },
-      { label: 'Pricing', href: '/#pricing' },
+      { label: 'Pricing', href: '/pricing' },
       { label: 'The Index', href: '/the-index' },
       { label: 'Changelog', href: 'https://github.com/assay-dev/assay/releases' },
     ],

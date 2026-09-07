@@ -1,0 +1,397 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+export type DocsGroup = {
+  label: string;
+  items: { id: string; label: string }[];
+};
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  eyebrow: string;
+  heading: string;
+  lede: string;
+  subLede?: string;
+  groups: DocsGroup[];
+  /** Shown under the on-this-page outline, e.g. "Method v1.0". */
+  meta?: string;
+}
+
+const {
+  title,
+  description,
+  path,
+  eyebrow,
+  heading,
+  lede,
+  subLede,
+  groups,
+  meta,
+} = Astro.props;
+
+// Flat list drives the right-hand outline and the scroll-spy; the left rail
+// keeps the grouping so the two rails are not the same list twice.
+const flat = groups.flatMap((g) => g.items);
+---
+
+<BaseLayout title={title} description={description} path={path}>
+  <PageHeader eyebrow={eyebrow} title={heading} lede={lede} subLede={subLede} />
+
+  <div class="shell docs-shell">
+    <div class="docs">
+      <!-- Left rail: the whole document, grouped. -->
+      <aside class="docs-rail docs-rail-left" aria-label="Document sections">
+        <details class="docs-disclosure" open>
+          <summary class="docs-summary">
+            <span class="micro">On this page</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M6 9.5l6 6 6-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </summary>
+
+          <nav class="docs-nav">
+            {
+              groups.map((group) => (
+                <div class="docs-group">
+                  <p class="docs-group-label">{group.label}</p>
+                  <ul>
+                    {group.items.map((item) => (
+                      <li>
+                        <a href={`#${item.id}`} data-docs-link={item.id}>
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </nav>
+        </details>
+      </aside>
+
+      <div class="docs-main"><slot /></div>
+
+      <!-- Right rail: flat outline with the reading position marked. -->
+      <aside class="docs-rail docs-rail-right" aria-label="On this page">
+        <p class="micro docs-toc-label">On this page</p>
+        <nav class="docs-toc">
+          <ul>
+            {
+              flat.map((item) => (
+                <li>
+                  <a href={`#${item.id}`} data-docs-toc={item.id}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        {meta && <p class="micro docs-toc-meta">{meta}</p>}
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Two rails plus a readable measure do not fit inside the 1200px marketing
+     shell. Widen only on screens that can actually spend the pixels. */
+  @media (min-width: 1280px) {
+    .docs-shell {
+      max-width: 1380px;
+    }
+  }
+
+  .docs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-block: 8px 40px;
+  }
+
+  /* Three columns only when there is genuinely room for two rails plus a
+     readable measure. Below that the left rail collapses to a disclosure and
+     the right rail is redundant, so it goes. */
+  @media (min-width: 1100px) {
+    .docs {
+      grid-template-columns: 208px minmax(0, 1fr) 200px;
+      gap: 48px;
+      padding-block: 0 64px;
+    }
+  }
+
+  @media (min-width: 1320px) {
+    .docs {
+      grid-template-columns: 224px minmax(0, 1fr) 216px;
+      gap: 64px;
+    }
+  }
+
+  .docs-rail {
+    font-size: 13.5px;
+  }
+
+  .docs-rail-right {
+    display: none;
+  }
+
+  @media (min-width: 1100px) {
+    .docs-rail {
+      position: sticky;
+      /* 61px nav plus breathing room. */
+      top: 92px;
+      align-self: start;
+      max-height: calc(100svh - 120px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-block: 40px;
+    }
+
+    .docs-rail-right {
+      display: block;
+    }
+  }
+
+  /* --- left rail --- */
+
+  .docs-disclosure {
+    border-bottom: 1px solid var(--line);
+    padding-block: 18px;
+  }
+
+  .docs-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    list-style: none;
+    color: var(--fg-2);
+  }
+
+  .docs-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .docs-summary svg {
+    transition: transform 180ms ease-out;
+    flex: none;
+  }
+
+  .docs-disclosure[open] .docs-summary svg {
+    transform: rotate(180deg);
+  }
+
+  .docs-nav {
+    padding-top: 20px;
+  }
+
+  @media (min-width: 1100px) {
+    .docs-disclosure {
+      border-bottom: 0;
+      padding-block: 0;
+    }
+
+    .docs-summary {
+      display: none;
+    }
+
+    .docs-nav {
+      padding-top: 0;
+    }
+  }
+
+  .docs-group + .docs-group {
+    margin-top: 26px;
+  }
+
+  .docs-group-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--fg-2);
+    opacity: 0.7;
+    margin-bottom: 10px;
+  }
+
+  .docs-nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 1px solid var(--line);
+  }
+
+  .docs-nav a {
+    display: block;
+    padding: 5px 0 5px 14px;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--fg-2);
+    line-height: 1.4;
+    transition: color 140ms ease-out, border-color 140ms ease-out;
+  }
+
+  .docs-nav a:hover {
+    color: var(--fg);
+  }
+
+  .docs-nav a[aria-current='true'] {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* --- right rail --- */
+
+  .docs-toc-label {
+    margin-bottom: 14px;
+  }
+
+  .docs-toc ul {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .docs-toc a {
+    display: block;
+    padding: 5px 0;
+    color: var(--fg-2);
+    font-size: 12.5px;
+    line-height: 1.45;
+    transition: color 140ms ease-out;
+  }
+
+  .docs-toc a:hover {
+    color: var(--fg);
+  }
+
+  .docs-toc a[aria-current='true'] {
+    color: var(--accent);
+  }
+
+  .docs-toc-meta {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* --- content column ---
+     The page's sections are built from the marketing <Section> primitive,
+     which supplies its own full-width shell and 120px rhythm. Inside the docs
+     column both are wrong, so they are neutralised here rather than by
+     rewriting 750 lines of hand-authored content. */
+  .docs-main :global(.section) {
+    padding-block: 44px;
+  }
+
+  @media (min-width: 1024px) {
+    .docs-main :global(.section) {
+      padding-block: 56px;
+    }
+  }
+
+  .docs-main :global(.shell) {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  /* Section tints are a full-bleed device. In a bordered reading column they
+     read as an accident, so the rule alone separates sections. */
+  .docs-main :global(.section.bg-bg-2\/70) {
+    background: transparent;
+  }
+
+  .docs-main :global(.section:first-child) {
+    padding-top: 40px;
+  }
+</style>
+
+<script>
+  // The rail is a disclosure on narrow screens and a permanent sidebar from
+  // 1100px up, where the summary is hidden. Server-rendered markup cannot know
+  // which, so it ships open and is closed here if the viewport is narrow.
+  {
+    const disclosure = document.querySelector<HTMLDetailsElement>('.docs-disclosure');
+    const wide = window.matchMedia('(min-width: 1100px)');
+    const sync = () => {
+      if (disclosure) disclosure.open = wide.matches;
+    };
+    sync();
+    // Only on a breakpoint crossing, so a reader who opened it keeps it open.
+    wide.addEventListener('change', sync);
+  }
+
+  // Scroll-spy across both rails. Marks the section whose heading most
+  // recently crossed the top of the reading area.
+  const sections = Array.from(
+    document.querySelectorAll<HTMLElement>('.docs-main [id]'),
+  ).filter((el) => el.tagName === 'SECTION');
+
+  const links = new Map<string, HTMLAnchorElement[]>();
+  document
+    .querySelectorAll<HTMLAnchorElement>('[data-docs-link], [data-docs-toc]')
+    .forEach((a) => {
+      const id = a.dataset.docsLink ?? a.dataset.docsToc;
+      if (!id) return;
+      const list = links.get(id) ?? [];
+      list.push(a);
+      links.set(id, list);
+    });
+
+  if (sections.length && links.size) {
+    let current = '';
+
+    const mark = (id: string) => {
+      if (id === current) return;
+      links.get(current)?.forEach((a) => a.removeAttribute('aria-current'));
+      links.get(id)?.forEach((a) => a.setAttribute('aria-current', 'true'));
+      current = id;
+    };
+
+    const update = () => {
+      // The last section whose top has passed the nav line wins. Falling back
+      // to the first keeps something lit before the reader has scrolled.
+      const line = 140;
+      let active = sections[0].id;
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= line) active = section.id;
+        else break;
+      }
+
+      // At the very bottom the final section may never reach the line, so
+      // pin it once the page cannot scroll further.
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 4) {
+        active = sections[sections.length - 1].id;
+      }
+
+      mark(active);
+    };
+
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        update();
+      });
+    };
+
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+  }
+</script>

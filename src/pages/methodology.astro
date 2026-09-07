@@ -1,6 +1,6 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHeader from '../components/PageHeader.astro';
+import DocsLayout from '../layouts/DocsLayout.astro';
+import type { DocsGroup } from '../layouts/DocsLayout.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import CodePanel from '../components/CodePanel.astro';
@@ -8,6 +8,44 @@ import { highlightJson } from '../lib/highlight';
 import { METHOD_VERSION, SECURITY_ADVISORY_URL } from '../lib/site';
 
 const lastUpdated = new Date().toISOString().slice(0, 10);
+
+const docsGroups: DocsGroup[] = [
+  {
+    label: 'The contract',
+    items: [{ id: 'contract', label: 'Three verdicts' }],
+  },
+  {
+    label: 'The four checks',
+    items: [
+      { id: 'check-01', label: '01 Closed' },
+      { id: 'check-02', label: '02 Behaviour held' },
+      { id: 'check-03', label: '03 No regression' },
+      { id: 'check-04', label: '04 Provenance clean' },
+    ],
+  },
+  {
+    label: 'The record',
+    items: [
+      { id: 'artifact', label: 'The artifact' },
+      { id: 'index-rules', label: 'The Index' },
+    ],
+  },
+  {
+    label: 'Where it breaks',
+    items: [
+      { id: 'assumptions', label: 'Assumptions' },
+      { id: 'limitations', label: 'Limitations' },
+      { id: 'disputes', label: 'Disputes' },
+    ],
+  },
+  {
+    label: 'Reference',
+    items: [
+      { id: 'terms', label: 'Terms' },
+      { id: 'method-version', label: 'Version and changes' },
+    ],
+  },
+];
 
 const verdicts = [
   {
@@ -127,17 +165,17 @@ const terms = [
 ] as const;
 ---
 
-<BaseLayout
-  title="Methodology"
+<DocsLayout
+  title="Documentation"
   description="How Assay decides whether a fix actually worked. The four checks in full, the artifact schema, the assumptions, and the limitations."
   path="/methodology"
+  eyebrow="Documentation"
+  heading="How we decide whether a fix actually worked."
+  lede="Assay makes one claim: that a specific change to your code closed a specific vulnerability without breaking anything and without being tampered with. That claim is only worth something if you can see how it was reached. This page is the whole method, including the parts where it does not work."
+  subLede="If you find a hole in this, we want to hear about it. The harness is open source and every verdict is reproducible from the artifact it emits."
+  groups={docsGroups}
+  meta={`Method v${METHOD_VERSION}`}
 >
-  <PageHeader
-    eyebrow="Methodology"
-    title="How we decide whether a fix actually worked."
-    lede="Assay makes one claim: that a specific change to your code closed a specific vulnerability without breaking anything and without being tampered with. That claim is only worth something if you can see how it was reached. This page is the whole method, including the parts where it does not work."
-    subLede="If you find a hole in this, we want to hear about it. The harness is open source and every verdict is reproducible from the artifact it emits."
-  />
 
   <!-- 1. The contract -->
   <Section id="contract" rule={false}>
@@ -739,7 +777,7 @@ const terms = [
       Nullius in verba. Take nobody&rsquo;s word for it, including ours.
     </p>
   </Section>
-</BaseLayout>
+</DocsLayout>
 
 <style>
   /* "The question:" lines. They set up every check section, so they get a
