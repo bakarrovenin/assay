@@ -42,8 +42,8 @@ const rules = [
   <PageHeader
     eyebrow="The Index"
     title="Which AI fixers actually work?"
-    lede="Nobody has independently tested them. Every published number comes from the vendor that wrote the fix. We run the same harness against every commercial fixer, quarterly, with the free DARPA systems as the baseline row, and we publish the methodology."
-    subLede="The first edition has not published. Until it does, every cell below is empty, because the alternative is inventing numbers, which is the exact thing this Index exists to catch."
+    lede="Nobody has independently tested them. Every published number comes from the vendor that wrote the fix."
+    subLede="Every cell below is empty, because the alternative is inventing numbers, which is the exact thing this Index exists to catch."
   />
 
   <Section id="results" rule={false}>
@@ -98,12 +98,6 @@ const rules = [
   <Section id="columns">
     <Eyebrow class="reveal">Reading the table</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">The gap is the finding.</h2>
-
-    <p class="lede reveal mt-6">
-      Two of these three columns already exist in vendor marketing. The third is the one
-      that has never been measured, and the distance between the second and the third is
-      the entire point of the exercise.
-    </p>
 
     <ol class="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-[3px] border border-line bg-line lg:grid-cols-3">
       {
