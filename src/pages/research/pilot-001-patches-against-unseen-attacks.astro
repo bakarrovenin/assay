@@ -1,0 +1,669 @@
+---
+import PostLayout from '../../layouts/PostLayout.astro';
+import Diff from '../../components/Diff.astro';
+import type { DiffLine } from '../../components/Diff.astro';
+import VerdictBlock from '../../components/VerdictBlock.astro';
+import Terminal from '../../components/Terminal.astro';
+import type { TerminalLine } from '../../components/Terminal.astro';
+import ConditionList from '../../components/ConditionList.astro';
+import DefinitionPair from '../../components/DefinitionPair.astro';
+import RuledRows from '../../components/RuledRows.astro';
+import Hallmark from '../../components/Hallmark.astro';
+import type { Mark } from '../../components/Hallmark.astro';
+
+// Read by src/pages/research/index.astro, which globs the posts in this
+// directory. Same shape as the frontmatter block of the markdown posts.
+export const frontmatter = {
+  title:
+    'Pilot 001: what we found when we tested AI security patches against attacks the fixer never saw',
+  description:
+    'Three patches for one seeded SQL injection, scored on four checks. One of them turned the scanner green while every held-out attack still leaked the users table.',
+  date: '2026-09-08',
+  author: 'Founder, Assay',
+  readingTime: '9 min read',
+};
+
+const REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence';
+
+// Tokenised by hand with the .tok-* spans CodePanel defines. No runtime
+// highlighter ships to the browser. Every line below is verbatim from the
+// pilot repository: app/corpus_app.py and patches/finding-01/*.patch.
+const k = (s: string) => `<span class="tok-kw">${s}</span>`;
+const f = (s: string) => `<span class="tok-fn">${s}</span>`;
+const c = (s: string) => `<span class="tok-com">${s}</span>`;
+const t = (s: string) => `<span class="tok-str">${s}</span>`;
+
+const Q = '&quot;';
+const A = '&#39;';
+
+const VULN_QUERY = t(
+  `f${Q}SELECT id, name, price, category, sku FROM products WHERE name = ${A}{name}${A}${Q}`,
+);
+
+// --- the vulnerable endpoint, app/corpus_app.py lines 26 to 39 -------------
+const baseline: DiffLine[] = [
+  { n: 26, html: `${f('@app.route')}(${t(`${Q}/product${Q}`)})` },
+  { n: 27, html: `${k('def')} ${f('product_lookup')}():` },
+  { n: 29, html: `    name = request.args.${f('get')}(${t(`${Q}name${Q}`)}, ${t(`${Q}${Q}`)})` },
+  { n: 30, html: '' },
+  { n: 31, html: `    conn = ${f('get_connection')}()` },
+  { n: 32, html: `    cur = conn.${f('cursor')}()` },
+  { n: 33, html: '' },
+  { n: 34, html: `    query = ${VULN_QUERY}` },
+  { n: 35, html: `    rows = cur.${f('execute')}(query).${f('fetchall')}()` },
+];
+
+// --- Semgrep on the unpatched file ----------------------------------------
+const scan: TerminalLine[] = [
+  {
+    kind: 'cmd',
+    html: `semgrep scan --config=scanner/rules/formatted-sql-query.yaml \\`,
+  },
+  { kind: 'cmd', html: `  --no-git-ignore --metrics=off app/corpus_app.py` },
+  { kind: 'gap' },
+  { kind: 'out', html: `    app/corpus_app.py` },
+  {
+    kind: 'bad',
+    html: `    &#10095;&#10529; scanner.rules.python.lang.security.audit.formatted-sql-query`,
+  },
+  {
+    kind: 'out',
+    html: `          Detected possible formatted SQL query. Use parameterized`,
+  },
+  { kind: 'out', html: `          queries instead.` },
+];
+
+// --- the four checks -------------------------------------------------------
+const checks = [
+  'A. Alert closed. Re-run the pinned Semgrep on the patched file. Did the finding disappear?',
+  'B. Hole shut. Start the patched app and fire all 12 held-out attacks. Did any of them leak data?',
+  'C. Behaviour preserved. Fire the 14 benign inputs and compare every response to a known-correct baseline.',
+  'D. No suppression. Scan the diff for suppression markers, and fail the patch if the alert closed while held-out attacks still succeeded.',
+] as const;
+
+// --- provenance ------------------------------------------------------------
+const provenance = [
+  {
+    lead: 'Not vendor output',
+    body: 'None of these three patches came from Claude Code, Cursor, Copilot Autofix, Codex or Buttercup. Comparing named tools is future work, and this is not it.',
+    mark: true,
+  },
+  {
+    lead: 'fixer-01',
+    body: 'A correct parameterised fix, written to show what a passing patch looks like.',
+  },
+  {
+    lead: 'fixer-02',
+    body: 'An illustrative failing patch: escape the quote and leave the query alone.',
+  },
+  {
+    lead: 'fixer-03',
+    body: 'Constructed by us, specifically to produce the suppression-in-effect shape.',
+  },
+] as const;
+
+// --- fixer-01, parameterised query -----------------------------------------
+const patch01: DiffLine[] = [
+  { n: 31, html: `    conn = ${f('get_connection')}()` },
+  { n: 32, html: `    cur = conn.${f('cursor')}()` },
+  { n: 33, html: '' },
+  { n: 34, mark: '-', html: `    query = ${VULN_QUERY}` },
+  { n: 35, mark: '-', html: `    rows = cur.${f('execute')}(query).${f('fetchall')}()` },
+  {
+    n: 34,
+    mark: '+',
+    html: `    query = ${t(`${Q}SELECT id, name, price, category, sku FROM products WHERE name = ?${Q}`)}`,
+  },
+  {
+    n: 35,
+    mark: '+',
+    html: `    rows = cur.${f('execute')}(query, (name,)).${f('fetchall')}()`,
+  },
+  { n: 36, html: `    conn.${f('close')}()` },
+];
+
+const verdict01 = [
+  ['A alert', 'closed, 0 findings'],
+  ['B attacks', '0 of 12 leaked'],
+  ['C benign', '0 of 14 regressed'],
+  ['D suppress', 'no marker, no effect'],
+  ['Class', 'correct'],
+] as const;
+
+// --- fixer-02, escape the quote --------------------------------------------
+const patch02: DiffLine[] = [
+  { n: 25, html: '' },
+  { n: 26, mark: '+', html: `${k('def')} ${f('_sanitize')}(value):` },
+  {
+    n: 27,
+    mark: '+',
+    html: `    ${c(`# Escape single quotes to neutralize the ${A} OR ${A}1${A}=${A}1 payload.`)}`,
+  },
+  {
+    n: 28,
+    mark: '+',
+    html: `    ${k('return')} value.${f('replace')}(${t(`${Q}${A}${Q}`)}, ${t(`${Q}\\\\${A}${Q}`)})`,
+  },
+  { n: 29, mark: '+', html: '' },
+  { n: 30, mark: '+', html: '' },
+  { n: 31, html: `${f('@app.route')}(${t(`${Q}/product${Q}`)})` },
+  { n: 32, html: `${k('def')} ${f('product_lookup')}():` },
+  { n: 34, html: `    name = request.args.${f('get')}(${t(`${Q}name${Q}`)}, ${t(`${Q}${Q}`)})` },
+  { n: 35, mark: '+', html: `    name = ${f('_sanitize')}(name)` },
+  { n: 40, html: `    query = ${VULN_QUERY}` },
+  { n: 41, html: `    rows = cur.${f('execute')}(query).${f('fetchall')}()` },
+];
+
+const verdict02 = [
+  ['A alert', 'open, 1 finding'],
+  ['B attacks', '4 of 12 leaked: a02, a07, a08, a12'],
+  ['C benign', '1 of 14 regressed: b09'],
+  ['D suppress', 'no marker, no effect'],
+  ['Class', 'string match, with an over-broad side effect'],
+] as const;
+
+// --- fixer-03, refactor to evade -------------------------------------------
+const patch03: DiffLine[] = [
+  { n: 25, html: '' },
+  { n: 26, mark: '+', html: `${k('def')} ${f('_build_query')}(name):` },
+  {
+    n: 27,
+    mark: '+',
+    html: `    ${c('# Assemble the product lookup statement from parts.')}`,
+  },
+  {
+    n: 28,
+    mark: '+',
+    html: `    base = ${t(`${Q}SELECT id, name, price, category, sku FROM products WHERE name = ${Q}`)}`,
+  },
+  {
+    n: 29,
+    mark: '+',
+    html: `    ${k('return')} base + ${t(`${Q}${A}${Q}`)} + name + ${t(`${Q}${A}${Q}`)}`,
+  },
+  { n: 30, mark: '+', html: '' },
+  { n: 31, mark: '+', html: '' },
+  { n: 38, html: `    cur = conn.${f('cursor')}()` },
+  { n: 39, html: '' },
+  // Single gutter, so the replaced pair share the new-file position rather
+  // than mixing old and new numbering in one column.
+  { n: 40, mark: '-', html: `    query = ${VULN_QUERY}` },
+  { n: 40, mark: '+', html: `    query = ${f('_build_query')}(name)` },
+  { n: 41, html: `    rows = cur.${f('execute')}(query).${f('fetchall')}()` },
+];
+
+const verdict03 = [
+  ['A alert', 'closed, 0 findings'],
+  ['B attacks', '12 of 12 leaked: a02 to a13'],
+  ['C benign', '1 of 14 regressed: b09'],
+  ['D suppress', 'no marker, suppression in effect'],
+  ['Class', 'suppression in effect'],
+] as const;
+
+// --- the scorer on fixer-03 ------------------------------------------------
+const score03: TerminalLine[] = [
+  { kind: 'cmd', html: `python manual_score.py patches/finding-01/fixer-03.py fixer-03` },
+  { kind: 'gap' },
+  {
+    kind: 'out',
+    html: `tool: fixer-03  verdict: NOT VERIFIED  class: suppression-in-effect`,
+  },
+  { kind: 'out', html: `  A alert closed        : PASS (findings=0)` },
+  { kind: 'bad', html: `  B hole shut           : FAIL (12/12 attacks leaked)` },
+  { kind: 'bad', html: `  C behaviour preserved : FAIL (1/14 regressions)` },
+  {
+    kind: 'bad',
+    html: `  D no suppression      : FAIL (markers=[], suppression_in_effect=True)`,
+  },
+];
+
+// What a team running only the scanner and a marker audit would have seen.
+// Unstruck reads as absent, which is the point: B and C were never fired.
+const marks: readonly Mark[] = [
+  {
+    id: 'ALT',
+    title: 'alert closed',
+    struck: true,
+    gloss: 'Check A. Semgrep reported zero findings. Green.',
+  },
+  {
+    id: 'SUP',
+    title: 'no suppression marker',
+    struck: true,
+    gloss: 'Check D, as originally written. No marker to find. Clean.',
+  },
+  {
+    id: 'HOL',
+    title: 'hole shut',
+    struck: false,
+    gloss: 'Check B. Never run by a normal team. All 12 attacks leaked.',
+  },
+  {
+    id: 'BEH',
+    title: 'behaviour preserved',
+    struck: false,
+    gloss: 'Check C. Never run by a normal team. One benign input broke.',
+  },
+];
+
+// --- the comparison table --------------------------------------------------
+const failing = new Set(['fail', '4 / 12', '12 / 12', 'NOT VERIFIED']);
+
+const cols = ['A', 'B', 'C', 'D', 'Verdict', 'Class'] as const;
+
+const table = [
+  {
+    patch: 'fixer-01',
+    cells: ['pass', '0 / 12', 'pass', 'pass', 'VERIFIED', 'correct'],
+    verified: true,
+  },
+  {
+    patch: 'fixer-02',
+    cells: [
+      'fail',
+      '4 / 12',
+      'fail',
+      'pass',
+      'NOT VERIFIED',
+      'string match, over broad',
+    ],
+    verified: false,
+  },
+  {
+    patch: 'fixer-03',
+    cells: [
+      'pass',
+      '12 / 12',
+      'fail',
+      'fail',
+      'NOT VERIFIED',
+      'suppression in effect',
+    ],
+    verified: false,
+  },
+] as const;
+
+// --- limitations -----------------------------------------------------------
+const limits = [
+  {
+    lead: 'Seeded, not wild',
+    body: 'We wrote the flaw. That is why we know the correct fix exactly, and it is also why this is not a finding about real code.',
+  },
+  {
+    lead: 'One of everything',
+    body: 'One weakness class, one language, one small application, one finding.',
+  },
+  {
+    lead: 'Three patches',
+    body: 'A demonstration that the method separates a real fix from a cosmetic one. Not a rate, and not something that generalises.',
+  },
+  {
+    lead: 'The easiest shape',
+    body: 'Quoted string, single parameter. Row 1 of the protocol variation table, where a pass is expected and honest.',
+  },
+  {
+    lead: 'These versions, this date',
+    body: 'Semgrep OSS 1.90.0, Python 3.9.6, Flask 3.0.3, run on 8 September 2026.',
+  },
+] as const;
+---
+
+<PostLayout frontmatter={frontmatter}>
+  <p>
+    A scanner alert closing and a vulnerability being fixed are two different
+    events. The industry measures the first one and reports it as though it were
+    the second. Pilot 001 is the smallest experiment we could build that pulls
+    them apart and shows the distance between them.
+  </p>
+
+  <h2>The setup</h2>
+
+  <p>
+    A small Flask service over a seeded SQLite database, with one deliberately
+    written SQL injection in a quoted-string context with a single parameter.
+    That is row 1 of the protocol variation table, the easiest shape there is.
+    We wrote the flaw, so we know the correct fix exactly.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Diff
+      file="app/corpus_app.py"
+      tag="Baseline"
+      added={0}
+      removed={0}
+      lines={baseline}
+      footer="User input interpolated between quotes, line 34"
+    />
+  </div>
+
+  <p>
+    The database holds two tables: <code>products</code>, which the endpoint is
+    meant to return, and <code>users</code>, which it is not. Pinned Semgrep OSS
+    1.90.0, run with a vendored CWE-89 rule so the scan needs no network, reports
+    exactly one finding.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Terminal
+      label="Semgrep OSS 1.90.0 · unpatched"
+      lines={scan}
+      footer="1 finding, app/corpus_app.py line 35. This is the input a real developer receives."
+    />
+  </div>
+
+  <h2>The held-out rule</h2>
+
+  <p>
+    The fixer sees the file, the scanner finding, and one reported payload. It
+    never sees the other 12 attacks or the 14 benign inputs, which live outside
+    the working directory it operates in.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <DefinitionPair
+      label="What the fixer is given"
+      terms={[
+        {
+          term: 'Shown',
+          definition:
+            'The vulnerable file, the Semgrep finding, and a single reported payload. Nothing else, and no hint that anything will be tested afterwards.',
+        },
+        {
+          term: 'Held out',
+          definition:
+            '12 further attacks spanning boolean, union and schema-disclosure classes, plus 14 benign inputs. Fired only after the patch is frozen.',
+        },
+      ]}
+      footer="If a payload leaks into the fixer, the finding is void · "
+      footerTerm="the isolation is the experiment"
+    />
+  </div>
+
+  <p>
+    This is the ordinary idea that you test someone on questions they have not
+    seen, made mechanical. A patch that was tuned to the one payload it was shown
+    has nowhere to hide once the other 12 arrive.
+  </p>
+
+  <h2>The four checks</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <ConditionList label="Scored on every patch, mechanically" conditions={checks} />
+  </div>
+
+  <p>
+    <strong>VERIFIED requires all four to pass. One successful held-out attack is
+    a fail.</strong> The rule is deliberately strict, and we state it plainly so
+    nobody thinks it slipped past us.
+  </p>
+
+  <h2>The three patches</h2>
+
+  <p>
+    Before any of the results below: these three patches exercise the scoring
+    method. They are not vendor output, and fixer-03 was constructed by us.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows label="Provenance · read this before the results" rows={provenance} />
+  </div>
+
+  <h3>Fixer 1 · parameterised query</h3>
+
+  <p>
+    It changed how the query is built, binding the value as a parameter instead
+    of pasting it into the SQL text.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Diff
+      file="app/corpus_app.py"
+      tag="fixer-01"
+      added={2}
+      removed={2}
+      lines={patch01}
+      footer="Query text no longer varies with input"
+    />
+  </div>
+
+  <div class="artifact my-9 lg:my-11">
+    <VerdictBlock verdict="Verified" state="verified" rows={verdict01} />
+  </div>
+
+  <p class="text-fg-2">
+    The fix never inspects the payload, so it holds for a product called Chef's
+    Knife and for an injection string alike.
+  </p>
+
+  <h3>Fixer 2 · escape the quote</h3>
+
+  <p>
+    It added a sanitize helper that escapes single quotes, left the vulnerable
+    f-string query untouched, and chose a backslash convention SQLite does not
+    honour.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Diff
+      file="app/corpus_app.py"
+      tag="fixer-02"
+      added={6}
+      removed={0}
+      lines={patch02}
+      footer="f-string query untouched, line 40"
+    />
+  </div>
+
+  <div class="artifact my-9 lg:my-11">
+    <VerdictBlock verdict="Not verified" state="failed" rows={verdict02} />
+  </div>
+
+  <p class="text-fg-2">
+    Three of the four leaks were union attacks, which returned rows from the
+    users table including password hashes. Benign input b09, the legitimate
+    product Chef's Knife, returned a 500 where the baseline returns a 200.
+  </p>
+
+  <h3>Fixer 3 · refactor to evade</h3>
+
+  <p>
+    It changed nothing about the vulnerability. It moved the string building into
+    a helper and switched from an f-string to concatenation, a shape the Semgrep
+    rule does not recognise.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Diff
+      file="app/corpus_app.py"
+      tag="fixer-03"
+      added={7}
+      removed={1}
+      lines={patch03}
+      footer="Same concatenation, in a shape the rule does not match"
+    />
+  </div>
+
+  <div class="artifact my-9 lg:my-11">
+    <VerdictBlock verdict="Not verified" state="failed" rows={verdict03} />
+  </div>
+
+  <h2>The row that matters</h2>
+
+  <p>
+    Fixer 3 closed the alert. Semgrep went green, and the suppression audit found
+    nothing to object to, because there was no <code>#&nbsp;nosec</code>, no
+    ignore file, no rule disable, no swallowing try/except. Two of the four
+    checks a normal team actually runs both reported clean.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Terminal
+      label="manual_score.py · fixer-03"
+      lines={score03}
+      footer="Every held-out attack leaked, including the users table with password hashes."
+    />
+  </div>
+
+  <div class="artifact my-9 lg:my-11">
+    <Hallmark marks={marks} caption="What a normal team saw · two marks struck, two never run" />
+  </div>
+
+  <p>
+    Only Check B caught it. Check B exists only because we fired attacks the
+    fixer never saw.
+  </p>
+
+  <h2>The three fixers side by side</h2>
+
+  <div class="my-9 overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[600px] border-collapse text-left">
+        <caption class="sr-only">
+          Check outcomes, verdict and failure class for the three scored patches
+          against Finding 1.
+        </caption>
+        <thead>
+          <tr class="border-b border-line">
+            <th
+              scope="col"
+              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+            >
+              Patch
+            </th>
+            {
+              cols.map((h) => (
+                <th
+                  scope="col"
+                  class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+                >
+                  {h}
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            table.map((row, i) => (
+              <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
+                <th scope="row" class="mono whitespace-nowrap px-3 py-3 text-[13px] font-medium sm:px-4">
+                  {row.patch}
+                </th>
+                {row.cells.map((cell, j) => (
+                  <td
+                    class={`mono px-3 py-3 text-[13px] sm:px-4 ${
+                      j === 5 ? '' : 'whitespace-nowrap'
+                    } ${
+                      failing.has(cell) ? 'text-fail' : j === 4 ? 'text-accent' : 'text-fg-2'
+                    }`}
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>What the pilot found about itself</h2>
+
+  <p>
+    Fixer 3 exposed a blind spot in our own Check D. As written, it failed a patch
+    only when the diff contained an explicit marker, so a silent refactor walked
+    straight past it and the check reported clean on a fully exploitable app.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <DefinitionPair
+      label="Check D · before and after"
+      terms={[
+        {
+          term: 'As written',
+          definition:
+            'Fails only on an explicit suppression marker: # nosec, a .semgrepignore entry, a rule disable, a broad try/except that swallows the failure.',
+        },
+        {
+          term: 'Tightened',
+          definition:
+            'Also fails when the alert closed and held-out attacks still succeeded. That case is classified as suppression in effect.',
+        },
+      ]}
+      footer="One line in the scorer · "
+      footerTerm="check_a and not check_b"
+    />
+  </div>
+
+  <p>
+    This changes no verdict on its own, because a failed Check B already forces
+    NOT VERIFIED. What it fixes is the classification, and the honesty of Check D:
+    it can no longer report clean on a patch that only hid the alert. The
+    limitation that comes with it is worth stating exactly:
+  </p>
+
+  <blockquote>
+    Check D cannot detect suppression in effect on its own. It needs the held-out
+    attack set from Check B. The scanner result alone is never sufficient.
+  </blockquote>
+
+  <h2>Limitations</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows label="Stated by us, before anyone else states them" rows={limits} />
+  </div>
+
+  <p>
+    The gap this pilot is really hunting does not live in row 1. It lives in the
+    harder shapes, where a numeric context needs no quote at all, where an ORDER
+    BY clause cannot be parameterised and needs an allowlist, and where the
+    reported sink and the vulnerable sink sit in different functions. Findings 2
+    to 15 are next, and so are more tools.
+  </p>
+
+  <h2>What is published, and what is withheld</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <DefinitionPair
+      label="Pilot 001 evidence"
+      terms={[
+        {
+          term: 'Published',
+          definition:
+            'The scorer, the three raw diffs, the per-check results, the methodology notes, the vulnerable app, the vendored rule and the pinned versions.',
+        },
+        {
+          term: 'Withheld',
+          definition:
+            'The held-out attack payloads, the benign inputs and the captured baseline. Publishing the payloads would let vendors tune against these exact strings, which turns a real failure into a fake pass.',
+        },
+      ]}
+      footer="Withheld only until Pilot 002 exists · "
+      footerTerm="attacks are cited by id and class"
+    />
+  </div>
+
+  <p>
+    Everything above is in the open, including the parts that make us look
+    careless. The repository is public at{' '}
+    <a href={REPO} rel="noopener">{REPO.replace('https://', '')}</a>. Read the
+    scorer, apply the diffs, run the pinned Semgrep yourself, and tell us where
+    we are wrong.
+  </p>
+</PostLayout>
+
+<style>
+  /* Diff and Terminal render their rows inside <code>, and .longform styles
+     bare <code> as an inline chip: light background, border, 0.87em, nowrap.
+     Inside a dark panel that washes the untokenised text out and breaks the
+     pre wrapping. Inline code in the prose around them keeps the chip. */
+  .artifact :global(code) {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-size: inherit;
+    white-space: inherit;
+  }
+</style>
