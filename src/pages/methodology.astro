@@ -4,6 +4,12 @@ import type { DocsGroup } from '../layouts/DocsLayout.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import CodePanel from '../components/CodePanel.astro';
+import ConditionList from '../components/ConditionList.astro';
+import DefinitionPair from '../components/DefinitionPair.astro';
+import RuledRows from '../components/RuledRows.astro';
+import type { Row } from '../components/RuledRows.astro';
+import Terminal from '../components/Terminal.astro';
+import type { TerminalLine } from '../components/Terminal.astro';
 import { highlightJson } from '../lib/highlight';
 import { METHOD_VERSION, SECURITY_ADVISORY_URL } from '../lib/site';
 
@@ -28,6 +34,13 @@ const docsGroups: DocsGroup[] = [
     items: [
       { id: 'artifact', label: 'The artifact' },
       { id: 'index-rules', label: 'The Index' },
+    ],
+  },
+  {
+    label: 'The harness',
+    items: [
+      { id: 'harness', label: 'What runs the checks' },
+      { id: 'harness-scope', label: 'Decisions and scope' },
     ],
   },
   {
@@ -65,6 +78,86 @@ const verdicts = [
     tone: 'muted',
     meaning:
       'We could not run one or more checks to a standard we would stand behind. This is not a pass. It is an explicit statement that we do not know.',
+  },
+];
+
+const EVIDENCE_REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence';
+
+// The Pilot 001 harness. Every line below is a property of code in that
+// repository, not a description of intent.
+const harnessStages = [
+  'Corpus. One manifest entry per finding, split at check A. The loader refuses a public manifest carrying reference_fix, endpoint or oracle.',
+  'Baseline. Benign responses captured from a known correct reference, never the unpatched app, which 500s on a legitimate apostrophe. Scanner baseline pinned to SARIF.',
+  'Scorer. The four checks inside a container, image pinned by digest, no bind mounts, one container per patch, removed after.',
+  'Runner. Applies supplied diffs across the findings by tools matrix and aggregates. It never invokes a fixer, so prompt and retry policy stay out of the result.',
+];
+
+const harnessGates: Row[] = [
+  {
+    lead: 'Stage 1 parity',
+    body:
+      're-scores the three patches with the current harness into a scratch tree and byte compares six artifacts against the ones committed from the manual run, run date pinned. Catches a refactor that moved a verdict rather than only moving code.',
+  },
+  {
+    lead: 'Stage 3 container parity',
+    body:
+      'the same comparison from inside the container, plus diff path and patched file agreement on every field except patch_file, plus a required egress measurement per run. Catches container SQLite 3.40.1 and Python 3.9.25 disagreeing with host 3.51.0 and 3.9.6 on a response body, which moves check C.',
+  },
+  {
+    lead: 'Report math recount',
+    body:
+      'recomputes every published rate, count and failure class from the per cell artifacts, importing nothing from the aggregation. Then corrupts the summary fourteen ways, one per branch, and requires the recount to report each and name the field that moved. Catches an arithmetic error in a rate, which would read as a finding rather than a bug.',
+    tag: 'both directions',
+  },
+  {
+    lead: 'Insufficient evidence paths',
+    body:
+      'provokes all four on purpose: a diff that will not apply, a patch that raises on import, a container that can reach the network, absent held-out material. Each has to name itself. Catches check B scoring an app that never started as a hole that was shut.',
+  },
+  {
+    lead: 'Leak guard, tracked files',
+    body:
+      'no held-out payload in any tracked file, nothing under heldout/ tracked. Catches an attack payload reaching the public tree, which voids the finding it belongs to.',
+  },
+  {
+    lead: 'Leak guard, git objects',
+    body:
+      'reads blobs and commit messages over the range a push would send, failing on a held-out payload, experimenter prose, any blob that parses as a manifest carrying the answer key, or any path under heldout/. Refuses to pass when the held-out material is absent. Catches a key cleaned in a later commit while the blob stays fetchable, which is what happened here.',
+    tag: 'both directions',
+    mark: true,
+  },
+];
+
+// Run on 2026-09-09. Transcribed from the actual output, including the two
+// gates that did not run.
+const gateRun: TerminalLine[] = [
+  { kind: 'cmd', html: `python tools/check_no_leak.py` },
+  { kind: 'out', html: `  exit 0   RESULT: NO LEAK` },
+  { kind: 'cmd', html: `python tools/check_history_no_leak.py` },
+  { kind: 'out', html: `  exit 0   RESULT: NO LEAK IN HISTORY` },
+  { kind: 'cmd', html: `python tools/verify_history_guard.py` },
+  { kind: 'out', html: `  exit 0   fails on 3 planted leaks and the real pre-rewrite commit` },
+  { kind: 'cmd', html: `python tools/verify_report_math.py` },
+  { kind: 'out', html: `  exit 0   14 corrupted summaries, all reported and named` },
+  { kind: 'cmd', html: `python tools/verify_stage1_parity.py` },
+  { kind: 'out', html: `  exit 0   RESULT: PARITY HELD (6 artifacts byte identical)` },
+  { kind: 'gap' },
+  { kind: 'cmd', html: `python tools/verify_stage3_parity.py` },
+  { kind: 'bad', html: `  exit 3   no container runtime, did not run` },
+  { kind: 'cmd', html: `python tools/verify_insufficient_evidence.py` },
+  { kind: 'bad', html: `  exit 3   no container runtime, did not run` },
+];
+
+const harnessScope = [
+  {
+    term: 'Published',
+    definition:
+      'The harness, the corpus structure, the containerised scorer, the gates above, the results, and the methodology notes.',
+  },
+  {
+    term: 'Withheld',
+    definition:
+      'The held-out attack and benign sets, the captured baseline, the reference app, and the experimenter manifest carrying reference_fix, endpoint and oracle.',
   },
 ];
 
@@ -626,7 +719,113 @@ const terms = [
     </div>
   </Section>
 
-  <!-- 8. Assumptions -->
+  <!-- 8. The harness -->
+  <Section id="harness" tint>
+    <Eyebrow class="reveal">The harness</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      What runs the checks, and what checks the runner.
+    </h2>
+
+    <div class="longform reveal mt-8">
+      <p>
+        The scorer runs the four checks on one patch against one finding. The harness makes
+        that repeatable across the findings by tools matrix, and emits the evidence
+        unchanged in schema from the first hand run.
+      </p>
+    </div>
+
+    <div class="reveal mt-9">
+      <ConditionList label="Four stages" conditions={harnessStages} />
+    </div>
+
+    <div class="longform reveal mt-11">
+      <p>
+        The gates are the part worth attacking. Each one exists because a check that has
+        only ever passed has not been tested.
+      </p>
+    </div>
+
+    <div class="reveal mt-8">
+      <RuledRows label="Gates · what each one would catch" rows={harnessGates} />
+    </div>
+
+    <div class="reveal mt-9">
+      <Terminal
+        label="gate suite · 2026-09-09"
+        lines={gateRun}
+        footer="Five gates executed on 2026-09-09. The two container gates did not run on that machine and report exit 3 rather than a pass."
+      />
+    </div>
+  </Section>
+
+  <!-- 9. Harness decisions and scope -->
+  <Section id="harness-scope">
+    <Eyebrow class="reveal">Decisions and scope</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">
+      Three decisions that are not obvious.
+    </h2>
+
+    <div class="longform reveal mt-8">
+      <h3>Isolation is measured, not asserted.</h3>
+      <p>
+        The container reads its own interfaces and default route and opens real TCP and DNS
+        connections off host, before a patch is applied or a payload is built. Any of them
+        connecting means INSUFFICIENT EVIDENCE and nothing is scored. The probe carries a
+        positive control: on an ordinary bridge network it reports
+        <code>egress_blocked false</code> and <code>observed_mode routed</code>, so it is not
+        a function that always returns the comforting answer.
+      </p>
+
+      <h3>Isolation provenance is a sidecar.</h3>
+      <p>
+        The measurement lands in a provenance file carrying the sha256 of each evidence file
+        it describes, not in a field inside the evidence. A new field would change the
+        evidence bytes on every patch and end the parity chain, in the direction that hides
+        things: a real verdict change would be indistinguishable from our own schema edit.
+      </p>
+
+      <h3>Rates are over scored cells.</h3>
+      <p>
+        A run that produced no verdict produced no check A result to count. That denominator
+        flatters, so the insufficient rate sits in the same table, every row prints supplied,
+        scored and insufficient, and a tool with no scored cells reads n/a rather than 0%.
+      </p>
+    </div>
+
+    <div class="reveal mt-12 lg:mt-14">
+      <DefinitionPair
+        label="Pilot 001 · what is public"
+        terms={harnessScope}
+        footer="The oracle is the detector, not the answer. Publish it and a patch can be tuned to return one row and avoid five marker strings, passing check B with the hole open, on "
+        footerTerm="criteria we published ourselves."
+      />
+    </div>
+
+    <div class="longform reveal mt-11">
+      <h3>Limitations.</h3>
+      <p>
+        The parity results describe one finding in the easiest shape, quoted string context
+        with a single parameter. One of fifteen corpus entries is built.
+      </p>
+      <p>
+        The container and host agreeing on SQLite behaviour has not been retested on the
+        numeric, LIKE or ORDER BY shapes. When those exist the comparison runs again rather
+        than being assumed.
+      </p>
+      <p>
+        Three false passes found in our own method does not mean three existed. It means
+        three were found, by an experiment that has scored three patches against one
+        finding.
+      </p>
+      <p>
+        The full record, including the notes on each false pass and how it was closed, is in
+        <a href={`${EVIDENCE_REPO}/blob/main/METHODOLOGY-NOTES.md`} rel="noopener" class="link-inline">METHODOLOGY-NOTES.md</a>
+        in the <a href={EVIDENCE_REPO} rel="noopener" class="link-inline">evidence repository</a>.
+      </p>
+    </div>
+  </Section>
+
+  <!-- 10. Assumptions -->
   <Section id="assumptions" tint>
     <Eyebrow class="reveal">Assumptions</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">What we take as given.</h2>
@@ -667,7 +866,7 @@ const terms = [
     </div>
   </Section>
 
-  <!-- 9. Limitations -->
+  <!-- 11. Limitations -->
   <Section id="limitations">
     <Eyebrow class="reveal">Limitations</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Where this does not work.</h2>
@@ -700,7 +899,7 @@ const terms = [
     </ol>
   </Section>
 
-  <!-- 10. Disputes -->
+  <!-- 12. Disputes -->
   <Section id="disputes" tint>
     <Eyebrow class="reveal">Disputes</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">If we are wrong.</h2>
@@ -733,7 +932,7 @@ const terms = [
     </div>
   </Section>
 
-  <!-- 11. Terms -->
+  <!-- 13. Terms -->
   <Section id="terms">
     <Eyebrow class="reveal">Terms</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">
