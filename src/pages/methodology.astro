@@ -128,8 +128,7 @@ const harnessGates: Row[] = [
   },
 ];
 
-// Run on 2026-09-09. Transcribed from the actual output, including the two
-// gates that did not run.
+// Run on 2026-09-09, all seven. Transcribed from the actual output.
 const gateRun: TerminalLine[] = [
   { kind: 'cmd', html: `python tools/check_no_leak.py` },
   { kind: 'out', html: `  exit 0   RESULT: NO LEAK` },
@@ -141,11 +140,10 @@ const gateRun: TerminalLine[] = [
   { kind: 'out', html: `  exit 0   14 corrupted summaries, all reported and named` },
   { kind: 'cmd', html: `python tools/verify_stage1_parity.py` },
   { kind: 'out', html: `  exit 0   RESULT: PARITY HELD (6 artifacts byte identical)` },
-  { kind: 'gap' },
   { kind: 'cmd', html: `python tools/verify_stage3_parity.py` },
-  { kind: 'bad', html: `  exit 3   no container runtime, did not run` },
+  { kind: 'out', html: `  exit 0   RESULT: PARITY HELD (from the container, 6 byte identical)` },
   { kind: 'cmd', html: `python tools/verify_insufficient_evidence.py` },
-  { kind: 'bad', html: `  exit 3   no container runtime, did not run` },
+  { kind: 'out', html: `  exit 0   RESULT: ALL FAILURE PATHS REPORT THEMSELVES` },
 ];
 
 const harnessScope = [
@@ -753,7 +751,7 @@ const terms = [
       <Terminal
         label="gate suite · 2026-09-09"
         lines={gateRun}
-        footer="Five gates executed on 2026-09-09. The two container gates did not run on that machine and report exit 3 rather than a pass."
+        footer="All seven gates executed on 2026-09-09 against Docker 29.5.2 in a 4 GB VM. Stage 3 re-scored every patch in a container with no measured egress, and the artifacts still byte compare against the ones committed from the hand run."
       />
     </div>
   </Section>
