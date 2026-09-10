@@ -1,0 +1,335 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import { METHOD_VERSION } from '../lib/site';
+
+// A document of record, not a marketing page. One narrow column, prose,
+// bold headings, and nothing else: no artifact frames, no bordered panels,
+// no section tints, no rules between sections, no buttons in the body.
+// Whitespace carries the structure. The wordmark and the header block are
+// the only distinctive elements on the page.
+//
+// Copy is verbatim from assay-whitepaper-copy.md. Three protected lines run
+// through it (a test is a sample, the student and their own exam, and the
+// terms we intend to hold to), so scripts/check-protected-copy.mjs covers
+// this page too.
+
+const FILED = '2026.09';
+
+const checks = [
+  {
+    n: '01',
+    body: 'Alert closed. The scanner no longer reports the finding.',
+  },
+  {
+    n: '02',
+    body: 'Hole shut. No held out attack succeeds. One success is a failure.',
+  },
+  {
+    n: '03',
+    body: 'Behaviour preserved. Every ordinary input matches a baseline captured from a known correct reference.',
+  },
+  {
+    n: '04',
+    body: 'Provenance clean. No suppression, no new finding, and no alert closed while held out attacks still succeed.',
+  },
+];
+
+const EVIDENCE_REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence';
+const PILOT_POST = '/research/pilot-001-patches-against-unseen-attacks';
+
+const description =
+  'Independent verification for AI authored code. The verification gap, the four checks, Pilot 001, and what the method caught in itself.';
+---
+
+<BaseLayout title="Whitepaper" description={description} path="/whitepaper">
+  <article class="paper">
+    {/* The header block. The one place mono metadata appears on this page. */}
+    <header class="paper-head">
+      <Logo class="paper-mark" />
+
+      <p class="paper-title">Independent verification for AI authored code</p>
+
+      <p class="paper-meta">Method v{METHOD_VERSION} &middot; Filed {FILED}</p>
+    </header>
+
+    <div class="paper-body">
+      <h2>Summary</h2>
+      <p>
+        AI now writes security patches, and the patch is validated by the tool that
+        wrote it. The only signal anyone measures is whether the scanner alert closed.
+        We tested whether that signal means anything. On a controlled corpus, a patch
+        closed the alert, passed a suppression audit, and left every attack we had held
+        back still working.
+      </p>
+
+      <h2>The gap</h2>
+      <p>
+        A scanner flags a vulnerability. An agent writes a fix. The scanner runs again,
+        the warning disappears, and the change merges. Nothing in that loop establishes
+        that the vulnerability closed. It establishes that the scanner stopped
+        reporting it, which is a different fact.
+      </p>
+      <p>
+        Automated program repair has known this for over a decade and named it:
+        overfitting, a patch that satisfies the test without correcting the fault. The
+        literature was explicit that human validation of every candidate patch was
+        mandatory. Agents did not solve overfitting. They industrialised it and removed
+        the validation step.
+      </p>
+
+      <h2>Why the checker cannot be the author</h2>
+      <p>
+        Aardvark writes the patch with Codex, then scans its own patch. CodeMender runs
+        its own validation. Snyk, Pixee, Mobb and ZeroPath all certify their own output.
+        Google still puts a human researcher on every CodeMender patch before it ships,
+        which is the tell: the best resourced team in the field does not trust its own
+        fixer.
+      </p>
+      <p>
+        A test is a sample, not a specification. If you let a student write their own
+        exam, they will pass it. You test them on questions they have not seen.
+      </p>
+
+      <h2>Method</h2>
+      <p>Assay evaluates a patch against inputs the fixer never had access to.</p>
+      <p>
+        For each finding we hold back an attack set and a set of ordinary inputs that
+        must keep working. The fixer receives the flagged file and exactly one reported
+        payload. Nothing else. After the patch is applied we run four checks inside an
+        isolated container with no network egress.
+      </p>
+
+      <ol class="checks">
+        {
+          checks.map((check) => (
+            <li>
+              <span class="checks-n">{check.n}</span>
+              <span>{check.body}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <p>
+        A patch is VERIFIED only if all four hold. INSUFFICIENT EVIDENCE is a first
+        class verdict and is reported rather than dropped.
+      </p>
+
+      <h2>Pilot 001</h2>
+      <p>
+        One seeded SQL injection, quoted string context, the easiest shape. Three
+        patches.
+      </p>
+      <p>
+        The first bound the value as a parameter rather than assembling it into the
+        query. Alert closed, zero of twelve held out attacks succeeded, no regression.
+        VERIFIED.
+      </p>
+      <p>
+        The second escaped the quote it had been shown and left the query untouched.
+        Four of twelve attacks still returned the users table. It also rejected a
+        legitimate product name containing an apostrophe. NOT VERIFIED.
+      </p>
+      <p>
+        The third changed nothing about the vulnerability. It moved the query into a
+        helper and reassembled the string in a form the scanner&rsquo;s rule does not match.
+        The alert closed. The suppression audit found no marker. Twelve of twelve
+        attacks still returned the users table including password hashes.
+      </p>
+      <p>
+        Two of the four signals a competent team relies on, the scanner and the
+        suppression audit, both reported clean on a fully exploitable patch. Only the
+        held out attack set separated it from the correct fix.
+      </p>
+
+      <h2>Limitations</h2>
+      <p>
+        The flaw was seeded by us. One weakness class, one language, one application,
+        one finding, the easiest shape. The three patches exercise the method rather
+        than being commercial vendor output, and the third was constructed
+        deliberately. This is a demonstration that the method discriminates, not a rate
+        that generalises to any tool.
+      </p>
+      <p>
+        The harness, corpus, scorer, results and full methodology notes are public. The
+        held out attack sets are withheld, because publishing them permits a patch to
+        be tuned against them.
+      </p>
+
+      <h2>What the method caught in itself</h2>
+      <p>
+        Three of our own checks passed for reasons unrelated to the thing being true. A
+        patch that failed to start scored as a patch that shut the hole, because every
+        attack failed to connect and every failure was recorded as an attack that did
+        not succeed. A pre publication guard reported no leak, correctly, about the
+        working tree, while the answer key remained in an earlier commit.
+      </p>
+      <p>
+        Each failed in the flattering direction. A check that wrongly accuses a good
+        patch is investigated within the hour. A check that wrongly clears a bad one is
+        the answer nobody interrogates. All are documented in full.
+      </p>
+
+      <h2>What follows</h2>
+      <p>
+        Pilot 001 establishes the method. The Index applies it: an independent,
+        published measure of verified fix rate against closed alert rate for each
+        commercial fixer, quarterly, with the open DARPA systems as a baseline row and
+        every vendor given right of reply, published unedited.
+      </p>
+      <p>
+        If the first Index returns verified fix rates above eighty five percent, the
+        gap is smaller than we believe and we will publish that.
+      </p>
+      <p>We have no customers yet. These are the terms we intend to hold to.</p>
+
+      <p class="paper-close">Nullius in verba.</p>
+    </div>
+
+    <footer class="paper-foot">
+      <a href={EVIDENCE_REPO} rel="noopener">Evidence repository</a>
+      <a href="/methodology">Full methodology</a>
+      <a href={PILOT_POST}>Pilot 001 in detail</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  /* One column, its own measure, centred. Not the site shell: the shell is
+     1200px and this page is a document. */
+  .paper {
+    width: 100%;
+    /* The measure is ~68 characters of real prose. Not 68ch: the ch unit is
+       the width of "0", which is wider than the average lowercase letter, so
+       68ch sets about 82 characters. Measured, not assumed. */
+    max-width: 56ch;
+    margin-inline: auto;
+    padding-inline: 24px;
+    padding-block: 72px 96px;
+  }
+
+  @media (min-width: 768px) {
+    .paper {
+      padding-block: 112px 140px;
+    }
+  }
+
+  /* --- the header block --- */
+
+  .paper-head {
+    margin-bottom: 72px;
+  }
+
+  @media (min-width: 768px) {
+    .paper-head {
+      margin-bottom: 96px;
+    }
+  }
+
+  .paper-mark {
+    color: var(--fg);
+  }
+
+  .paper-title {
+    margin-top: 26px;
+    font-family: var(--font-display);
+    font-size: clamp(21px, 2.6vw, 27px);
+    font-weight: 700;
+    line-height: 1.28;
+    letter-spacing: -0.015em;
+    max-width: 22ch;
+  }
+
+  .paper-meta {
+    margin-top: 16px;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  /* --- the body --- */
+
+  .paper-body {
+    font-size: var(--t-body);
+    line-height: 1.78;
+    color: var(--fg-2);
+  }
+
+  .paper-body :global(p) {
+    margin-top: 1.1em;
+  }
+
+  /* Modest, and set in the foreground so the hierarchy is weight and colour
+     rather than size. */
+  .paper-body :global(h2) {
+    margin-top: 2.9em;
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+
+  .paper-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .paper-body :global(h2 + p) {
+    margin-top: 0.7em;
+  }
+
+  /* The four checks. A hanging number and a line of prose, no frame. */
+  .checks {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+
+  .checks :global(li) {
+    display: flex;
+    gap: 14px;
+    margin-top: 0.6em;
+  }
+
+  .checks-n {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.78;
+    color: var(--fg-3);
+  }
+
+  .paper-close {
+    margin-top: 2.9em;
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  /* --- the foot --- */
+
+  .paper-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    margin-top: 84px;
+    font-size: var(--t-small);
+  }
+
+  .paper-foot a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 38%, transparent);
+    transition: text-decoration-color 150ms ease-out;
+  }
+
+  .paper-foot a:hover {
+    text-decoration-color: var(--accent);
+  }
+</style>

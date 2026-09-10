@@ -14,6 +14,7 @@ export const SECURITY_ADVISORY_URL =
 export const nav = [
   { label: 'Product', href: '/product' },
   { label: 'The Index', href: '/the-index' },
+  { label: 'Whitepaper', href: '/whitepaper' },
   { label: 'Research', href: '/research' },
   { label: 'Docs', href: '/methodology' },
   { label: 'Pricing', href: '/pricing' },
