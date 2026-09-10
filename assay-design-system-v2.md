@@ -148,7 +148,9 @@ hash and version on the site must trace to a real artifact.
     --space-block      48px                        within a section
     --space-tight      16px
 
-- Sections alternate --bg and --bg-2. No exceptions, so the rhythm is legible.
+- Sections alternate --bg and --bg-2, so the rhythm is legible. This applies to
+  full-bleed marketing sections only. Inside the docs reading column it does
+  not: see the sixth correction below.
 - Hairline rules separate, they do not decorate. One rule per boundary.
 - Artifacts (Diff, Terminal, VerdictBlock) get real air: minimum 64px above and
   below, never crowded by prose.
@@ -189,6 +191,14 @@ figures. The form yields to the facts.
 where a verdict exists. On /product, which explains what the checks are, the
 punches are unstruck: a check that has not been applied yet. The hero
 certificate is the struck version of the same card.
+
+**Alternating tints do not apply inside the docs reading column.** Section 5
+says sections alternate with no exceptions. That is wrong. The tint is a
+full-bleed device: it works because the band runs the whole width of the
+viewport and the rhythm is read at the page edge. Inside the bordered reading
+column on /methodology there is no edge to run to, so the tint reads as a
+stray filled box behind a paragraph rather than as rhythm. DocsLayout sets
+those sections transparent on purpose. Methodology stays untinted.
 
 ---
 
