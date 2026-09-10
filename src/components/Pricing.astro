@@ -1,101 +1,297 @@
 ---
 import Section from './Section.astro';
 
-// Lives on /pricing only. The page header carries the eyebrow and headline.
+// An assay ledger. Line items down the left, the charge in an amount column
+// on the right, a total due under each rule, and an authorisation line at the
+// foot that is deliberately unsigned.
+//
+// Every amount here is real or explicitly absent. Two of the three tiers have
+// no price yet, and those cells stay empty and say why, the same device
+// /the-index already uses for results we do not have. A ledger of invented
+// figures on a site about verification would be the exact failure we publish
+// about, so the form yields to the facts rather than the other way round.
+//
+// There is no subtotal. Section 6 asks for one, but the three tiers are
+// mutually exclusive: a reader buys one of them, and summing them is not a
+// number that means anything.
 
-const tiers = [
+type Item = { label: string; qty: string; amount: string | null };
+
+const accounts: {
+  name: string;
+  items: Item[];
+  total: string;
+  totalNote: string | null;
+  cta: { label: string; modal?: boolean } | null;
+  state: string | null;
+}[] = [
   {
     name: 'Open source',
-    price: 'Free forever',
-    priceNote: 'Public repositories',
-    body: 'Unlimited verdicts on public repositories. Every verdict is public.',
-    cta: { label: 'Verify a pull request', href: null, modal: true },
-    featured: false,
+    items: [
+      { label: 'Verdicts on public repositories', qty: 'unlimited', amount: '0.00' },
+      { label: 'Public evidence for every verdict', qty: 'included', amount: '0.00' },
+    ],
+    total: '0.00',
+    totalNote: 'Free forever',
+    cta: { label: 'Verify a pull request', modal: true },
     state: null,
   },
   {
     name: 'Team',
-    price: 'Per repository',
-    priceNote: 'Monthly',
-    body:
-      'Private repos, blocking policy, held-out test generation, dashboards.',
-    cta: { label: 'Talk to us', href: null },
-    featured: true,
-    state: 'Pricing in progress · talk to us',
+    items: [
+      { label: 'Private repositories', qty: 'per repository', amount: null },
+      { label: 'Blocking policy', qty: 'included', amount: null },
+      { label: 'Held-out test generation', qty: 'included', amount: null },
+      { label: 'Dashboards', qty: 'included', amount: null },
+    ],
+    total: '—',
+    totalNote: 'Not priced yet',
+    cta: { label: 'Talk to us' },
+    state: 'Pricing in progress',
   },
   {
     name: 'Enterprise',
-    price: 'Custom',
-    priceNote: 'Priced per agent under governance',
-    body:
-      'Signed attestation, audit export, SSO, org-wide policy.',
-    cta: { label: 'Talk to us', href: null },
-    featured: false,
+    items: [
+      { label: 'Signed attestation', qty: 'included', amount: null },
+      { label: 'Audit export', qty: 'included', amount: null },
+      { label: 'SSO and org-wide policy', qty: 'included', amount: null },
+    ],
+    total: '—',
+    totalNote: 'Priced per agent under governance',
+    cta: { label: 'Talk to us' },
     state: null,
   },
 ];
 ---
 
 <Section id="pricing" rule={false}>
-  <ul class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+  <div class="ledger reveal">
+    <div class="ledger-head">
+      <span>Account</span>
+      <span>Basis</span>
+      <span class="amount">Charge</span>
+    </div>
+
     {
-      tiers.map((tier, i) => (
-        <li
-          class={`reveal flex flex-col rounded-[3px] border p-6 lg:p-7 ${
-            tier.featured ? 'border-accent bg-accent-tint' : 'border-line'
-          }`}
-          style={`--reveal-delay:${i * 60}ms`}
-        >
-          <h3 class="font-display text-[19px] font-bold leading-tight tracking-[-0.015em]">
-            {tier.name}
-          </h3>
+      accounts.map((account) => (
+        <section class="account">
+          <div class="account-head">
+            <h3 class="account-name">{account.name}</h3>
+            {account.state && <span class="account-state">{account.state}</span>}
+          </div>
 
-          <p class="mt-5 font-display text-[26px] font-bold leading-none tracking-[-0.02em]">
-            {tier.price}
-          </p>
-          <p class="micro mt-2.5">{tier.priceNote}</p>
+          <dl class="items">
+            {account.items.map((item) => (
+              <div class="item">
+                <dt class="item-label">{item.label}</dt>
+                <dd class="item-qty">{item.qty}</dd>
+                <dd class="item-amount">{item.amount ?? '—'}</dd>
+              </div>
+            ))}
+          </dl>
 
-          <p class="mt-6 text-[14.5px] leading-[1.6] text-fg-2">{tier.body}</p>
+          <div class="total">
+            <span class="total-label">Total due</span>
+            <span class="total-note">{account.totalNote}</span>
+            <span class={`total-amount ${account.total === '0.00' ? 'is-settled' : 'is-open'}`}>
+              {account.total}
+            </span>
+          </div>
 
-          {tier.state && (
-            <p class="mono mt-5 text-[10px] uppercase tracking-[0.14em] text-accent">
-              {tier.state}
-            </p>
-          )}
-
-          <div class="mt-auto pt-8">
-            {tier.cta.modal ? (
-              <button
-                type="button"
-                data-verify-cta
-                class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                {tier.cta.label}
+          <div class="account-cta">
+            {account.cta?.modal ? (
+              <button type="button" data-verify-cta class="btn btn-primary">
+                {account.cta.label}
               </button>
-            ) : tier.cta.href ? (
-              <a
-                href={tier.cta.href}
-                class={`btn w-full ${tier.featured ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                {tier.cta.label}
-              </a>
             ) : (
-              <span
-                class={`btn w-full cursor-default opacity-60 ${
-                  tier.featured ? 'btn-primary' : 'btn-secondary'
-                }`}
-                aria-disabled="true"
-              >
-                {tier.cta.label}
+              <span class="btn btn-secondary cursor-default opacity-60" aria-disabled="true">
+                {account.cta?.label}
               </span>
             )}
           </div>
-        </li>
+        </section>
       ))
     }
-  </ul>
 
-  <p class="mono reveal mt-7 text-[11px] text-fg-2">
-    We have no customers yet. These are the terms we intend to hold to.
-  </p>
+    {/* The authorisation line. Unsigned, because there is nobody to sign it. */}
+    <div class="auth">
+      <span class="auth-rule" aria-hidden="true"></span>
+      <p class="auth-line">
+        We have no customers yet. These are the terms we intend to hold to.
+      </p>
+    </div>
+  </div>
 </Section>
+
+<style>
+  .ledger {
+    border-top: 1px solid var(--line);
+  }
+
+  .ledger-head,
+  .item,
+  .total {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 14ch) minmax(0, 12ch);
+    gap: 16px;
+    align-items: baseline;
+  }
+
+  .ledger-head {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .amount,
+  .item-amount,
+  .total-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .account {
+    padding-block: 26px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .account-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .account-name {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+  }
+
+  .account-state {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  .item {
+    padding: 7px 0;
+  }
+
+  .item-label {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .item-qty,
+  .item-amount {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--fg-2);
+  }
+
+  /* Ruled off, the way a total is. */
+  .total {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .total-label {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  .total-note {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--fg-2);
+  }
+
+  .total-amount {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* The settled total is the one accent on this page: nothing is owed, which
+     is the whole argument of "free where the work is public". */
+  .total-amount.is-settled {
+    color: var(--accent);
+  }
+
+  /* An unpriced total is an empty cell, not a figure. At display weight the
+     marker read as a redaction bar rather than as an absent number. */
+  .total-amount.is-open {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--fg-3);
+  }
+
+  .account-cta {
+    margin-top: 20px;
+  }
+
+  .auth {
+    padding-top: 26px;
+  }
+
+  .auth-rule {
+    display: block;
+    width: min(280px, 100%);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 10px;
+  }
+
+  .auth-line {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--fg-2);
+    max-width: 62ch;
+  }
+
+  @media (max-width: 640px) {
+    .ledger-head {
+      display: none;
+    }
+
+    .item,
+    .total {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .item-qty {
+      grid-column: 1;
+      color: var(--fg-3);
+    }
+
+    .item-amount {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .total-note {
+      grid-column: 1;
+    }
+
+    .total-amount {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+</style>

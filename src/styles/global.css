@@ -550,6 +550,34 @@
   .tok-mut { color: var(--color-code-fg-2); }
   .tok-bad { color: var(--color-code-fail); }
 
+  /* The punch. A struck mark is impressed into the plate and takes the
+     accent, which is a verified state. An unstruck one keeps its seat and
+     stays empty, so a missing mark reads as absence rather than as a
+     different kind of presence. */
+  .punch {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .punch-struck {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .punch-unstruck {
+    border: 1.5px dashed color-mix(in srgb, var(--fg-3) 55%, transparent);
+    background: transparent;
+  }
+
+  .punch svg {
+    display: block;
+  }
+
   /* Panels that stay dark regardless of theme. */
   .panel-dark {
     /* Grid and flex children default to min-width:auto, which lets the widest
