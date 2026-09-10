@@ -1,5 +1,7 @@
 ---
 interface Props {
+  /** Zone number on the sheet, e.g. "01". */
+  n?: string;
   /** The headline number as displayed, e.g. "45%" or "3 to 4x". */
   value: string;
   label: string;
@@ -13,7 +15,7 @@ interface Props {
   class?: string;
 }
 
-const { value, label, emphasise, source, class: className = '' } = Astro.props;
+const { n, value, label, emphasise, source, class: className = '' } = Astro.props;
 
 // Split rather than interpolate HTML, so the label stays plain text.
 const i = emphasise ? label.indexOf(emphasise) : -1;
@@ -27,31 +29,122 @@ const match = value.match(/^(\D*?)(\d+(?:\.\d+)?)(\D*)$/);
 const countable = match !== null;
 ---
 
-<div class={`flex flex-col border-t border-line pt-5 ${className}`}>
-  <div
-    class="font-display text-[38px] font-bold leading-none tracking-[-0.02em] lg:text-[46px]"
-    data-stat={countable ? '' : undefined}
-    data-target={match?.[2]}
-    data-prefix={match?.[1]}
-    data-suffix={match?.[3]}
-  >
-    {value}
+<div class={`zone ${className}`}>
+  <div class="zone-head">
+    {n && <span class="zone-n">{n}</span>}
+
+    <p class="zone-label">
+      {
+        parts ? (
+          <>
+            {parts.before}
+            <strong>{parts.mark}</strong>
+            {parts.after}
+          </>
+        ) : (
+          label
+        )
+      }
+    </p>
+
+    <span class="leader" aria-hidden="true"></span>
+
+    <div
+      class="zone-value"
+      data-stat={countable ? '' : undefined}
+      data-target={match?.[2]}
+      data-prefix={match?.[1]}
+      data-suffix={match?.[3]}
+    >
+      {value}
+    </div>
   </div>
-  <p class="mt-3.5 text-[14.5px] leading-[1.5] text-fg-2">
-    {
-      parts ? (
-        <>
-          {parts.before}
-          <strong class="font-semibold text-fg">{parts.mark}</strong>
-          {parts.after}
-        </>
-      ) : (
-        label
-      )
-    }
-  </p>
-  <p class="micro mt-auto pt-4">{source}</p>
+
+  <p class="zone-source">{source}</p>
 </div>
+
+<style>
+  /* A zone on a spec sheet: ruled, numbered, with the figure carried out to
+     the edge on a leader line. Was a bordered card; a spec sheet is ruled,
+     not boxed. */
+  .zone {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 0 16px;
+  }
+
+  .zone-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  .zone-n {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    color: var(--fg-3);
+    flex: none;
+  }
+
+  .zone-label {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--fg-2);
+    max-width: 56ch;
+  }
+
+  .zone-label strong {
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  /* Carries the eye from the claim to the figure. Structure, not ornament:
+     without it the number floats away from what it measures. */
+  .leader {
+    flex: 1 1 auto;
+    min-width: 24px;
+    align-self: flex-end;
+    margin-bottom: 6px;
+    border-bottom: 1px dotted var(--line);
+  }
+
+  .zone-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(26px, 2.8vw, 38px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    flex: none;
+  }
+
+  .zone-source {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+    margin-top: 9px;
+    padding-left: 34px;
+  }
+
+  @media (max-width: 640px) {
+    .zone-head {
+      flex-wrap: wrap;
+    }
+    .zone-label {
+      flex: 1 1 100%;
+      order: 3;
+      padding-left: 34px;
+      margin-top: 6px;
+    }
+    .leader {
+      order: 2;
+    }
+    .zone-source {
+      margin-top: 8px;
+    }
+  }
+</style>
 
 <script>
   const stats = document.querySelectorAll<HTMLElement>('[data-stat]');

@@ -1,28 +1,38 @@
 ---
-// Fabricated pull request and verdict. This is an illustration of what Assay
-// posts, not a screenshot of a real repository.
+// The certificate. This is the primary object of the hero, not an ornament
+// beside the headline.
 //
-// Dark in both themes, like the PR panel in the workflow section: it depicts a
-// code-review surface rather than being part of the page chrome.
+// Fabricated pull request and verdict: an illustration of what Assay posts,
+// not a screenshot of a real repository. The only metadata printed on it is
+// metadata that is true, per the design system section 4. There is no
+// certificate number, because we do not have one to print.
+import { METHOD_VERSION } from '../lib/site';
 
+// The four checks, as a punch card. A struck punch means the check was made
+// and held; an unstruck one is absent rather than a different kind of
+// present, which is the whole point of the device.
 const checks = [
   {
+    n: '01',
     name: 'Closed',
     detail: 'Reported sink removed. No suppression added.',
     failed: false,
   },
   {
+    n: '02',
     name: 'Behaviour held',
     detail:
       '1 of 47 held-out payloads still injects. Patch matched the reported string, not the class.',
     failed: true,
   },
   {
+    n: '03',
     name: 'No regression',
     detail: 'No new findings in the diff. Benign inputs unchanged.',
     failed: false,
   },
   {
+    n: '04',
     name: 'Provenance clean',
     detail: 'Author, token scope, and blast radius within bounds.',
     failed: false,
@@ -68,14 +78,13 @@ const label = [
       {
         checks.map((check) => (
           <div class={`check ${check.failed ? 'failed' : ''}`}>
-            <span class={`glyph ${check.failed ? 'fail' : 'pass'}`}>
-              {check.failed ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></svg>
+            <span class="c-n">{check.n}</span>
+            <span class={`punch ${check.failed ? 'unstruck' : 'struck'}`} aria-hidden="true">
+              {!check.failed && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></svg>
               )}
             </span>
-            <div>
+            <div class="c-body">
               <div class="c-name">{check.name}</div>
               <div class="c-detail">{check.detail}</div>
             </div>
@@ -89,7 +98,10 @@ const label = [
     </div>
     <div class="kicker">The alert went green. The bug didn&rsquo;t.</div>
 
-    <div class="foot"><span class="evidence">View evidence &rarr;</span></div>
+    <div class="foot">
+      <span>Method v{METHOD_VERSION}</span>
+      <span class="evidence">View evidence &rarr;</span>
+    </div>
   </div>
 </div>
 
@@ -110,7 +122,7 @@ const label = [
     --p-red-dim: color-mix(in srgb, var(--fail) 76%, var(--fg));
 
     width: 100%;
-    max-width: 520px;
+    max-width: 600px;
     border: 1px solid var(--p-line);
     border-radius: 14px;
     background: var(--p-panel);
@@ -160,8 +172,9 @@ const label = [
     color: var(--p-bone);
     margin-bottom: 12px;
   }
+  /* Was accent. Decoration, not meaning, so it is neutral now. */
   .pr-title .kw {
-    color: var(--p-blue);
+    color: var(--p-graphite);
   }
   .scanner {
     display: inline-flex;
@@ -175,7 +188,7 @@ const label = [
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--p-blue);
+    background: var(--p-graphite-dim);
   }
   .scanner b {
     color: var(--p-bone);
@@ -219,25 +232,47 @@ const label = [
   }
   .check {
     display: grid;
-    grid-template-columns: 20px 1fr;
+    grid-template-columns: auto 18px 1fr;
     gap: 12px;
-    padding: 9px 0;
+    padding: 11px 0;
     border-top: 1px solid var(--p-line);
     align-items: start;
   }
   .check:first-child {
     border-top: none;
   }
-  .glyph {
+
+  /* The card number. Metadata, so --fg-3 weight, never accent. */
+  .c-n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--p-graphite-dim);
+    padding-top: 2px;
+  }
+
+  /* The punch. Struck is a filled mark in the accent, which is a verified
+     state and the one place accent is earned in this section. Unstruck is an
+     open seat: the check was not made, so nothing was impressed into it. */
+  .punch {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 1px;
+    flex: none;
   }
-  .glyph.pass {
-    color: var(--p-blue);
+  .punch.struck {
+    background: var(--p-blue);
+    color: var(--p-ink);
   }
-  .glyph.fail {
-    color: var(--p-red);
+  .punch.unstruck {
+    border: 1.5px dashed var(--p-red);
+    background: transparent;
   }
-  .glyph svg {
+  .punch svg {
     display: block;
   }
   .c-name {
@@ -288,13 +323,21 @@ const label = [
   }
   .foot {
     display: flex;
-    justify-content: flex-end;
-    padding: 12px 20px 0;
-  }
-  .evidence {
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 11px 0 0;
+    border-top: 1px solid var(--p-line);
     font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--p-blue);
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--p-graphite-dim);
+  }
+  /* Illustrative, not a live link, so it does not take the accent. */
+  .evidence {
+    color: var(--p-graphite);
   }
 
   @media (max-width: 400px) {

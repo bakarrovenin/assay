@@ -6,11 +6,14 @@ import Hallmark from './Hallmark.astro';
 // The four punches map one to one onto the four fields a verdict records.
 // This is the section the hallmark metaphor was built for, so it is the
 // anchor here rather than the footnote it is on /product.
+// Three struck, one not. The fourth punch is the one nobody can strike for
+// themselves, which the copy under the device already says, so showing all
+// four struck contradicted the sentence beside it.
 const marks = [
   { id: 'AGT', title: 'agent', struck: true, gloss: 'which agent wrote it' },
   { id: 'AUT', title: 'authority', struck: true, gloss: 'what authority it held' },
   { id: 'VER', title: 'verifier', struck: true, gloss: 'what verified it' },
-  { id: 'APR', title: 'approver', struck: true, gloss: 'who approved' },
+  { id: 'APR', title: 'approver', struck: false, gloss: 'who approved' },
 ] as const;
 
 const frameworks = [
@@ -32,12 +35,11 @@ const frameworks = [
   </p>
 
   <p class="reveal mt-7 text-[17px] leading-[1.62]" style="--reveal-delay:60ms;max-width:64ch">
-    Every Assay verdict is a signed attestation. Which agent wrote it, what authority it
-    held, what verified it, who approved.
+    Every Assay verdict is a signed attestation.
   </p>
 
   <div class="reveal mt-11 lg:mt-12" style="--reveal-delay:60ms">
-    <Hallmark marks={marks} caption="Hallmark · struck on every verdict" />
+    <Hallmark class="hm-lg" marks={marks} caption="Hallmark · struck on every verdict" />
   </div>
 
   <p class="reveal mt-11 text-[17px] leading-[1.62]" style="--reveal-delay:60ms">

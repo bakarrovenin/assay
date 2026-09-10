@@ -97,6 +97,39 @@ const description = `Hallmark. ${marks
     color: var(--fg-2);
   }
 
+  /* Large block form, opted into with .hm-lg. The punches become the anchor
+     of a section rather than a device inside one. Scoped rather than applied
+     to every block hallmark, because the pilot-001 post uses the block form
+     too and is not part of this stage. */
+  .hm.hm-lg .hm-cell {
+    gap: 16px;
+    padding: 28px 20px 26px;
+  }
+
+  .hm.hm-lg .hm-mark {
+    min-width: 0;
+    width: 100%;
+    padding: 22px 12px;
+    font-size: clamp(20px, 2.6vw, 30px);
+    letter-spacing: 0.16em;
+    font-weight: 500;
+  }
+
+  .hm.hm-lg .hm-mark.is-struck {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: color-mix(in srgb, var(--accent) 34%, transparent);
+  }
+
+  .hm.hm-lg .hm-mark:not(.is-struck) {
+    color: var(--fg-3);
+    background: transparent;
+    /* An empty seat has to read as a seat, or the unstruck punch looks like
+       quiet text rather than an absent mark. */
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--fg-3) 55%, transparent);
+  }
+
   .hm-rule {
     flex: 1 1 auto;
     height: 1px;

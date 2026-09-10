@@ -119,9 +119,25 @@
 
   --selection:   color-mix(in srgb, var(--accent) 22%, transparent);
 
+  /* Code surfaces. Always dark, in both themes, because Diff, Terminal,
+     CodePanel and PRPanel depict a tool rather than being page chrome. These
+     are the ink values, pinned: they are deliberately NOT redefined under the
+     dark theme blocks below. --panel and --panel-2 stay theme following and
+     are for general surfaces. */
+  --code-bg:     #101719;
+  --code-bg-2:   #161E21;
+  --code-fg:     #E8EDEF;
+  --code-fg-2:   #8A979B;
+  --code-line:   rgba(232, 237, 239, 0.10);
+  --code-accent: #2FB3A3;
+  --code-fail:   #E0614C;
+
   /* Type scale, section 3. The dynamic range is the point: 10.5px to 96px. */
-  --t-display:   clamp(44px, 7.5vw, 96px);
-  --t-section:   clamp(30px, 4.2vw, 56px);
+  /* Redrawn downward from the section 3 values, which were sized for a serif
+     at weight 500 and read too heavy on Archivo. The range against 10.5px
+     meta is what matters and is kept wide. */
+  --t-display:   clamp(38px, 5.4vw, 72px);
+  --t-section:   clamp(28px, 3.6vw, 46px);
   --t-lead:      clamp(18px, 2vw, 22px);
   --t-body:      17px;
   --t-small:     14px;
@@ -195,13 +211,18 @@
   --color-accent-tint: var(--accent-dim);
   --color-fail-tint:   var(--fail-dim);
 
+  /* General surfaces, theme following. */
   --color-panel:      var(--panel);
   --color-panel-2:    var(--panel-2);
-  --color-panel-fg:   var(--fg);
-  --color-panel-fg-2: var(--fg-2);
-  --color-panel-line: var(--line);
-  --color-panel-accent: var(--accent);
-  --color-panel-fail:   var(--fail);
+
+  /* Code surfaces, pinned dark in both themes. */
+  --color-code:       var(--code-bg);
+  --color-code-2:     var(--code-bg-2);
+  --color-code-fg:    var(--code-fg);
+  --color-code-fg-2:  var(--code-fg-2);
+  --color-code-line:  var(--code-line);
+  --color-code-accent: var(--code-accent);
+  --color-code-fail:   var(--code-fail);
 
   --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-sans:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -518,25 +539,25 @@
     color: var(--fg-2);
   }
 
-  /* Syntax tokens. Shared by every dark code surface: CodePanel, Diff and
-     Terminal. Tuned for contrast on --color-panel, not for a theme, because
-     those surfaces stay dark in both. */
+  /* Syntax tokens. Shared by every dark code surface: CodePanel, Diff,
+     PRPanel and Terminal. Functional colour, not brand colour, so exempt from
+     the two-colour rule. Tuned for contrast on --color-code. */
   .tok-com { color: #7C848F; font-style: italic; }
   .tok-kw  { color: #C99BF0; }
   .tok-fn  { color: #77B7FF; }
   .tok-str { color: #9BD69B; }
-  .tok-var { color: var(--color-panel-fg); }
-  .tok-mut { color: var(--color-fg-2); }
-  .tok-bad { color: var(--color-panel-fail); }
+  .tok-var { color: var(--color-code-fg); }
+  .tok-mut { color: var(--color-code-fg-2); }
+  .tok-bad { color: var(--color-code-fail); }
 
   /* Panels that stay dark regardless of theme. */
   .panel-dark {
     /* Grid and flex children default to min-width:auto, which lets the widest
        code line widen the track instead of scrolling inside the panel. */
     min-width: 0;
-    background: var(--color-panel);
-    color: var(--color-panel-fg);
-    border: 1px solid var(--color-panel-line);
+    background: var(--color-code);
+    color: var(--color-code-fg);
+    border: 1px solid var(--color-code-line);
     border-radius: 4px;
   }
 }

@@ -25,14 +25,14 @@ const detail = [
   aria-label="Illustration of a pull request checks block. Build and unit tests: passed. Scanner re-run: alert closed. Assay proof-of-fix: NOT VERIFIED, because the held-out case sqli_tautology_v2 is still reachable, the patch narrows on the reported payload only, and the merge is blocked by policy with an appeal in the thread."
 >
   <div
-    class="mono flex items-center gap-2 border-b border-[color:var(--color-panel-line)] px-4 py-3 text-[10.5px] uppercase tracking-[0.14em] text-[color:var(--color-panel-fg-2)] sm:px-5"
+    class="mono flex items-center gap-2 border-b border-[color:var(--color-code-line)] px-4 py-3 text-[10.5px] uppercase tracking-[0.14em] text-[color:var(--color-code-fg-2)] sm:px-5"
   >
-    <span class="text-[color:var(--color-panel-fg)]">Pull request #4471</span>
+    <span class="text-[color:var(--color-code-fg)]">Pull request #4471</span>
     <span aria-hidden="true">·</span>
     <span>autofix/cwe-89</span>
   </div>
 
-  <ul class="mono divide-y divide-[color:var(--color-panel-line)]">
+  <ul class="mono divide-y divide-[color:var(--color-code-line)]">
     {
       rows.map((row, i) => (
         <li
@@ -45,7 +45,7 @@ const detail = [
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            class="shrink-0 text-[color:var(--color-panel-accent)]"
+            class="shrink-0 text-[color:var(--color-code-accent)]"
           >
             <path
               d="M4.5 12.6l5 5.2L19.5 6.6"
@@ -55,10 +55,10 @@ const detail = [
               stroke-linejoin="round"
             />
           </svg>
-          <span class="min-w-0 flex-1 truncate text-[color:var(--color-panel-fg)]">
+          <span class="min-w-0 flex-1 truncate text-[color:var(--color-code-fg)]">
             {row.name}
           </span>
-          <span class="shrink-0 text-[color:var(--color-panel-fg-2)]">{row.status}</span>
+          <span class="shrink-0 text-[color:var(--color-code-fg-2)]">{row.status}</span>
         </li>
       ))
     }
@@ -73,7 +73,7 @@ const detail = [
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
-        class="shrink-0 text-[color:var(--color-panel-fail)]"
+        class="shrink-0 text-[color:var(--color-code-fail)]"
       >
         <path
           d="M6 6l12 12M18 6L6 18"
@@ -83,12 +83,12 @@ const detail = [
         />
       </svg>
       <span
-        class="min-w-0 flex-1 truncate text-[13.5px] font-medium text-[color:var(--color-panel-fg)] sm:text-[14.5px]"
+        class="min-w-0 flex-1 truncate text-[13.5px] font-medium text-[color:var(--color-code-fg)] sm:text-[14.5px]"
       >
         assay / proof-of-fix
       </span>
       <span
-        class="shrink-0 text-[12px] font-medium tracking-[0.08em] text-[color:var(--color-panel-fail)] sm:text-[13px]"
+        class="shrink-0 text-[12px] font-medium tracking-[0.08em] text-[color:var(--color-code-fail)] sm:text-[13px]"
       >
         NOT VERIFIED
       </span>
@@ -96,13 +96,13 @@ const detail = [
   </ul>
 
   <div
-    class="pr-detail mono border-t border-[color:var(--color-panel-line)] px-4 py-4 sm:px-5"
+    class="pr-detail mono border-t border-[color:var(--color-code-line)] px-4 py-4 sm:px-5"
     style="--row-delay:1200ms"
   >
-    <ul class="space-y-2 border-l-2 border-[color:var(--color-panel-fail)] pl-4">
+    <ul class="space-y-2 border-l-2 border-[color:var(--color-code-fail)] pl-4">
       {
         detail.map((line) => (
-          <li class="text-[11.5px] leading-relaxed text-[color:var(--color-panel-fg-2)] sm:text-[12px]">
+          <li class="text-[11.5px] leading-relaxed text-[color:var(--color-code-fg-2)] sm:text-[12px]">
             {line}
           </li>
         ))
@@ -131,8 +131,8 @@ const detail = [
   }
 
   .pr-row-fail {
-    background: color-mix(in srgb, var(--color-panel-fail) 9%, transparent);
-    box-shadow: inset 2px 0 0 var(--color-panel-fail);
+    background: color-mix(in srgb, var(--color-code-fail) 9%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-code-fail);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -8,13 +8,12 @@ import HeroVerdictPanel from './HeroVerdictPanel.astro';
       <p class="eyebrow reveal">Independent verification for AI-authored code</p>
 
       <h1 class="h1 reveal mt-5" style="--reveal-delay:60ms">
-        Your AI fixed it.<br />We check whether<br /> it actually did.
+        Your AI fixed it. We check whether it actually did.
       </h1>
 
       <p class="lede reveal mt-7" style="--reveal-delay:120ms">
         Every AI security tool now writes its own patches and certifies its own work.
-        Assay is the third party that checks. One verdict on every AI-authored change,
-        before it merges.
+        Assay is the third party that checks.
       </p>
 
       <div class="reveal mt-8 flex flex-wrap gap-3" style="--reveal-delay:180ms">
@@ -49,7 +48,7 @@ import HeroVerdictPanel from './HeroVerdictPanel.astro';
   /* Text column gets a tighter measure than the shell, so the headline sets to
      three lines instead of spanning the page. */
   .hero-text {
-    max-width: 580px;
+    max-width: 620px;
   }
 
   /* One column below 900px: text first, then the panel, centred. */
@@ -68,11 +67,11 @@ import HeroVerdictPanel from './HeroVerdictPanel.astro';
     }
 
     .hero-grid {
-      /* Fluid panel track. A fixed 520px starves the text column between
-         900 and 1300px, which breaks the headline onto a fourth line. */
-      grid-template-columns: minmax(0, 1fr) clamp(360px, 40vw, 520px);
+      /* The certificate is the primary object, so it takes the larger track.
+         Stage 1 had the text column dominant and the panel as a sidecar. */
+      grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
       align-items: center;
-      gap: 48px;
+      gap: 56px;
       width: 100%;
     }
 

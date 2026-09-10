@@ -68,9 +68,8 @@ const stats = [
 
   <p class="reveal mt-10 text-[17px] leading-[1.6] lg:text-[18px]" style="--reveal-delay:120ms;max-width:74ch">
     A test is{' '}
-    <strong class="font-semibold text-fg">a sample, not a specification</strong>. Automated
-    program repair has spent over a decade producing patches that satisfy the sample, and
-    the field has a word for them.
+    <strong class="font-semibold text-fg">a sample, not a specification</strong>. The field
+    has a word for the patches that satisfy the sample.
   </p>
 
   <div class="reveal mt-11" style="--reveal-delay:60ms">
@@ -84,9 +83,11 @@ const stats = [
 
   <div class="mt-14 grid grid-cols-1 gap-14 lg:mt-16 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,1fr)] lg:gap-16">
     <div class="space-y-8">
+      {/* The one struck layer on the sheet. The remedy is not wrong, it was
+          removed, so it is set as a line ruled through rather than deleted. */}
       <p class="reveal text-[17px] leading-[1.6]">
-        That literature was explicit about the remedy: a human validates every candidate
-        before anyone trusts it.
+        That literature was explicit about the remedy:{' '}
+        <span class="struck">a human validates every candidate before anyone trusts it</span>.
       </p>
 
       {/* The conclusion of the whole section, so it carries weight rather than
@@ -108,18 +109,17 @@ const stats = [
     />
   </div>
 
-  <div class="mt-20 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-24 lg:grid-cols-4">
+  {/* Spec sheet. Numbered zones, each figure carried out on a leader line. */}
+  <div class="reveal mt-20 border-t border-line lg:mt-24">
     {
       stats.map((stat, i) => (
-        <div class="reveal flex" style={`--reveal-delay:${i * 60}ms`}>
-          <StatCard
-            value={stat.value}
-            label={stat.label}
-            emphasise={stat.emphasise}
-            source={stat.source}
-            class="flex-1"
-          />
-        </div>
+        <StatCard
+          n={String(i + 1).padStart(2, '0')}
+          value={stat.value}
+          label={stat.label}
+          emphasise={stat.emphasise}
+          source={stat.source}
+        />
       ))
     }
   </div>
@@ -142,4 +142,14 @@ const stats = [
       The industry measures the first one.&rdquo;
     </p>
   </blockquote>
+
+  <style>
+    /* Struck, not deleted: the step was removed from practice, not disproved. */
+    .struck {
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+      text-decoration-color: var(--fg-3);
+      color: var(--fg-2);
+    }
+  </style>
 </Section>
