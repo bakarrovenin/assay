@@ -1,61 +1,81 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Logo from '../components/Logo.astro';
-import { METHOD_VERSION } from '../lib/site';
-
-// A document of record, not a marketing page. One narrow column, prose,
-// bold headings, and nothing else: no artifact frames, no bordered panels,
-// no section tints, no rules between sections, no buttons in the body.
-// Whitespace carries the structure. The wordmark and the header block are
-// the only distinctive elements on the page.
+// A standalone document. This page deliberately does NOT use BaseLayout, the
+// v2 token layer, global.css, or any site component, because none of them
+// apply to it: no nav, no footer, no modal, no theme toggle, no dark theme,
+// no section conventions. Everything it needs is in this file, so nothing
+// leaks either way.
 //
-// Copy is verbatim from assay-whitepaper-copy.md. Three protected lines run
-// through it (a test is a sample, the student and their own exam, and the
-// terms we intend to hold to), so scripts/check-protected-copy.mjs covers
-// this page too.
+// Treatment is taken from inferact.ai, measured rather than guessed: a warm
+// off-white ground, near black text, a humanist book face, section headings
+// barely larger than the body and told apart by weight, paragraphs separated
+// by space alone, and links underlined in the text colour.
+//
+// Copy is verbatim from assay-whitepaper-copy.md, minus the header block.
+// Three protected lines run through it, so scripts/check-protected-copy.mjs
+// covers this page.
+import { site } from '../lib/site';
 
-const FILED = '2026.09';
-
-const checks = [
-  {
-    n: '01',
-    body: 'Alert closed. The scanner no longer reports the finding.',
-  },
-  {
-    n: '02',
-    body: 'Hole shut. No held out attack succeeds. One success is a failure.',
-  },
-  {
-    n: '03',
-    body: 'Behaviour preserved. Every ordinary input matches a baseline captured from a known correct reference.',
-  },
-  {
-    n: '04',
-    body: 'Provenance clean. No suppression, no new finding, and no alert closed while held out attacks still succeed.',
-  },
-];
+const title = 'Whitepaper · Assay';
+const description =
+  'Independent verification for AI authored code. The verification gap, the four checks, Pilot 001, and what the method caught in itself.';
+const canonical = new URL('/whitepaper/', site.url).href;
+const ogImage = new URL('/og.png', site.url).href;
 
 const EVIDENCE_REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence';
 const PILOT_POST = '/research/pilot-001-patches-against-unseen-attacks';
-
-const description =
-  'Independent verification for AI authored code. The verification gap, the four checks, Pilot 001, and what the method caught in itself.';
 ---
 
-<BaseLayout title="Whitepaper" description={description} path="/whitepaper">
-  <article class="paper">
-    {/* The header block. The one place mono metadata appears on this page. */}
-    <header class="paper-head">
-      <Logo class="paper-mark" />
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      <p class="paper-motto">Nullius in verba.</p>
+    {/* Google Analytics 4 (gtag.js), the same tag the rest of the site carries. */}
+    <script
+      is:inline
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-BDC37TQ4BY"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
 
-      <p class="paper-title">Independent verification for AI authored code</p>
+      gtag('config', 'G-BDC37TQ4BY');
+    </script>
 
-      <p class="paper-meta">Method v{METHOD_VERSION} &middot; Filed {FILED}</p>
-    </header>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
 
-    <div class="paper-body">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {/* Light in every context. This page has no dark treatment. */}
+    <meta name="theme-color" content="#F7F6F3" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+  </head>
+
+  <body>
+    <main class="doc">
+      <header class="doc-head">
+        <p class="doc-mark">assay</p>
+        <p class="doc-motto">Nullius in verba.</p>
+      </header>
+
       <h2>Summary</h2>
       <p>
         AI now writes security patches, and the patch is validated by the tool that
@@ -101,18 +121,16 @@ const description =
         payload. Nothing else. After the patch is applied we run four checks inside an
         isolated container with no network egress.
       </p>
-
-      <ol class="checks">
-        {
-          checks.map((check) => (
-            <li>
-              <span class="checks-n">{check.n}</span>
-              <span>{check.body}</span>
-            </li>
-          ))
-        }
-      </ol>
-
+      <p>01 Alert closed. The scanner no longer reports the finding.</p>
+      <p>02 Hole shut. No held out attack succeeds. One success is a failure.</p>
+      <p>
+        03 Behaviour preserved. Every ordinary input matches a baseline captured from a
+        known correct reference.
+      </p>
+      <p>
+        04 Provenance clean. No suppression, no new finding, and no alert closed while
+        held out attacks still succeed.
+      </p>
       <p>
         A patch is VERIFIED only if all four hold. INSUFFICIENT EVIDENCE is a first
         class verdict and is reported rather than dropped.
@@ -185,154 +203,117 @@ const description =
         gap is smaller than we believe and we will publish that.
       </p>
       <p>We have no customers yet. These are the terms we intend to hold to.</p>
-    </div>
 
-    <footer class="paper-foot">
-      <a href={EVIDENCE_REPO} rel="noopener">Evidence repository</a>
-      <a href="/methodology">Full methodology</a>
-      <a href={PILOT_POST}>Pilot 001 in detail</a>
-    </footer>
-  </article>
-</BaseLayout>
+      <footer class="doc-foot">
+        <a href={EVIDENCE_REPO} rel="noopener">Evidence repository</a>
+        <a href="/methodology">Full methodology</a>
+        <a href={PILOT_POST}>Pilot 001 in detail</a>
+      </footer>
+    </main>
+  </body>
+</html>
 
-<style>
-  /* One column, its own measure, centred. Not the site shell: the shell is
-     1200px and this page is a document. */
-  .paper {
-    width: 100%;
-    /* The measure is ~68 characters of real prose. Not 68ch: the ch unit is
-       the width of "0", which is wider than the average lowercase letter, so
-       68ch sets about 82 characters. Measured, not assumed. */
-    max-width: 56ch;
+<style is:global>
+  /* Everything this page needs is declared here. global.css is not imported,
+     so none of the site's tokens, utilities or resets reach it, and nothing
+     written here can reach them: every rule is under .doc or on the two
+     elements this document owns outright. */
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Light in every context. This page has no dark treatment. */
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: #f7f6f3;
+    color: #111111;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* The column is the whole page: wide margins either side, and a long run of
+     whitespace above the wordmark before anything begins. */
+  .doc {
+    box-sizing: border-box;
+    max-width: 35em;
     margin-inline: auto;
-    padding-inline: 24px;
-    padding-block: 72px 96px;
+    padding: 128px 24px 112px;
+
+    /* A warm book face. Iowan and Charter ship with macOS, Georgia and
+       Cambria cover Windows, and the generic serif catches the rest. Set
+       locally rather than loaded, so this page fetches no font at all. */
+    font-family: 'Iowan Old Style', Charter, 'Bitstream Charter', 'Palatino Linotype',
+      Palatino, Georgia, Cambria, 'Times New Roman', serif;
+    font-size: 19px;
+    line-height: 1.7;
   }
 
-  @media (min-width: 768px) {
-    .paper {
-      padding-block: 112px 140px;
+  @media (min-width: 640px) {
+    .doc {
+      padding: 188px 32px 152px;
     }
   }
 
-  /* --- the header block --- */
-
-  .paper-head {
-    margin-bottom: 72px;
+  .doc-head {
+    margin-bottom: 68px;
   }
 
-  @media (min-width: 768px) {
-    .paper-head {
-      margin-bottom: 96px;
-    }
-  }
-
-  .paper-mark {
-    color: var(--fg);
-  }
-
-  /* The motto sits under the mark, in the header block. Same type as when it
-     closed the document: display, 19px, bold, foreground. Only its position
-     and the margin around it changed. */
-  .paper-motto {
-    margin-top: 22px;
-    font-family: var(--font-display);
-    font-size: 19px;
+  .doc-mark,
+  .doc-motto {
+    margin: 0;
     font-weight: 700;
-    color: var(--fg);
   }
 
-  .paper-title {
-    margin-top: 18px;
-    font-family: var(--font-display);
-    font-size: clamp(21px, 2.6vw, 27px);
+  /* Barely larger than the body, told apart by weight rather than size, and
+     given space above rather than a rule. */
+  .doc h2 {
+    margin: 2.4em 0 0;
+    font-size: 20px;
     font-weight: 700;
-    line-height: 1.28;
-    letter-spacing: -0.015em;
-    max-width: 22ch;
+    line-height: 1.45;
   }
 
-  .paper-meta {
-    margin-top: 16px;
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    letter-spacing: var(--t-meta-track);
-    text-transform: uppercase;
-    color: var(--fg-3);
-  }
-
-  /* --- the body --- */
-
-  .paper-body {
-    font-size: var(--t-body);
-    line-height: 1.78;
-    color: var(--fg-2);
-  }
-
-  .paper-body :global(p) {
-    margin-top: 1.1em;
-  }
-
-  /* Modest, and set in the foreground so the hierarchy is weight and colour
-     rather than size. */
-  .paper-body :global(h2) {
-    margin-top: 2.9em;
-    font-family: var(--font-display);
-    font-size: 19px;
-    font-weight: 700;
-    line-height: 1.35;
-    letter-spacing: -0.01em;
-    color: var(--fg);
-  }
-
-  .paper-body :global(h2:first-child) {
+  .doc h2:first-of-type {
     margin-top: 0;
   }
 
-  .paper-body :global(h2 + p) {
-    margin-top: 0.7em;
+  /* Separated by space alone. */
+  .doc p {
+    margin: 0 0 1.05em;
   }
 
-  /* The four checks. A hanging number and a line of prose, no frame. */
-  .checks {
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
+  .doc h2 + p {
+    margin-top: 0.55em;
   }
 
-  .checks :global(li) {
-    display: flex;
-    gap: 14px;
-    margin-top: 0.6em;
-  }
-
-  .checks-n {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.78;
-    color: var(--fg-3);
-  }
-
-  /* --- the foot --- */
-
-  .paper-foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 26px;
-    margin-top: 84px;
-    font-size: var(--t-small);
-  }
-
-  .paper-foot a {
-    color: var(--accent);
+  .doc a {
+    color: inherit;
     text-decoration: underline;
-    text-underline-offset: 3px;
+    text-underline-offset: 2px;
     text-decoration-thickness: 1px;
-    text-decoration-color: color-mix(in srgb, var(--accent) 38%, transparent);
-    transition: text-decoration-color 150ms ease-out;
   }
 
-  .paper-foot a:hover {
-    text-decoration-color: var(--accent);
+  .doc-foot {
+    margin-top: 4.4em;
+    font-size: 15px;
+    line-height: 1.9;
+  }
+
+  .doc-foot a {
+    margin-right: 1.5em;
+    color: #5a564f;
+  }
+
+  .doc-foot a:last-child {
+    margin-right: 0;
+  }
+
+  @media (max-width: 520px) {
+    .doc-foot a {
+      display: block;
+      margin-right: 0;
+    }
   }
 </style>
