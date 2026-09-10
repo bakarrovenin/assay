@@ -48,6 +48,8 @@ const description =
     <header class="paper-head">
       <Logo class="paper-mark" />
 
+      <p class="paper-motto">Nullius in verba.</p>
+
       <p class="paper-title">Independent verification for AI authored code</p>
 
       <p class="paper-meta">Method v{METHOD_VERSION} &middot; Filed {FILED}</p>
@@ -183,8 +185,6 @@ const description =
         gap is smaller than we believe and we will publish that.
       </p>
       <p>We have no customers yet. These are the terms we intend to hold to.</p>
-
-      <p class="paper-close">Nullius in verba.</p>
     </div>
 
     <footer class="paper-foot">
@@ -231,8 +231,19 @@ const description =
     color: var(--fg);
   }
 
+  /* The motto sits under the mark, in the header block. Same type as when it
+     closed the document: display, 19px, bold, foreground. Only its position
+     and the margin around it changed. */
+  .paper-motto {
+    margin-top: 22px;
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
   .paper-title {
-    margin-top: 26px;
+    margin-top: 18px;
     font-family: var(--font-display);
     font-size: clamp(21px, 2.6vw, 27px);
     font-weight: 700;
@@ -300,14 +311,6 @@ const description =
     font-size: 13px;
     line-height: 1.78;
     color: var(--fg-3);
-  }
-
-  .paper-close {
-    margin-top: 2.9em;
-    font-family: var(--font-display);
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--fg);
   }
 
   /* --- the foot --- */
