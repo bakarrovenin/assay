@@ -215,13 +215,15 @@ const flat = groups.flatMap((g) => g.items);
     margin-top: 26px;
   }
 
+  /* The same metadata grammar as everywhere else: 10.5px mono, 0.2em, --fg-3.
+     This predated the grammar and was setting its own size, tracking and a
+     dimmed --fg-2 in place of --fg-3. */
   .docs-group-label {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: var(--t-meta);
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--fg-2);
-    opacity: 0.7;
+    letter-spacing: var(--t-meta-track);
+    color: var(--fg-3);
     margin-bottom: 10px;
   }
 

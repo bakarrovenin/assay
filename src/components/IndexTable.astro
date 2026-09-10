@@ -15,6 +15,8 @@ const tools = [
 ];
 
 const EMPTY = '—';
+
+const COLUMNS = ['Fixes tested', 'Alert closed', 'Verified fix'] as const;
 ---
 
 <div class="sheet reveal">
@@ -25,8 +27,8 @@ const EMPTY = '—';
     <span class="sheet-state">First edition in progress</span>
   </div>
 
-  <div class="overflow-x-auto">
-    <table class="w-full min-w-[560px] border-collapse text-left">
+  <div class="sheet-scroll">
+    <table class="sheet-table">
       <caption class="sr-only">
         Assay Index results by tool. No results have been published yet: the first
         edition is in progress, so every value is empty.
@@ -35,9 +37,7 @@ const EMPTY = '—';
         <tr>
           <th scope="col" class="col-tool">Tool</th>
           {
-            ['Fixes tested', 'Alert closed', 'Verified fix'].map((h) => (
-              <th scope="col" class="col-figure">{h}</th>
-            ))
+            COLUMNS.map((h) => <th scope="col" class="col-figure">{h}</th>)
           }
         </tr>
       </thead>
@@ -46,8 +46,10 @@ const EMPTY = '—';
           tools.map((tool) => (
             <tr>
               <th scope="row" class="cell-tool">{tool}</th>
-              {[0, 1, 2].map(() => (
-                <td class="cell-figure">{EMPTY}</td>
+              {COLUMNS.map((h) => (
+                <td class="cell-figure" data-label={h}>
+                  {EMPTY}
+                </td>
               ))}
             </tr>
           ))
@@ -129,5 +131,75 @@ const EMPTY = '—';
   .sheet :global(tbody tr:last-child th),
   .sheet :global(tbody tr:last-child td) {
     border-bottom: 0;
+  }
+
+  .sheet-table {
+    width: 100%;
+    text-align: left;
+  }
+
+  @media (min-width: 640px) {
+    .sheet-scroll {
+      overflow-x: auto;
+    }
+
+    .sheet-table {
+      min-width: 560px;
+    }
+  }
+
+  /* Narrow: the sheet stacks into one record per tool rather than scrolling a
+     column off the edge. Every figure stays on screen and carries its own
+     column name, so the reader can see what the sheet holds and that all of
+     it is empty, which is the point of the page. */
+  @media (max-width: 639px) {
+    .sheet :global(thead) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .sheet :global(tbody tr) {
+      display: block;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sheet :global(tbody tr:last-child) {
+      border-bottom: 0;
+    }
+
+    .sheet :global(.cell-tool) {
+      display: block;
+      padding: 16px 0 10px;
+      border-bottom: 0;
+    }
+
+    .sheet :global(.cell-figure) {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 7px 0 7px 16px;
+      border-left: 1px solid var(--line);
+      border-bottom: 0;
+      text-align: left;
+    }
+
+    .sheet :global(.cell-figure):last-child {
+      padding-bottom: 16px;
+    }
+
+    /* The column name travels with the figure once the header row is gone. */
+    .sheet :global(.cell-figure)::before {
+      content: attr(data-label);
+      font-family: var(--font-mono);
+      font-size: var(--t-meta);
+      letter-spacing: var(--t-meta-track);
+      text-transform: uppercase;
+      color: var(--fg-3);
+    }
   }
 </style>
