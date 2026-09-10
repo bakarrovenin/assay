@@ -17,19 +17,12 @@ const tools = [
 const EMPTY = '—';
 ---
 
-<div class="reveal overflow-hidden rounded-[3px] border border-line bg-bg">
-  <div
-    class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5"
-  >
-    <span class="mono text-[10px] uppercase tracking-[0.16em] text-fg-2">
-      Quarterly · method v1.0
-    </span>
-    <span
-      class="mono inline-flex items-center gap-2 rounded-[2px] border border-accent px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-accent"
-    >
-      <span class="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>
-      First edition in progress
-    </span>
+<div class="sheet reveal">
+  {/* Sheet header. Metadata left, the state of the edition right. The state
+      is the one accent here: it is what the empty table means. */}
+  <div class="sheet-head">
+    <span>Quarterly · method v1.0</span>
+    <span class="sheet-state">First edition in progress</span>
   </div>
 
   <div class="overflow-x-auto">
@@ -39,39 +32,22 @@ const EMPTY = '—';
         edition is in progress, so every value is empty.
       </caption>
       <thead>
-        <tr class="border-b border-line">
-          <th
-            scope="col"
-            class="mono px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-5"
-          >
-            Tool
-          </th>
+        <tr>
+          <th scope="col" class="col-tool">Tool</th>
           {
             ['Fixes tested', 'Alert closed', 'Verified fix'].map((h) => (
-              <th
-                scope="col"
-                class="mono px-4 py-3 text-right text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-5"
-              >
-                {h}
-              </th>
+              <th scope="col" class="col-figure">{h}</th>
             ))
           }
         </tr>
       </thead>
       <tbody>
         {
-          tools.map((tool, i) => (
-            <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
-              <th
-                scope="row"
-                class="px-4 py-3 text-[14px] font-medium sm:px-5"
-              >
-                {tool}
-              </th>
+          tools.map((tool) => (
+            <tr>
+              <th scope="row" class="cell-tool">{tool}</th>
               {[0, 1, 2].map(() => (
-                <td class="mono px-4 py-3 text-right text-[14px] text-fg-2 opacity-45 sm:px-5">
-                  {EMPTY}
-                </td>
+                <td class="cell-figure">{EMPTY}</td>
               ))}
             </tr>
           ))
@@ -80,3 +56,78 @@ const EMPTY = '—';
     </table>
   </div>
 </div>
+
+<style>
+  /* A results sheet: ruled top and bottom, column rules between figures,
+     no box around it and no alternating row fill. */
+  .sheet {
+    border-top: 1px solid var(--line);
+  }
+
+  .sheet-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  .sheet-state {
+    color: var(--accent);
+  }
+
+  .sheet :global(table) {
+    border-collapse: collapse;
+  }
+
+  .sheet :global(th),
+  .sheet :global(td) {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sheet :global(thead th) {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 500;
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  .sheet :global(.col-tool),
+  .sheet :global(.cell-tool) {
+    padding-left: 0;
+    text-align: left;
+  }
+
+  .sheet :global(.col-figure),
+  .sheet :global(.cell-figure) {
+    text-align: right;
+    /* The column rule. This is what separates values on a sheet. */
+    border-left: 1px solid var(--line);
+  }
+
+  .sheet :global(.cell-tool) {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .sheet :global(.cell-figure) {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--fg-3);
+  }
+
+  .sheet :global(tbody tr:last-child th),
+  .sheet :global(tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+</style>

@@ -40,17 +40,17 @@ const checks = [
     Four checks that nobody runs today, on every AI-authored change.
   </p>
 
-  {/* A punch card. Four checks, struck in order, mono and ruled rather than
-      four cards in a row. The struck marks are this section's one accent. */}
+  {/* A punch card, with every seat empty. This page explains what the checks
+      are, so nothing has been struck yet: striking means a verdict everywhere
+      else on the site, and four struck punches here would read as four
+      passes. The hero card is the struck version of this one. */}
   <ol class="card mt-14">
     {
       checks.map((check, i) => (
         <li class="card-row reveal" style={`--reveal-delay:${i * 60}ms`}>
           <span class="card-n">{check.n}</span>
 
-          <span class="punch punch-struck" aria-hidden="true">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></svg>
-          </span>
+          <span class="punch punch-unstruck" aria-hidden="true"></span>
 
           <div class="card-body">
             <h3 class="card-title">{check.title}</h3>
@@ -93,9 +93,7 @@ const checks = [
         claude-code-action v1.0.94.
       </p>
       <p>
-        Nothing about a patch like that looks wrong to a scanner, because the scanner is
-        not the thing being attacked. When the agent writing your fix can be instructed by
-        the code it is reading,{' '}
+        When the agent writing your fix can be instructed by the code it is reading,{' '}
         <strong class="font-semibold text-fg">provenance stops being paperwork</strong>.
       </p>
     </div>

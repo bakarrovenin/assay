@@ -166,12 +166,29 @@ the part that must not be flattened back into a uniform grid.
 | The gap | A spec sheet. Numbered zones, leader lines, one struck layer |
 | Overfitted patch | Already correct. Keep. This is the benchmark |
 | The four checks | A punch card. 01 to 04, struck marks, mono |
-| Pricing | An assay ledger. Line items, subtotal, total due, auth line |
+| Pricing | An assay ledger. Line items, total due, auth line. No subtotal |
 | The Index | A results sheet. Ruled table, column rules, no card chrome |
 | The record | A hallmark. Four punches, struck and unstruck, large |
 | Research | A dispatch. Issue number, filed date, contact sheet listing |
 | Methodology | A technical manual. Sidebar, anchors, dense, no marketing |
 | About | A colophon. Nullius in verba as the mark |
+
+Two corrections from building it.
+
+**Pricing has no subtotal.** The three tiers are mutually exclusive: a reader
+buys one of them, and summing them is not a number that means anything. The
+line was written before anyone tried to draw it.
+
+**Two of the three totals are empty, and stay empty.** Assay has no price for
+Team or Enterprise. A ledger wants figures and there are none, so those cells
+carry the reason instead, which is the device /the-index already uses. Filling
+them would be inventing figures on a site whose argument is that vendors invent
+figures. The form yields to the facts.
+
+**A struck punch means a verdict.** So the four checks read as struck only
+where a verdict exists. On /product, which explains what the checks are, the
+punches are unstruck: a check that has not been applied yet. The hero
+certificate is the struck version of the same card.
 
 ---
 

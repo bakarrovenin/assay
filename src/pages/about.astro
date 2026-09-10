@@ -7,7 +7,7 @@ import ConditionList from '../components/ConditionList.astro';
 import DefinitionPair from '../components/DefinitionPair.astro';
 import RuledRows from '../components/RuledRows.astro';
 import type { Row } from '../components/RuledRows.astro';
-import { SECURITY_ADVISORY_URL } from '../lib/site';
+import { SECURITY_ADVISORY_URL, METHOD_VERSION } from '../lib/site';
 
 const checks = [
   'the reported hole is genuinely gone, not merely quiet',
@@ -50,6 +50,17 @@ const commitments: Row[] = [
     lead: 'Bypasses',
     body: 'wanted. A patch we approve that does not fix the vulnerability is the most valuable bug in the product.',
   },
+];
+
+// The colophon. Every line is checkable in the repository: the three faces
+// are the woff2 files in public/fonts, the method version is METHOD_VERSION,
+// and the source is public. Nothing here is a claim about the company.
+const colophon: Row[] = [
+  { lead: 'Display', body: 'Archivo' },
+  { lead: 'Text', body: 'Inter' },
+  { lead: 'Mono', body: 'IBM Plex Mono' },
+  { lead: 'Method', body: `v${METHOD_VERSION}` },
+  { lead: 'Source', body: 'Static build, no tracking beyond page analytics' },
 ];
 
 const status: Row[] = [
@@ -170,7 +181,33 @@ const status: Row[] = [
       </span>
       <a href="/methodology" class="btn btn-secondary">Read the methodology</a>
     </div>
+
+    {/* The colophon proper: how this was set, under the mark it was set by. */}
+    <div class="colophon reveal">
+      <p class="mark">Nullius in verba</p>
+      <div style="max-width:66ch">
+        <RuledRows label="Colophon" rows={colophon} />
+      </div>
+    </div>
   </Section>
+
+  <style>
+    .colophon {
+      margin-top: 72px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* The motto set as a mark rather than as a sentence: the thing the
+       colophon is signed with. */
+    .mark {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 2.4vw, 30px);
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin-bottom: 24px;
+    }
+  </style>
 </BaseLayout>
 
 <style>
