@@ -83,10 +83,10 @@ const W = 1200;
 const H = 630;
 const PAD = 76;
 
-const PAPER = '#E9E5DC';
-const INK = '#14161A';
-const BLUE = '#1B5FD9';
-const RULE = 'rgba(20,22,26,0.16)';
+const PAPER = '#F0F3F2';
+const INK = '#0B1214';
+const BLUE = '#0E7A6D';
+const RULE = 'rgba(10,20,22,0.12)';
 
 export async function renderOgImage(): Promise<Buffer> {
   const display = loadFont('@fontsource/archivo', 'archivo-latin-800-normal.woff');
