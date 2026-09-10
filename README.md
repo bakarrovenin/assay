@@ -14,8 +14,17 @@ npm install
 npm run dev      # http://localhost:4321
 npm run build    # → dist/
 npm run preview  # serve dist/ exactly as a static host would
-npm run check    # astro check, must stay at 0 errors
+npm run check    # astro check, then build, then the protected-copy guard
+npm run check:copy  # the copy guard alone, against an existing dist/
 ```
+
+`npm run check` must stay at 0 errors. It builds before checking copy because
+the protected lines are verified against the rendered HTML, not the source: a
+line can be intact in a component and still reach the page split by an inline
+tag or run on into the next clause.
+
+Protected lines live in `PROTECTED-COPY.md`, which is the single source the
+guard reads. Add a line there and it is enforced from the next run.
 
 Deploy target is Vercel, live at <https://assay.website>. No `vercel.json` is
 needed: the output is plain static files and the defaults serve them correctly.
