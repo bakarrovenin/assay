@@ -1,33 +1,32 @@
 ---
-import HeroVerdictPanel from './HeroVerdictPanel.astro';
+// Single column. The certificate used to sit beside the headline as the
+// hero's primary object; it now assembles beat by beat in the explainer
+// section directly below, so nothing is duplicated here and the headline
+// gets the width back.
 ---
 
 <section class="hero">
-  <div class="shell hero-grid">
+  <div class="shell">
     <div class="hero-text">
       <p class="eyebrow reveal">Independent verification for AI-authored code</p>
 
-      <h1 class="h1 reveal mt-5" style="--reveal-delay:60ms">
+      <h1 class="h1 hero-h1 reveal mt-6" style="--reveal-delay:60ms">
         Your AI fixed it. We check whether it actually did.
       </h1>
 
-      <p class="lede reveal mt-7" style="--reveal-delay:120ms">
+      <p class="lede reveal mt-8" style="--reveal-delay:120ms">
         Every AI security tool now writes its own patches and certifies its own work.
         Assay is the third party that checks.
       </p>
 
-      <div class="reveal mt-8 flex flex-wrap gap-3" style="--reveal-delay:180ms">
+      <div class="reveal mt-9 flex flex-wrap gap-3" style="--reveal-delay:180ms">
         <button type="button" class="btn btn-primary" data-verify-cta>Verify a pull request</button>
         <a href="/the-index" class="btn btn-secondary">Read the Index</a>
       </div>
 
-      <p class="mono reveal mt-5 text-[12px] text-fg-2" style="--reveal-delay:240ms">
+      <p class="mono reveal mt-6 text-[12px] text-fg-2" style="--reveal-delay:240ms">
         Free forever on public repositories &middot; Installs in under a minute
       </p>
-    </div>
-
-    <div class="hero-panel reveal" style="--reveal-delay:300ms">
-      <HeroVerdictPanel />
     </div>
   </div>
 </section>
@@ -36,67 +35,28 @@ import HeroVerdictPanel from './HeroVerdictPanel.astro';
   .hero {
     display: flex;
     align-items: center;
-    padding-block: 48px;
+    padding-block: 64px 72px;
   }
 
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 44px;
-  }
-
-  /* Text column gets a tighter measure than the shell, so the headline sets to
-     three lines instead of spanning the page. */
-  .hero-text {
-    max-width: 620px;
-  }
-
-  /* One column below 900px: text first, then the panel, centred. */
-  .hero-panel {
-    display: flex;
-    justify-content: center;
+  /* Full display size. The stage 2 rebuild took the headline from 80 to 72
+     because it had to share the row with the certificate and still fit the
+     viewport. That constraint is gone with the column, so the size comes
+     back with it. 22ch lets the line set to two lines across the shell at
+     1512, breaking after "check" rather than after "We". */
+  .hero-h1 {
+    font-size: clamp(40px, 6.4vw, 80px);
+    max-width: 22ch;
   }
 
   @media (min-width: 960px) {
     .hero {
-      /* The whole hero occupies exactly one screen under the 61px nav, with
-         the two columns centred against each other. svh rather than vh so a
-         mobile browser's collapsing chrome cannot clip the panel. */
-      min-height: calc(100svh - 61px);
-      padding-block: 56px;
-    }
-
-    .hero-grid {
-      /* The certificate is the primary object, so it takes the larger track.
-         Stage 1 had the text column dominant and the panel as a sidecar. */
-      grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
-      align-items: center;
-      gap: 56px;
-      width: 100%;
-    }
-
-    .hero-panel {
-      justify-content: flex-end;
+      padding-block: 96px 104px;
     }
   }
 
-  @media (min-width: 1180px) {
-    .hero-grid {
-      gap: 56px;
-    }
-  }
-
-  /* Short laptop screens: keep the whole hero on one screen by tightening the
-     outer padding rather than by shrinking or clipping the panel. */
-  @media (min-width: 960px) and (max-height: 840px) {
+  @media (min-width: 960px) and (max-height: 760px) {
     .hero {
-      padding-block: 36px;
-    }
-  }
-
-  @media (min-width: 960px) and (max-height: 730px) {
-    .hero {
-      padding-block: 24px;
+      padding-block: 64px 72px;
     }
   }
 </style>

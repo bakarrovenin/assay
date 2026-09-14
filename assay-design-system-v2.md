@@ -192,6 +192,13 @@ where a verdict exists. On /product, which explains what the checks are, the
 punches are unstruck: a check that has not been applied yet. The hero
 certificate is the struck version of the same card.
 
+**The certificate moved out of the hero.** Beside the headline it cost the
+headline its size and the panel its room, and a finished certificate says
+nothing about how it was reached. It now assembles one beat at a time in the
+explainer section directly under the hero, pinned while the six beats play
+where the stage fits under the nav, in normal flow elsewhere. The hero is a
+single column again. The panel exists in one place, not two.
+
 **Alternating tints do not apply inside the docs reading column.** Section 5
 says sections alternate with no exceptions. That is wrong. The tint is a
 full-bleed device: it works because the band runs the whole width of the

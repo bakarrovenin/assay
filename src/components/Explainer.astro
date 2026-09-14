@@ -1,0 +1,812 @@
+---
+// The explainer. Six beats that assemble the certificate one piece at a time
+// as the reader scrolls, ported from assay-explainer.html at the repo root.
+//
+// The certificate here is the same illustration the hero used to carry. It
+// lives in one place now, this section, so it is not duplicated. The pull
+// request, the scanner result and the verdict are a fabricated example of
+// what Assay posts, not a screenshot of a real repository. The only metadata
+// printed on it is metadata that is true.
+//
+// Interaction, in order of precedence:
+//   1. prefers-reduced-motion: the final assembled frame, no animation. The
+//      controls still step through the beats, without scrolling.
+//   2. Pinned: the stage holds under the nav while the page scrolls through
+//      a track six beats long, then releases. Only where the whole stage fits
+//      in the viewport under the nav, which is desktop in practice.
+//   3. Flow: the stage sits in normal flow and assembles as the section
+//      travels up the viewport, one beat per scroll increment. This is the
+//      fallback for phones and short windows.
+// For review, ?explainer=flow forces flow mode and ?explainer=pin asks for
+// pinned mode; both ignore the OS reduce-motion setting so the scroll modes
+// can be seen on a machine that has it on. Pin still yields to the fit check.
+// Click on the stage, the Next and Back buttons, the progress dots and the
+// arrow keys all work in every mode. In the scroll-driven modes they scroll
+// the page to the beat rather than fighting the scroll position.
+import { METHOD_VERSION } from '../lib/site';
+
+const beats = [
+  {
+    h: 'An AI just wrote a security fix.',
+    b: 'A search box on this app has a hole: an attacker can type database commands into it and pull back data they should never see. An AI agent was shown one example of the attack and told to fix it. It opened this pull request.',
+    chip: 'SQL injection · CWE-89 · /api/search',
+    red: false,
+  },
+  {
+    h: 'The scanner re-runs and finds nothing.',
+    b: 'The security scanner checks the patched code and reports zero findings. The alert is green. This is where almost everyone stops, merges the fix, and moves on. “Found means fixed.”',
+    chip: 'Semgrep 1.80.0 · 0 findings',
+    red: false,
+  },
+  {
+    h: 'Assay doesn’t trust the scanner.',
+    b: 'The scanner only re-checks the one thing the patch was written to satisfy, so it almost always goes green. Assay asks a harder question, using attacks the AI was never shown, and runs four independent checks.',
+    chip: 'held-out testing · the AI saw one attack, we kept the rest hidden',
+    red: false,
+  },
+  {
+    h: 'Four checks run.',
+    b: 'Three ask the ordinary questions any careful team would ask. One asks the question nobody runs: does the fix stop the attacks it was never shown? Watch which one fails.',
+    chip: 'resolving…',
+    red: false,
+  },
+  {
+    h: 'Three pass. One fails, and it’s the one that matters.',
+    b: 'The AI blocked the exact attack string it was shown. But 46 other versions of the same attack walk straight through and still leak the users table. It patched the example, not the vulnerability.',
+    chip: '1 of 47 held-out payloads still injects',
+    red: true,
+  },
+  {
+    h: 'The alert went green. The bug didn’t.',
+    b: 'The scanner said zero findings. Two of the four checks a normal team runs also came back clean. And the hole is still wide open. That gap, between the fix looking done and being done, is the entire reason Assay exists.',
+    chip: 'verdict: NOT VERIFIED',
+    red: true,
+  },
+];
+
+// The four checks. Plain is the question in ordinary words; detail is what
+// the check actually found, which only appears once the checks resolve.
+const checks = [
+  {
+    n: '01',
+    name: 'Closed',
+    plain: 'Is the reported hole actually gone?',
+    detail: 'Reported sink removed. No suppression added.',
+    failed: false,
+  },
+  {
+    n: '02',
+    name: 'Behaviour held',
+    plain: 'Does it stop attacks we never showed the AI?',
+    detail:
+      '1 of 47 held-out payloads still injects. The patch blocked the exact string it was shown, not the whole class.',
+    failed: true,
+  },
+  {
+    n: '03',
+    name: 'No regression',
+    plain: 'Did the fix break anything that worked before?',
+    detail: 'No new findings in the diff. Benign inputs unchanged.',
+    failed: false,
+  },
+  {
+    n: '04',
+    name: 'Provenance clean',
+    plain: 'Was the change itself trustworthy?',
+    detail: 'Author, token scope, and blast radius within bounds.',
+    failed: false,
+  },
+];
+
+const N = beats.length;
+---
+
+<section class="ex rule-t" data-explainer data-beats={N} aria-label="How Assay works">
+  <div class="track" data-track>
+    <div class="stick" data-stick>
+      <div class="shell">
+        <div class="top">
+          <p class="eyebrow">How it works</p>
+          <div class="progress">
+            <span class="stepno"><b data-cur>01</b> / {String(N).padStart(2, '0')}</span>
+            <div class="dots" role="tablist" aria-label="Beats">
+              {
+                beats.map((_, k) => (
+                  <button
+                    type="button"
+                    class="dot"
+                    role="tab"
+                    data-dot={k}
+                    aria-label={`Beat ${k + 1} of ${N}`}
+                    aria-selected={k === 0 ? 'true' : 'false'}
+                  />
+                ))
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="stage" data-stage>
+            <div class="panel">
+              <div class="pr">
+                <div class="pr-top">
+                  <span class="pr-actor">coding-agent</span>
+                  <span class="pr-bot">bot</span>
+                  <span>opened a pull request</span>
+                  <span class="pr-num">#248</span>
+                </div>
+                <div class="pr-title"><span class="kw">fix:</span> escape user input in /api/search</div>
+                <div class="scanner piece piece-scan">
+                  <span class="d"></span>
+                  <span>Semgrep 1.80.0</span>
+                  <span>&middot;</span>
+                  <b>0 findings</b>
+                </div>
+              </div>
+
+              <div class="assay piece piece-assay">
+                <div class="p-eyebrow">
+                  <span class="mark" aria-hidden="true">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg>
+                  </span>
+                  Assay &middot; independent verification
+                </div>
+
+                <div class="checks">
+                  {
+                    checks.map((c) => (
+                      <div class={`check ${c.failed ? 'is-fail' : 'is-pass'}`}>
+                        <span class="idx">{c.n}</span>
+                        <span class="glyph" aria-hidden="true">
+                          {!c.failed && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6" /></svg>
+                          )}
+                        </span>
+                        <div class="c-body">
+                          <div class="c-name">{c.name}</div>
+                          <div class="c-plain">{c.plain}</div>
+                          <div class="c-detail piece piece-detail">{c.detail}</div>
+                        </div>
+                      </div>
+                    ))
+                  }
+                </div>
+
+                <div class="verdict piece piece-final"><span class="stamp">Not verified</span></div>
+                <div class="kicker piece piece-final">The alert went green. The bug didn&rsquo;t.</div>
+
+                <div class="foot piece piece-final">
+                  <span>Method v{METHOD_VERSION}</span>
+                  <span class="evidence">View evidence &rarr;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="caption">
+              {
+                beats.map((s, k) => (
+                  <div class={`cap ${k === 0 ? 'on' : ''}`} data-cap={k}>
+                    <h2 class="cap-h">{s.h}</h2>
+                    <p class="cap-b">{s.b}</p>
+                    <span class={`cap-chip ${s.red ? 'red' : ''}`}>{s.chip}</span>
+                  </div>
+                ))
+              }
+          </div>
+
+          <div class="controls">
+            <button type="button" class="btn btn-secondary btn-sm" data-prev disabled>&larr; Back</button>
+            <span class="hint" data-hint>Scroll or click to continue</span>
+            <button type="button" class="btn btn-secondary btn-sm" data-next>Next &rarr;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<noscript>
+  <style>
+    /* Without JS the section is the finished certificate with every caption
+       under it, which is the whole argument in one static frame. */
+    [data-explainer] .piece { display: block !important; }
+    [data-explainer] .piece-scan { display: inline-flex !important; }
+    [data-explainer] .verdict { display: flex !important; }
+    [data-explainer] .foot { display: flex !important; }
+    [data-explainer] .cap { display: block !important; }
+    [data-explainer] .cap + .cap { margin-top: 24px; }
+    [data-explainer] .controls, [data-explainer] .progress { display: none !important; }
+  </style>
+</noscript>
+
+<style>
+  .ex {
+    /* The nav is 61px and sticky. When pinned, the script sets --stick-top so
+       the stage at its final height sits centred in what is left of the
+       viewport, and --stick-h reserves that height from the first beat so
+       the certificate grows into space that is already its own. */
+    --nav: 61px;
+    --stick-top: calc(var(--nav) + 24px);
+    padding-block: 72px;
+  }
+
+  @media (min-width: 1024px) {
+    .ex { padding-block: 96px; }
+  }
+
+  /* Pinned mode. The track is tall and the stage sticks inside it; both
+     numbers are set by the script once it has measured the stage. Flow mode
+     is the same markup with neither rule, which is also what a no-JS page
+     gets. */
+  .ex.is-pinned {
+    padding-block: 24px 64px;
+  }
+  .ex.is-pinned .track {
+    min-height: var(--track, auto);
+  }
+  .ex.is-pinned .stick {
+    position: sticky;
+    top: var(--stick-top);
+    min-height: var(--stick-h, auto);
+  }
+
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    margin-bottom: 20px;
+  }
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: none;
+  }
+  .stepno {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--fg-3);
+    white-space: nowrap;
+  }
+  .stepno b {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .dots {
+    display: flex;
+    gap: 7px;
+  }
+  .dot {
+    width: 26px;
+    height: 12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    position: relative;
+  }
+  .dot::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 4.5px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--line);
+    transition: background 300ms ease-out;
+  }
+  .dot.done::after { background: var(--fg-3); }
+  .dot.on::after { background: var(--fg); }
+
+  /* Stacked on narrow screens with the caption first, so the words the
+     reader is scrolling past are the ones that change. Two columns from 960,
+     caption and controls hugging the vertical middle of the certificate. */
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'caption' 'stage' 'controls';
+    gap: 24px;
+    align-items: start;
+  }
+  .stage { grid-area: stage; }
+  .caption { grid-area: caption; }
+  .controls { grid-area: controls; }
+
+  @media (min-width: 960px) {
+    .grid {
+      grid-template-columns: minmax(0, 600px) minmax(280px, 1fr);
+      grid-template-rows: auto auto;
+      grid-template-areas: 'stage caption' 'stage controls';
+      align-content: start;
+      column-gap: 56px;
+      row-gap: 0;
+    }
+    .stage { grid-row: 1 / -1; }
+    .caption { padding-top: 4px; }
+    .controls { margin-top: 28px; }
+  }
+
+  /* The stage. Clicking anywhere on it advances. */
+  .stage {
+    cursor: pointer;
+    user-select: none;
+    min-width: 0;
+  }
+
+  /* ---- the assembling certificate ---- */
+  .panel {
+    --p-dim: color-mix(in srgb, var(--fg-2) 93%, var(--bg));
+    --p-fail-dim: color-mix(in srgb, var(--fail) 76%, var(--fg));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--panel);
+    color: var(--fg);
+    overflow: hidden;
+  }
+
+  .pr {
+    padding: 15px 20px 14px;
+    background: var(--panel-2);
+  }
+  .pr-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-2);
+    margin-bottom: 10px;
+  }
+  .pr-actor {
+    color: var(--fg);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .pr-bot {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--p-dim);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 1px 7px;
+  }
+  .pr-num {
+    margin-left: auto;
+    padding-left: 8px;
+    color: var(--p-dim);
+    white-space: nowrap;
+  }
+  .pr-title {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--fg);
+  }
+  /* Decoration, not meaning, so neutral rather than accent. */
+  .pr-title .kw {
+    color: var(--fg-2);
+  }
+  .scanner {
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--fg-2);
+  }
+  .scanner .d {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--p-dim);
+  }
+  .scanner b {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .assay {
+    padding: 15px 20px 18px;
+    border-top: 1px solid var(--line);
+  }
+  .p-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    margin-bottom: 6px;
+  }
+  .p-eyebrow .mark {
+    width: 15px;
+    height: 15px;
+    border: 1.5px solid var(--fg);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg);
+    flex: none;
+  }
+
+  .checks {
+    display: flex;
+    flex-direction: column;
+  }
+  .check {
+    display: grid;
+    grid-template-columns: 22px 20px 1fr;
+    gap: 11px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+    transition: opacity 350ms ease-out;
+  }
+  .idx {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--p-dim);
+    padding-top: 2px;
+  }
+
+  /* The punch, in three states. Pending is an empty seat in neutral. Once the
+     checks resolve, a passing check is struck in the accent, and the failing
+     one keeps its seat empty in the fail colour: a check that was made and
+     did not hold, so nothing was impressed into it. Same device as the
+     hallmark; a red cross would make the miss a different kind of presence. */
+  .glyph {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    flex: none;
+    border: 1.5px dashed color-mix(in srgb, var(--fg-3) 55%, transparent);
+    color: transparent;
+  }
+  .glyph svg {
+    display: block;
+    opacity: 0;
+  }
+  .ex.at-4 .is-pass .glyph {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .ex.at-4 .is-pass .glyph svg {
+    opacity: 1;
+    animation: fade 400ms ease;
+  }
+  .ex.at-4 .is-fail .glyph {
+    border-color: var(--fail);
+  }
+
+  .c-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin-bottom: 3px;
+  }
+  .c-plain,
+  .c-detail {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--fg-2);
+  }
+  .c-detail {
+    margin-top: 3px;
+  }
+  .ex.at-4 .is-fail .c-name {
+    color: var(--fail);
+  }
+  .ex.at-4 .is-fail .c-detail {
+    color: var(--p-fail-dim);
+  }
+  /* The final frame dims the passing checks so the failure carries the eye. */
+  .ex.at-5 .is-pass {
+    opacity: 0.28;
+  }
+
+  .verdict {
+    justify-content: center;
+    padding: 18px 0 10px;
+  }
+  .stamp {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fail);
+    border: 2px solid var(--fail);
+    border-radius: 7px;
+    padding: 10px 22px;
+    transform: rotate(-2.4deg);
+  }
+  .kicker {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg-2);
+  }
+  .foot {
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 11px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--p-dim);
+  }
+  /* Illustrative, not a live link, so it does not take the accent. */
+  .evidence {
+    color: var(--fg-2);
+  }
+
+  /* ---- assembly ---- */
+  /* Every piece is absent until its beat. Cumulative classes at-1 to at-5 on
+     the section are set by the script, so the CSS is the only place that
+     knows which piece belongs to which beat. */
+  .piece {
+    display: none;
+    animation: fade 400ms ease;
+  }
+  .ex.at-1 .piece-scan { display: inline-flex; }
+  .ex.at-2 .piece-assay { display: block; }
+  .ex.at-4 .piece-detail { display: block; }
+  .ex.at-5 .kicker { display: block; }
+  .ex.at-5 .verdict { display: flex; }
+  .ex.at-5 .foot { display: flex; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---- caption and controls ---- */
+  .caption {
+    min-width: 0;
+    min-height: 168px;
+  }
+  .cap {
+    display: none;
+  }
+  .cap.on {
+    display: block;
+    animation: fade 400ms ease;
+  }
+  .cap-h {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(20px, 2.2vw, 26px);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .cap-b {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--fg-2);
+    margin: 0;
+    max-width: 52ch;
+  }
+  .cap-chip {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--fg-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 5px 10px;
+  }
+  .cap-chip.red {
+    color: var(--fail);
+    border-color: color-mix(in srgb, var(--fail) 45%, transparent);
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .controls .btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--fg-3);
+    text-align: center;
+  }
+  .hint.off {
+    visibility: hidden;
+  }
+
+  @media (max-width: 400px) {
+    .pr, .assay { padding-inline: 16px; }
+    .stamp { font-size: 16px; }
+    .hint { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .piece, .cap.on, .ex.at-4 .is-pass .glyph svg { animation: none; }
+    .check, .dot::after { transition: none; }
+  }
+</style>
+
+<script>
+  const found = document.querySelector<HTMLElement>('[data-explainer]');
+
+  if (found) {
+    const root: HTMLElement = found;
+    const N = Number(root.dataset.beats);
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const stick = root.querySelector<HTMLElement>('[data-stick]')!;
+    const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+    const cur = root.querySelector<HTMLElement>('[data-cur]')!;
+    const hint = root.querySelector<HTMLElement>('[data-hint]')!;
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const dots = Array.from(root.querySelectorAll<HTMLElement>('[data-dot]'));
+    const caps = Array.from(root.querySelectorAll<HTMLElement>('[data-cap]'));
+
+    const mode = new URLSearchParams(location.search).get('explainer');
+    const forceFlow = mode === 'flow';
+    const reduced =
+      !forceFlow && mode !== 'pin' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const NAV = 61;
+    let STICK_TOP = NAV + 24;
+    // Scroll distance per beat when pinned, as a fraction of the viewport.
+    // 0.55 is about one deliberate trackpad flick or five wheel notches.
+    const BEAT_VH = 0.55;
+
+    let beat = 0;
+    let pinned = false;
+    let stickH = 0;
+
+    function render(k: number) {
+      beat = k;
+      for (let i = 1; i < N; i++) root.classList.toggle('at-' + i, k >= i);
+      cur.textContent = String(k + 1).padStart(2, '0');
+      dots.forEach((d, i) => {
+        d.classList.toggle('on', i === k);
+        d.classList.toggle('done', i < k);
+        d.setAttribute('aria-selected', i === k ? 'true' : 'false');
+      });
+      caps.forEach((c, i) => c.classList.toggle('on', i === k));
+      prev.disabled = k === 0;
+      next.innerHTML = k === N - 1 ? 'Restart ↻' : 'Next →';
+      hint.classList.toggle('off', k === N - 1);
+    }
+
+    // ---- reduced motion: the finished frame, stepping without scrolling ----
+    if (reduced) {
+      render(N - 1);
+      const go = (k: number) => render((k + N) % N);
+      stage.addEventListener('click', () => go(beat + 1));
+      next.addEventListener('click', () => go(beat + 1));
+      prev.addEventListener('click', () => beat > 0 && go(beat - 1));
+      dots.forEach((d) => d.addEventListener('click', () => go(Number(d.dataset.dot))));
+    } else {
+      // ---- scroll driven ----
+
+      // Height of the stage at its tallest, which is the final beat. Measured
+      // synchronously so no frame paints in between.
+      function measure() {
+        const was = beat;
+        for (let i = 1; i < N; i++) root.classList.add('at-' + i);
+        stickH = stick.offsetHeight;
+        for (let i = 1; i < N; i++) root.classList.toggle('at-' + i, was >= i);
+      }
+
+      // Pin only where the whole stage fits under the nav with room to spare,
+      // otherwise the last beats would be below the fold while pinned.
+      function layout() {
+        measure();
+        const vh = window.innerHeight;
+        const room = vh - NAV - stickH;
+        pinned = !forceFlow && room >= 32 && window.innerWidth >= 960;
+        root.classList.toggle('is-pinned', pinned);
+        if (pinned) {
+          STICK_TOP = NAV + Math.round(room / 2);
+          root.style.setProperty('--stick-top', STICK_TOP + 'px');
+          root.style.setProperty('--stick-h', stickH + 'px');
+          track.style.setProperty('--track', Math.round(stickH + N * BEAT_VH * vh) + 'px');
+        } else {
+          STICK_TOP = NAV + 24;
+          root.style.removeProperty('--stick-top');
+          root.style.removeProperty('--stick-h');
+          track.style.removeProperty('--track');
+        }
+      }
+
+      // Scroll positions between which the six beats play, as document Y.
+      // Pinned: from the moment the stage sticks until the track runs out.
+      // Flow: from the section's top edge entering at 85% of the viewport
+      // until it reaches the nav. Neither depends on the stage's current
+      // height, which changes with the beat and would feed back on itself.
+      function range() {
+        const vh = window.innerHeight;
+        const rect = track.getBoundingClientRect();
+        const top = rect.top + window.scrollY;
+        if (pinned) {
+          const start = top - STICK_TOP;
+          return { start, end: start + (rect.height - stickH) };
+        }
+        return { start: top - vh * 0.85, end: top - STICK_TOP };
+      }
+
+      function beatFor(y: number) {
+        const { start, end } = range();
+        const p = Math.min(1, Math.max(0, (y - start) / (end - start)));
+        return Math.min(N - 1, Math.floor(p * N));
+      }
+
+      function scrollToBeat(k: number) {
+        const { start, end } = range();
+        const y = start + ((k + 0.5) / N) * (end - start);
+        window.scrollTo({ top: Math.round(y), behavior: 'smooth' });
+      }
+
+      // Scroll events already arrive at most once per frame.
+      function onScroll() {
+        const k = beatFor(window.scrollY);
+        if (k !== beat) render(k);
+      }
+
+      const go = (k: number) => scrollToBeat((k + N) % N);
+      stage.addEventListener('click', () => go(beat + 1));
+      next.addEventListener('click', () => go(beat + 1));
+      prev.addEventListener('click', () => beat > 0 && go(beat - 1));
+      dots.forEach((d) => d.addEventListener('click', () => go(Number(d.dataset.dot))));
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', () => {
+        layout();
+        onScroll();
+      });
+
+      layout();
+      render(beatFor(window.scrollY));
+    }
+
+    // Arrow keys step the beats while the section is on screen and nothing
+    // else wants the keyboard: no field focused, no dialog open.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      const a = document.activeElement as HTMLElement | null;
+      if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable)) return;
+      if (document.querySelector('dialog[open]')) return;
+      const r = (pinned ? stick : track).getBoundingClientRect();
+      if (r.bottom < window.innerHeight * 0.3 || r.top > window.innerHeight * 0.7) return;
+      e.preventDefault();
+      if (e.key === 'ArrowRight') next.click();
+      else prev.click();
+    });
+  }
+</script>

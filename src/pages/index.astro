@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import Explainer from '../components/Explainer.astro';
 import EcosystemBar from '../components/EcosystemBar.astro';
 import VerificationGap from '../components/VerificationGap.astro';
 import StructuralProblem from '../components/StructuralProblem.astro';
@@ -12,6 +13,7 @@ import { site } from '../lib/site';
 
 <BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
   <Hero />
+  <Explainer />
   <EcosystemBar />
   <VerificationGap />
   <StructuralProblem />
