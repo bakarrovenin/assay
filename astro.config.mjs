@@ -10,10 +10,9 @@ export default defineConfig({
   // people type, so it redirects rather than becoming a second copy.
   redirects: {
     '/docs': '/methodology',
-    // Product became the benchmark. On main the benchmark is not shipping yet,
-    // so its explanatory material went to /methodology and the old URL points
-    // there rather than at a page that does not exist here.
-    '/product': '/methodology',
+    // Product became the benchmark: the free instrument lives at /benchmark and
+    // the explanatory material also lives on at /methodology.
+    '/product': '/benchmark',
   },
   integrations: [sitemap()],
   vite: {

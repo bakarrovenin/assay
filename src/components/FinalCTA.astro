@@ -6,22 +6,24 @@ import Section from './Section.astro';
   <h2 class="h2 reveal mx-auto">Take nobody&rsquo;s word for it.</h2>
 
   <p class="lede reveal mx-auto mt-6" style="--reveal-delay:60ms">
-    Read the Index, the method, and the evidence. We show our working, including where it broke.
+    Give any fixer one of the four flaws, paste the patch back, and see the four checks on it.
   </p>
 
-  {/* The benchmark is not on this branch: the scorer is stubbed, and a live
-      benchmark returning a fixed verdict would be worse than none. So the
-      primary action here is the pull-request verifier waitlist, which keeps its
-      Loops "verify-pr" userGroup via the shared data-verify-cta modal. */}
   <div
     class="reveal mt-9 flex flex-wrap justify-center gap-3"
     style="--reveal-delay:120ms"
   >
-    <button type="button" class="btn btn-primary" data-verify-cta>Join the waitlist</button>
+    <a href="/benchmark" class="btn btn-primary">Run the benchmark</a>
     <a href="/the-index" class="btn btn-secondary">Read the Index</a>
   </div>
 
-  <p class="reveal mx-auto mt-6 text-[13px] text-fg-2" style="--reveal-delay:180ms;max-width:48ch">
-    A verifier that runs on every pull request, on your own repositories, is in development.
-  </p>
+  {/* The pull-request verifier is a labelled waitlist, not a primary CTA, and
+      keeps its Loops "verify-pr" userGroup via the shared data-verify-cta modal. */}
+  <div class="reveal mx-auto mt-14 max-w-[52ch] border-t border-line pt-7" style="--reveal-delay:60ms">
+    <p class="micro mb-3">Coming later &middot; waitlist</p>
+    <p class="text-[15.5px] leading-[1.6] text-fg-2">
+      A verifier that runs on every pull request, on your own repositories, is in development.
+      <button type="button" class="link-inline font-medium text-fg" data-verify-cta>Join the waitlist</button>
+    </p>
+  </div>
 </Section>

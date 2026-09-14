@@ -49,3 +49,41 @@ export function highlightJson(source: string): string {
   out += escapeHtml(source.slice(last));
   return out;
 }
+
+const PY_KEYWORDS = new Set([
+  'def', 'return', 'if', 'else', 'elif', 'for', 'in', 'not', 'and', 'or', 'import',
+  'from', 'as', 'try', 'except', 'finally', 'with', 'while', 'class', 'pass',
+  'raise', 'None', 'True', 'False', 'is', 'lambda', 'yield', 'global', 'del',
+]);
+
+/**
+ * Build-time Python tokeniser for the benchmark corpus modules. Same token
+ * classes as the hand-written snippets, so the modules read like every other
+ * code panel. Coarse on purpose: comments, strings including f-strings and
+ * triple-quoted docstrings, keywords, decorators, calls and numbers.
+ */
+export function highlightPython(source: string): string {
+  const pattern =
+    /(#[^\n]*)|([rbfu]{0,2}(?:"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'))|(@[A-Za-z_][\w.]*)|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)(?=\s*\()|\b([A-Za-z_]\w*)\b/g;
+
+  let out = '';
+  let last = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(source)) !== null) {
+    out += escapeHtml(source.slice(last, match.index));
+    last = pattern.lastIndex;
+    const [whole, comment, str, deco, num, call, word] = match;
+    if (comment !== undefined) out += wrap('tok-com', comment);
+    else if (str !== undefined) out += wrap('tok-str', str);
+    else if (deco !== undefined) out += wrap('tok-fn', deco);
+    else if (num !== undefined) out += wrap('tok-str', num);
+    else if (call !== undefined)
+      out += PY_KEYWORDS.has(call) ? wrap('tok-kw', call) : wrap('tok-fn', call);
+    else if (word !== undefined)
+      out += PY_KEYWORDS.has(word) ? wrap('tok-kw', word) : escapeHtml(word);
+    else out += escapeHtml(whole);
+  }
+  out += escapeHtml(source.slice(last));
+  return out;
+}

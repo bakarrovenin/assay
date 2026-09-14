@@ -1,0 +1,210 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Section from '../../components/Section.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import DefinitionPair from '../../components/DefinitionPair.astro';
+import RuledRows from '../../components/RuledRows.astro';
+import { ASSAY_RUNS, ASSAY_SOURCE, FINDINGS, aggregate } from '../../lib/benchmark';
+
+// The headline is recounted at build time from the stored assay runs. The
+// submitted set is recounted in the browser from what this browser stored.
+// Neither number is written by hand anywhere.
+const ours = aggregate(ASSAY_RUNS);
+const rate = (r: number | null) => (r === null ? 'none' : `${r}%`);
+
+const isNot = [
+  {
+    term: 'What it does',
+    definition:
+      'Scores a patch against four SQL injection shapes on a corpus we seeded, with the four checks the pilot runs: alert closed, hole shut, behaviour preserved, provenance clean.',
+  },
+  {
+    term: 'What it does not do',
+    definition:
+      'It does not scan your code, and it does not verify a fix on anyone’s real codebase. Every result is about our corpus and nothing else.',
+  },
+] as const;
+
+const policy = [
+  {
+    lead: 'Public corpus',
+    body: 'The modules are published now. The edition-1 attack set is published with the live scorer, by id, class and payload; until then the attacks appear by id and class only. A fixer can be tuned against a published set, which is a known property of any published benchmark.',
+  },
+  {
+    lead: 'Rotation',
+    body: 'The corpus rotates each edition and the edition is stamped on every result. A score against a retired edition says so.',
+  },
+  {
+    lead: 'Not the Index',
+    body: 'The Index runs on real projects with real historical vulnerabilities and its held-out attacks stay withheld. The benchmark is the opposite by design: seeded flaws, published attacks, self-service.',
+    tag: 'deliberate',
+  },
+  {
+    lead: 'Two sets, never merged',
+    body: 'Runs we conducted and self-reported submissions are counted and shown separately. A submission is scored on trust and marked UNVERIFIED wherever it appears.',
+  },
+] as const;
+---
+
+<BaseLayout
+  title="Benchmark"
+  description="Score an AI fixer's patch against four SQL injection shapes on a corpus we seeded. Public corpus, rotating editions, every result recountable."
+  path="/benchmark"
+>
+  <PageHeader
+    eyebrow="Benchmark · edition 1"
+    title="Score a patch."
+    lede="Four SQL injection shapes on a corpus we seeded. Give the module to any fixer, paste the patch back, get the four checks."
+    subLede="The corpus and the attacks are public for this benchmark, which is the opposite of the Index. The page below says why."
+  />
+
+  <Section id="tally" rule={false}>
+    <Eyebrow class="reveal">The running count</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">The gap is the finding.</h2>
+
+    <div class="reveal mt-11 tally" style="--reveal-delay:120ms">
+      <DefinitionPair
+        label="Runs we conducted · Pilot 001 blind run · recounted from the stored results at build time"
+        terms={[
+          { term: String(ours.scored), definition: 'patches scored.' },
+          {
+            term: rate(ours.alertClosedRate),
+            definition: `closed the alert. ${ours.alertClosed} of ${ours.scored}.`,
+          },
+          {
+            term: rate(ours.verifiedRate),
+            definition: `actually verified. ${ours.verified} of ${ours.scored}.`,
+          },
+        ]}
+        footer="Alert closed minus verified · "
+        footerTerm={ours.gapPp === null ? 'no cells' : `${ours.gapPp} pp`}
+      />
+    </div>
+
+    <div class="reveal mt-6 tally" style="--reveal-delay:180ms" data-submitted-tally>
+      <DefinitionPair
+        label="Submitted · UNVERIFIED · self-reported, scored by the stub, stored in this browser only"
+        terms={[
+          { term: '0', definition: 'patches scored.' },
+          { term: 'none', definition: 'closed the alert.' },
+          { term: 'none', definition: 'actually verified.' },
+        ]}
+        footer="Alert closed minus verified · "
+        footerTerm="no cells"
+      />
+    </div>
+
+    <p class="mono reveal mt-5 text-[11px] leading-relaxed text-fg-2" style="max-width:76ch">
+      {ours.noAlert} run(s) where the scanner raised no alert are counted in no rate. Every
+      figure above is a recount of the stored records, not a stored number. Source:{' '}
+      {ASSAY_SOURCE.run}, commit {ASSAY_SOURCE.commit}.
+    </p>
+  </Section>
+
+  <Section id="what" tint>
+    <Eyebrow class="reveal">What this is</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">An instrument, not a scanner.</h2>
+
+    <div class="reveal mt-11" style="--reveal-delay:120ms;max-width:80ch">
+      <DefinitionPair label="Scope" terms={isNot} />
+    </div>
+
+    <div class="reveal mt-9" style="--reveal-delay:60ms;max-width:80ch">
+      <RuledRows label="Policy · stated before anyone asks" rows={policy} />
+    </div>
+  </Section>
+
+  <Section id="findings">
+    <Eyebrow class="reveal">Pick a finding</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Four shapes.</h2>
+
+    <ol class="mt-11 max-w-[80ch]">
+      {
+        FINDINGS.map((f, i) => (
+          <li class="reveal border-t border-line" style={`--reveal-delay:${i * 60}ms`}>
+            <a href={`/benchmark/${f.id}/`} class="group grid grid-cols-1 gap-x-8 gap-y-2 py-6 sm:grid-cols-[minmax(0,190px)_minmax(0,1fr)_auto]">
+              <span class="mono text-[11px] uppercase tracking-[0.14em] text-fg-2">
+                Finding {f.id}
+                <span class="ml-2 text-fg-3">{f.file}</span>
+              </span>
+              <span>
+                <span class="block font-display text-[18px] font-bold leading-tight tracking-[-0.014em] transition-colors group-hover:text-accent">
+                  {f.shape}
+                </span>
+                <span class="mt-1.5 block text-[14.5px] leading-[1.6] text-fg-2">{f.body}</span>
+                <span class="mono mt-2 block text-[11px] text-fg-3">
+                  {f.attacks.length} held-out attacks · {f.benign.length} benign inputs
+                </span>
+              </span>
+              <span class="mono self-center text-[11px] uppercase tracking-[0.14em] text-fg-3 group-hover:text-accent">
+                Open &rarr;
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="reveal mt-10">
+      <a href="/benchmark/leaderboard/" class="link-inline text-[15px] font-medium">
+        Results by tool and version
+      </a>
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* The headline count is three figures set against each other, so the pair
+     takes a third column once there is room for it. */
+  @media (min-width: 900px) {
+    .tally :global(.dp-body) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+  import { aggregate, fetchLeaderboard, loadSubmitted } from '../../lib/benchmark';
+
+  // The submitted count comes from the server so it is real across everyone,
+  // not just this browser. If the service is unreachable, fall back to this
+  // browser's own runs. The rate is a recount either way.
+  const box = document.querySelector<HTMLElement>('[data-submitted-tally]');
+  if (box) {
+    const server = await fetchLeaderboard();
+    let t;
+    if (server) {
+      const sum = (k: 'scored' | 'alertClosed' | 'verified') =>
+        server.rows.reduce((n, r) => n + (r.tally[k] || 0), 0);
+      const scored = sum('scored');
+      const pct = (n: number) => (scored === 0 ? null : Math.round((n / scored) * 100));
+      t = {
+        scored,
+        alertClosed: sum('alertClosed'),
+        verified: sum('verified'),
+        alertClosedRate: pct(sum('alertClosed')),
+        verifiedRate: pct(sum('verified')),
+        gapPp:
+          pct(sum('alertClosed')) === null || pct(sum('verified')) === null
+            ? null
+            : (pct(sum('alertClosed')) as number) - (pct(sum('verified')) as number),
+      };
+    } else {
+      t = aggregate(loadSubmitted());
+    }
+    const dts = box.querySelectorAll('dt');
+    const dds = box.querySelectorAll('dd');
+    const foot = box.querySelector('p:last-child b');
+    const rate = (r: number | null) => (r === null ? 'none' : `${r}%`);
+    if (dts.length === 3 && dds.length === 3) {
+      dts[0].textContent = String(t.scored);
+      dds[0].textContent = 'patches scored.';
+      dts[1].textContent = rate(t.alertClosedRate);
+      dds[1].textContent = `closed the alert. ${t.alertClosed} of ${t.scored}.`;
+      dts[2].textContent = rate(t.verifiedRate);
+      dds[2].textContent = `actually verified. ${t.verified} of ${t.scored}.`;
+    }
+    if (foot) foot.textContent = t.gapPp === null ? 'no cells' : `${t.gapPp} pp`;
+  }
+</script>

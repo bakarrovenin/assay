@@ -1,0 +1,246 @@
+{
+ "01": {
+  "attacks": [
+   {
+    "id": "a01",
+    "class": "boolean"
+   },
+   {
+    "id": "a02",
+    "class": "boolean"
+   },
+   {
+    "id": "a03",
+    "class": "boolean"
+   },
+   {
+    "id": "a04",
+    "class": "boolean"
+   },
+   {
+    "id": "a05",
+    "class": "boolean"
+   },
+   {
+    "id": "a06",
+    "class": "union"
+   },
+   {
+    "id": "a07",
+    "class": "union"
+   },
+   {
+    "id": "a08",
+    "class": "union"
+   },
+   {
+    "id": "a09",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a10",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a11",
+    "class": "schema-disclosure"
+   }
+  ],
+  "benign": [
+   "b01",
+   "b02",
+   "b03",
+   "b04",
+   "b05",
+   "b06",
+   "b07",
+   "b08",
+   "b09",
+   "b10",
+   "b11"
+  ]
+ },
+ "04": {
+  "attacks": [
+   {
+    "id": "a01",
+    "class": "boolean"
+   },
+   {
+    "id": "a02",
+    "class": "boolean"
+   },
+   {
+    "id": "a03",
+    "class": "boolean"
+   },
+   {
+    "id": "a04",
+    "class": "boolean"
+   },
+   {
+    "id": "a05",
+    "class": "boolean"
+   },
+   {
+    "id": "a06",
+    "class": "union"
+   },
+   {
+    "id": "a07",
+    "class": "union"
+   },
+   {
+    "id": "a08",
+    "class": "union"
+   },
+   {
+    "id": "a09",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a10",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a11",
+    "class": "schema-disclosure"
+   }
+  ],
+  "benign": [
+   "b01",
+   "b02",
+   "b03",
+   "b04",
+   "b05",
+   "b06",
+   "b07",
+   "b08",
+   "b09",
+   "b10",
+   "b11"
+  ]
+ },
+ "08": {
+  "attacks": [
+   {
+    "id": "a01",
+    "class": "union"
+   },
+   {
+    "id": "a02",
+    "class": "union"
+   },
+   {
+    "id": "a03",
+    "class": "union"
+   },
+   {
+    "id": "a04",
+    "class": "union"
+   },
+   {
+    "id": "a05",
+    "class": "union"
+   },
+   {
+    "id": "a06",
+    "class": "union"
+   },
+   {
+    "id": "a07",
+    "class": "union"
+   },
+   {
+    "id": "a08",
+    "class": "union"
+   },
+   {
+    "id": "a09",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a10",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a11",
+    "class": "schema-disclosure"
+   }
+  ],
+  "benign": [
+   "b01",
+   "b02",
+   "b03",
+   "b04",
+   "b05",
+   "b06",
+   "b07",
+   "b08",
+   "b09",
+   "b10",
+   "b11"
+  ]
+ },
+ "13": {
+  "attacks": [
+   {
+    "id": "a01",
+    "class": "boolean"
+   },
+   {
+    "id": "a02",
+    "class": "boolean"
+   },
+   {
+    "id": "a03",
+    "class": "boolean"
+   },
+   {
+    "id": "a04",
+    "class": "boolean"
+   },
+   {
+    "id": "a05",
+    "class": "boolean"
+   },
+   {
+    "id": "a06",
+    "class": "union"
+   },
+   {
+    "id": "a07",
+    "class": "union"
+   },
+   {
+    "id": "a08",
+    "class": "union"
+   },
+   {
+    "id": "a09",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a10",
+    "class": "schema-disclosure"
+   },
+   {
+    "id": "a11",
+    "class": "schema-disclosure"
+   }
+  ],
+  "benign": [
+   "b01",
+   "b02",
+   "b03",
+   "b04",
+   "b05",
+   "b06",
+   "b07",
+   "b08",
+   "b09",
+   "b10",
+   "b11"
+  ]
+ }
+}

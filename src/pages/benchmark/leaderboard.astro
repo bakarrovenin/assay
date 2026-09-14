@@ -1,0 +1,210 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Section from '../../components/Section.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import { ASSAY_RUNS, ASSAY_SOURCE, FINDINGS, aggregate, byTool, fmtRate } from '../../lib/benchmark';
+
+// Runs we conducted, recounted at build time from the stored records. The
+// submitted set is recounted in the browser from this browser's storage and
+// rendered into the second sheet by the script below, with the same function.
+const ours = byTool(ASSAY_RUNS);
+const oursAll = aggregate(ASSAY_RUNS);
+
+const th =
+  'mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4';
+const td = 'mono px-3 py-3 text-[13px] sm:px-4';
+
+const cellById = (toolKey: string, id: string) =>
+  ASSAY_RUNS.find((r) => r.toolKey === toolKey && r.finding === id);
+const toolKeys = [...new Set(ASSAY_RUNS.map((r) => r.toolKey!))];
+const toolName = (k: string) => ASSAY_RUNS.find((r) => r.toolKey === k)!.tool;
+---
+
+<BaseLayout
+  title="Leaderboard · Benchmark"
+  description="Benchmark results by tool and version: alert closed against verified, with the cell count beside every rate. Runs we conducted and self-reported submissions are shown separately."
+  path="/benchmark/leaderboard"
+>
+  <PageHeader
+    eyebrow="Benchmark · edition 1 · results"
+    title="By tool and version."
+    lede="Alert closed against verified. The cell count sits beside every rate, so three cells never read like thirty."
+    subLede="Two sets, never merged. Runs we conducted are the first sheet. Everything self-reported is the second, and is UNVERIFIED."
+  />
+
+  <Section id="assay" rule={false}>
+    <Eyebrow class="reveal">Runs we conducted</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Pilot 001, blind run.</h2>
+
+    <div class="reveal my-9 max-w-[88ch] overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11" style="--reveal-delay:120ms">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[640px] border-collapse text-left">
+          <caption class="sr-only">Runs conducted by Assay, by tool and version, with cell counts.</caption>
+          <thead>
+            <tr class="border-b border-line">
+              <th scope="col" class={th}>Tool</th>
+              <th scope="col" class={th}>Version</th>
+              <th scope="col" class={th}>Cells</th>
+              <th scope="col" class={th}>Alert closed</th>
+              <th scope="col" class={th}>Verified</th>
+              <th scope="col" class={th}>Gap</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              ours.map((row, i) => (
+                <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
+                  <th scope="row" class={`${td} whitespace-nowrap font-medium`}>{row.tool}</th>
+                  <td class={`${td} text-fg-2`}>{row.version}</td>
+                  <td class={`${td} whitespace-nowrap text-fg-2`}>
+                    {row.tally.scored}
+                    {row.tally.noAlert ? ` + ${row.tally.noAlert} no alert` : ''}
+                  </td>
+                  <td class={`${td} whitespace-nowrap`}>
+                    {fmtRate(row.tally.alertClosedRate, row.tally.alertClosed, row.tally.scored)}
+                  </td>
+                  <td class={`${td} whitespace-nowrap text-accent`}>
+                    {fmtRate(row.tally.verifiedRate, row.tally.verified, row.tally.scored)}
+                  </td>
+                  <td class={`${td} whitespace-nowrap ${row.tally.gapPp ? 'text-fail' : 'text-fg-2'}`}>
+                    {row.tally.gapPp === null ? 'no cells' : `${row.tally.gapPp} pp`}
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
+        {oursAll.scored} scored cells across {ours.length} tools · alert closed {oursAll.alertClosed} of{' '}
+        {oursAll.scored} · verified {oursAll.verified} of {oursAll.scored} · {oursAll.noAlert} no alert, counted
+        in no rate · source {ASSAY_SOURCE.run}, commit {ASSAY_SOURCE.commit}
+      </p>
+    </div>
+
+    {/* Verdict per finding, so the rates above can be recounted by eye. */}
+    <div class="reveal my-9 max-w-[88ch] overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11" style="--reveal-delay:180ms">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[560px] border-collapse text-left">
+          <caption class="sr-only">Verdict per tool per finding for the runs Assay conducted.</caption>
+          <thead>
+            <tr class="border-b border-line">
+              <th scope="col" class={th}>Finding</th>
+              {toolKeys.map((k) => <th scope="col" class={th}>{toolName(k)}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              FINDINGS.map((f, i) => (
+                <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
+                  <th scope="row" class={`${td} whitespace-nowrap font-medium`}>
+                    {f.shape} <span class="ml-2 text-[11px] text-fg-3">{f.id}</span>
+                  </th>
+                  {toolKeys.map((k) => {
+                    const cell = cellById(k, f.id);
+                    const text = cell ? cell.verdict : 'not supplied';
+                    const cls =
+                      text === 'VERIFIED' ? 'text-accent' : text === 'NOT VERIFIED' ? 'text-fail' : 'text-fg-3';
+                    return <td class={`${td} whitespace-nowrap ${cls}`}>{text.toLowerCase() === 'no alert' ? 'no alert raised' : text}</td>;
+                  })}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
+        Each cell is one evidence file in the pilot repository. The rates above are counted from these cells.
+      </p>
+    </div>
+  </Section>
+
+  <Section id="submitted" tint>
+    <Eyebrow class="reveal">Submitted</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Self-reported. Unverified.</h2>
+
+    <p class="reveal mt-9 text-[15.5px] leading-[1.65] text-fg-2" style="--reveal-delay:120ms;max-width:66ch">
+      Scored by the stub in the submitter's browser, on trust, and in this pass stored in
+      this browser only. These never merge with the sheet above.
+    </p>
+
+    <div class="reveal my-9 max-w-[88ch] overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11" style="--reveal-delay:180ms">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[640px] border-collapse text-left">
+          <caption class="sr-only">Self-reported submissions by tool and version, unverified.</caption>
+          <thead>
+            <tr class="border-b border-line">
+              <th scope="col" class={th}>Tool</th>
+              <th scope="col" class={th}>Version</th>
+              <th scope="col" class={th}>Cells</th>
+              <th scope="col" class={th}>Alert closed</th>
+              <th scope="col" class={th}>Verified</th>
+              <th scope="col" class={th}>Gap</th>
+            </tr>
+          </thead>
+          <tbody data-submitted-rows>
+            <tr>
+              <td colspan="6" class={`${td} text-fg-3`} data-submitted-empty>
+                No submissions stored in this browser yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4" data-submitted-foot>
+        UNVERIFIED · 0 scored cells
+      </p>
+    </div>
+
+    <p class="reveal mt-6">
+      <a href="/benchmark/" class="link-inline text-[15px] font-medium">Score a patch</a>
+    </p>
+  </Section>
+</BaseLayout>
+
+<script>
+  import type { ToolRow } from '../../lib/benchmark';
+  import { byTool, fmtRate, fetchLeaderboard, loadSubmitted } from '../../lib/benchmark';
+
+  const TD = 'mono px-3 py-3 text-[13px] sm:px-4';
+  const body = document.querySelector<HTMLElement>('[data-submitted-rows]')!;
+  const foot = document.querySelector<HTMLElement>('[data-submitted-foot]')!;
+
+  // Server-side leaderboard, so it is real rather than per browser. If the
+  // service is unreachable, fall back to this browser's own submissions.
+  const server = await fetchLeaderboard();
+  const rows: ToolRow[] = server ? server.rows : byTool(loadSubmitted());
+  const sum = (k: 'scored' | 'alertClosed' | 'verified') =>
+    rows.reduce((n, r) => n + (r.tally[k] || 0), 0);
+  const all = { scored: sum('scored'), alertClosed: sum('alertClosed'), verified: sum('verified') };
+
+  if (rows.length) {
+    body.replaceChildren(
+      ...rows.map((row, i) => {
+        const tr = document.createElement('tr');
+        if (i % 2 === 1) tr.className = 'bg-bg-2';
+        const cells: [string, string][] = [
+          [`${TD} whitespace-nowrap font-medium`, row.tool],
+          [`${TD} text-fg-2`, row.version],
+          [`${TD} whitespace-nowrap text-fg-2`, String(row.tally.scored)],
+          [`${TD} whitespace-nowrap`, fmtRate(row.tally.alertClosedRate, row.tally.alertClosed, row.tally.scored)],
+          [`${TD} whitespace-nowrap text-accent`, fmtRate(row.tally.verifiedRate, row.tally.verified, row.tally.scored)],
+          [
+            `${TD} whitespace-nowrap ${row.tally.gapPp ? 'text-fail' : 'text-fg-2'}`,
+            row.tally.gapPp === null ? 'no cells' : `${row.tally.gapPp} pp`,
+          ],
+        ];
+        cells.forEach(([cls, text], j) => {
+          const el = document.createElement(j === 0 ? 'th' : 'td');
+          if (j === 0) el.setAttribute('scope', 'row');
+          el.className = cls;
+          el.textContent = text;
+          tr.appendChild(el);
+        });
+        return tr;
+      }),
+    );
+  }
+  foot.textContent = `UNVERIFIED · ${all.scored} scored cells across ${rows.length} tool${rows.length === 1 ? '' : 's'} · alert closed ${all.alertClosed} of ${all.scored} · verified ${all.verified} of ${all.scored}`;
+</script>

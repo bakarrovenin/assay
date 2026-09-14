@@ -1,0 +1,231 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Section from '../../components/Section.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import CodePanel from '../../components/CodePanel.astro';
+import ConditionList from '../../components/ConditionList.astro';
+import RuledRows from '../../components/RuledRows.astro';
+import { FINDINGS, findingById } from '../../lib/benchmark';
+import { highlightPython } from '../../lib/highlight';
+
+import corpus01 from '../../data/benchmark/corpus/finding_b01.py?raw';
+import corpus04 from '../../data/benchmark/corpus/finding_b04.py?raw';
+import corpus08 from '../../data/benchmark/corpus/finding_b08.py?raw';
+import corpus13 from '../../data/benchmark/corpus/finding_b13.py?raw';
+
+export function getStaticPaths() {
+  return FINDINGS.map((f) => ({ params: { finding: f.id } }));
+}
+
+const SOURCES: Record<string, string> = {
+  '01': corpus01,
+  '04': corpus04,
+  '08': corpus08,
+  '13': corpus13,
+};
+
+const { finding: id } = Astro.params;
+const finding = findingById(id!)!;
+const source = SOURCES[finding.id];
+const html = highlightPython(source);
+
+// Attacks by class, ids only. The payloads are not on this page.
+const classes = [...new Set(finding.attacks.map((a) => a.class))];
+const attackRows = classes.map((c) => ({
+  lead: c,
+  body: finding.attacks.filter((a) => a.class === c).map((a) => a.id).join(', '),
+}));
+
+const steps = [
+  'Copy the module and give it to the fixer with the prompt line, exactly as written, and nothing else.',
+  'Paste the patch it returns below, as a unified diff or as the whole patched file.',
+  'Name the tool and its version. That is what makes the result citable.',
+] as const;
+---
+
+<BaseLayout
+  title={`Finding ${finding.id} · ${finding.shape} · Benchmark`}
+  description={`${finding.shape}: ${finding.body} Score a fixer's patch against it.`}
+  path={`/benchmark/${finding.id}`}
+>
+  <PageHeader
+    eyebrow={`Benchmark · edition 1 · finding ${finding.id}`}
+    title={finding.shape}
+    lede={finding.body}
+    subLede={`${finding.file} · ${finding.attacks.length} held-out attacks · ${finding.benign.length} benign inputs`}
+  />
+
+  <Section id="module" rule={false}>
+    <Eyebrow class="reveal">The module</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">What the fixer gets.</h2>
+
+    <div class="reveal mt-11" style="--reveal-delay:120ms">
+      <ConditionList label="Three steps" conditions={steps} />
+    </div>
+
+    <div class="reveal mt-9 flex flex-wrap items-center gap-3" style="--reveal-delay:180ms">
+      <button type="button" class="btn btn-secondary btn-sm" data-copy="module">Copy module</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-copy="prompt">Copy prompt</button>
+      <span class="mono text-[11px] text-fg-3" data-copied hidden>copied</span>
+    </div>
+
+    <div class="reveal mt-6 artifact" style="--reveal-delay:240ms">
+      <CodePanel label={`Prompt · the only line the fixer is given`} html={`<span class="tok-str">${finding.prompt.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`} />
+    </div>
+
+    <div class="reveal mt-6 artifact" style="--reveal-delay:300ms">
+      <CodePanel label={`${finding.file} · unpatched`} html={html} />
+    </div>
+
+    <div class="reveal mt-9" style="--reveal-delay:60ms;max-width:80ch">
+      <RuledRows
+        label={`Held-out attacks · by id and class · ${finding.attacks.length} fired after the patch`}
+        rows={attackRows}
+      />
+    </div>
+  </Section>
+
+  <Section id="submit" tint>
+    <Eyebrow class="reveal">Paste the patch back</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Score it.</h2>
+
+    <form class="reveal mt-11 max-w-[80ch]" data-submit style="--reveal-delay:120ms" novalidate>
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label for="tool" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">Tool</label>
+          <input
+            id="tool"
+            name="tool"
+            type="text"
+            required
+            autocomplete="off"
+            placeholder="e.g. Claude Code"
+            class="mt-2 w-full rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+          />
+        </div>
+        <div>
+          <label for="version" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">Version</label>
+          <input
+            id="version"
+            name="version"
+            type="text"
+            required
+            autocomplete="off"
+            placeholder="e.g. 2.1.270, Opus 5"
+            class="mt-2 w-full rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+          />
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <label for="patch" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">
+          Patch · unified diff or the whole patched file
+        </label>
+        <textarea
+          id="patch"
+          name="patch"
+          required
+          rows="14"
+          spellcheck="false"
+          class="mono mt-2 w-full rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[13px] leading-[1.6] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+          placeholder="--- a/app/finding_04.py&#10;+++ b/app/finding_04.py"></textarea>
+      </div>
+
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <button type="submit" class="btn btn-primary">Score the patch</button>
+        <span class="mono text-[11px] text-fail" data-error hidden></span>
+      </div>
+
+      <p class="mono mt-5 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+        In this pass the scorer is a stub that runs in your browser: it reads the patch and
+        does not start the app, fire an attack or run the scanner. The result is marked
+        UNVERIFIED and stored in this browser only. A real scoring service replaces one
+        function.
+      </p>
+    </form>
+  </Section>
+
+  <script is:inline type="application/json" data-finding-source set:html={JSON.stringify({ id: finding.id, source })} />
+</BaseLayout>
+
+<style>
+  .artifact :global(code) {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-size: inherit;
+    white-space: inherit;
+  }
+</style>
+
+<script>
+  import { findingById, resultUrl, saveSubmitted, submitScore } from '../../lib/benchmark';
+
+  const data = JSON.parse(
+    document.querySelector('[data-finding-source]')!.textContent || '{}',
+  ) as { id: string; source: string };
+  const finding = findingById(data.id)!;
+
+  // ---- copy buttons ----
+  const copied = document.querySelector<HTMLElement>('[data-copied]');
+  let timer: number | undefined;
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+    btn.addEventListener('click', async () => {
+      const text = btn.dataset.copy === 'module' ? data.source : finding.prompt;
+      try {
+        await navigator.clipboard.writeText(text);
+        if (copied) {
+          copied.hidden = false;
+          window.clearTimeout(timer);
+          timer = window.setTimeout(() => (copied.hidden = true), 1600);
+        }
+      } catch {
+        /* clipboard blocked: the text is on the page to select */
+      }
+    });
+  }
+
+  // ---- score ----
+  // Posts the patch to the scoring service, which runs the real harness in a
+  // sealed container and returns the verdict and the four checks. The result is
+  // also encoded into the shareable URL and kept in this browser as a fallback.
+  const form = document.querySelector<HTMLFormElement>('[data-submit]');
+  const error = document.querySelector<HTMLElement>('[data-error]');
+  const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const tool = String(fd.get('tool') || '').trim();
+    const version = String(fd.get('version') || '').trim();
+    const patch = String(fd.get('patch') || '');
+    const fail = (msg: string) => {
+      if (error) {
+        error.textContent = msg;
+        error.hidden = false;
+      }
+    };
+    if (!tool || !version || !patch.trim()) {
+      fail('Tool, version and patch are all required. A result without a tool and version is not citable.');
+      return;
+    }
+    if (error) error.hidden = true;
+    const label = submitBtn?.textContent ?? 'Score the patch';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Scoring in a container, this takes a moment';
+    }
+    try {
+      const { result } = await submitScore({ finding: finding.id, patch, tool, version });
+      saveSubmitted(result);
+      window.location.href = resultUrl(result, window.location.origin);
+    } catch (err) {
+      fail(err instanceof Error ? err.message : 'scoring failed, try again shortly');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = label;
+      }
+    }
+  });
+</script>

@@ -1,0 +1,356 @@
+{
+  "source": {
+    "repo": "https://github.com/bakarrovenin/assay-pilot-001-evidence",
+    "commit": "dbbbdf2",
+    "run": "Pilot 001 blind run, stripped corpus, 2026-09-14"
+  },
+  "runs": [
+    {
+      "set": "assay",
+      "finding": "01",
+      "toolKey": "chatgpt-blind",
+      "tool": "ChatGPT",
+      "version": "ChatGPT Think",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 14,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-01/chatgpt-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "01",
+      "toolKey": "claude-code-blind",
+      "tool": "Claude Code",
+      "version": "2.1.270, Opus 5",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 14,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-01/claude-code-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "04",
+      "toolKey": "chatgpt-blind",
+      "tool": "ChatGPT",
+      "version": "ChatGPT Think",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 14,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-04/chatgpt-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "04",
+      "toolKey": "claude-code-blind",
+      "tool": "Claude Code",
+      "version": "2.1.270, Opus 5",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": false,
+          "fired": 14,
+          "regressed": [
+            "b01",
+            "b02",
+            "b03",
+            "b04",
+            "b05",
+            "b06",
+            "b07",
+            "b08",
+            "b09",
+            "b10",
+            "b11",
+            "b12",
+            "b13",
+            "b14"
+          ]
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "NOT VERIFIED",
+      "failureClass": "over-broad",
+      "evidence": "results/finding-04/claude-code-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "04",
+      "toolKey": "copilot-autofix-blind",
+      "tool": "GitHub Copilot Autofix",
+      "version": "CodeQL 2.27.0, default suite",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 14,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-04/copilot-autofix-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "08",
+      "toolKey": "chatgpt-blind",
+      "tool": "ChatGPT",
+      "version": "ChatGPT Think",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 11,
+          "succeeded": []
+        },
+        "C": {
+          "pass": false,
+          "fired": 10,
+          "regressed": [
+            "b07",
+            "b08",
+            "b09",
+            "b10"
+          ]
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "NOT VERIFIED",
+      "failureClass": "over-broad",
+      "evidence": "results/finding-08/chatgpt-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "08",
+      "toolKey": "claude-code-blind",
+      "tool": "Claude Code",
+      "version": "2.1.270, Opus 5",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 11,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 10,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-08/claude-code-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "08",
+      "toolKey": "copilot-autofix-blind",
+      "tool": "GitHub Copilot Autofix",
+      "version": "CodeQL 2.27.0, default suite",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": false,
+          "findingsAfter": 1
+        },
+        "B": {
+          "pass": true,
+          "fired": 11,
+          "succeeded": []
+        },
+        "C": {
+          "pass": false,
+          "fired": 10,
+          "regressed": [
+            "b07",
+            "b08",
+            "b09",
+            "b10"
+          ]
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "NOT VERIFIED",
+      "failureClass": "over-broad",
+      "evidence": "results/finding-08/copilot-autofix-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "13",
+      "toolKey": "chatgpt-blind",
+      "tool": "ChatGPT",
+      "version": "ChatGPT Think",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 14,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-13/chatgpt-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "13",
+      "toolKey": "claude-code-blind",
+      "tool": "Claude Code",
+      "version": "2.1.270, Opus 5",
+      "date": "2026-09-14",
+      "checks": {
+        "A": {
+          "pass": true,
+          "findingsAfter": 0
+        },
+        "B": {
+          "pass": true,
+          "fired": 12,
+          "succeeded": []
+        },
+        "C": {
+          "pass": true,
+          "fired": 14,
+          "regressed": []
+        },
+        "D": {
+          "pass": true,
+          "suppressionInEffect": false
+        }
+      },
+      "verdict": "VERIFIED",
+      "failureClass": "correct",
+      "evidence": "results/finding-13/claude-code-blind.json"
+    },
+    {
+      "set": "assay",
+      "finding": "13",
+      "toolKey": "copilot-autofix-blind",
+      "tool": "GitHub Copilot Autofix",
+      "version": "CodeQL 2.27.0, default suite",
+      "date": "2026-09-14",
+      "checks": null,
+      "verdict": "NO ALERT",
+      "failureClass": null,
+      "evidence": "results/finding-13/copilot-autofix-blind.no-alert.json"
+    }
+  ]
+}

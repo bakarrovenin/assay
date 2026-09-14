@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assay — how it works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0B0D; --panel:#0F1114; --panel2:#14171B; --line:#23272D; --line2:#2C313A;
+    --fg:#E8EAED; --muted:#8A8F98; --dim:#6A7078; --monodim:#7C828B;
+    --teal:#5FB89E; --red:#E8705F; --blue:#5B9BFF;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --sans:"Inter",system-ui,sans-serif;
+    --disp:"Archivo",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+
+  .wrap{width:100%;max-width:660px}
+
+  /* progress */
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .stepno{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim)}
+  .stepno b{color:var(--fg);font-weight:500}
+  .dots{display:flex;gap:7px}
+  .dot{width:26px;height:3px;border-radius:2px;background:var(--line2);cursor:pointer;transition:background .3s}
+  .dot.on{background:var(--blue)}
+  .dot.done{background:var(--monodim)}
+
+  /* stage */
+  .stage{cursor:pointer;user-select:none}
+
+  /* the assembling panel */
+  .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .pr{padding:17px 20px 15px;border-bottom:1px solid var(--line);background:#0C0D10}
+  .pr-top{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--monodim);margin-bottom:10px}
+  .pr-actor{color:var(--fg);font-weight:500}
+  .pr-bot{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:999px;padding:1px 7px}
+  .pr-num{margin-left:auto;color:var(--dim)}
+  .pr-title{font-family:var(--mono);font-size:14px;color:var(--fg);margin-bottom:12px}
+  .pr-title .kw{color:var(--blue)}
+  .scanner{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;color:var(--monodim)}
+  .scanner .d{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+  .scanner b{color:var(--fg);font-weight:500}
+
+  .assay{padding:16px 20px 20px}
+  .eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .mark{width:15px;height:15px;border:1.5px solid var(--fg);border-radius:4px;display:inline-flex;align-items:center;justify-content:center}
+
+  .checks{display:flex;flex-direction:column}
+  .check{display:grid;grid-template-columns:22px 20px 1fr;gap:11px;padding:12px 0;border-top:1px solid var(--line);align-items:start;transition:opacity .35s}
+  .check .idx{font-family:var(--mono);font-size:11px;color:var(--dim);padding-top:2px}
+  .glyph{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .glyph.pending{border:1.5px dashed var(--line2)}
+  .glyph.pass{background:var(--teal)}
+  .glyph.fail{border:1.5px dashed var(--red)}
+  .c-name{font-family:var(--mono);font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg);margin-bottom:3px}
+  .c-plain{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .c-detail{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:3px}
+  .check.failed .c-name{color:var(--red)}
+  .check.failed .c-detail{color:#D98A82}
+  .check.dim{opacity:.28}
+  .check.spotlight .c-name{color:var(--red)}
+
+  .verdict{display:flex;justify-content:center;padding:24px 0 14px}
+  .stamp{font-family:var(--mono);font-weight:500;font-size:19px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);border:2px solid var(--red);border-radius:7px;padding:10px 22px;transform:rotate(-2.4deg)}
+  .kicker{text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .foot{display:flex;justify-content:space-between;align-items:center;padding:15px 20px 0;margin-top:4px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--dim)}
+  .foot a{color:var(--blue);text-decoration:none}
+
+  .hidden{display:none}
+  .reveal{animation:fade .4s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* caption */
+  .caption{margin-top:22px;min-height:112px}
+  .cap-h{font-family:var(--disp);font-weight:700;font-size:19px;line-height:1.25;letter-spacing:-.01em;margin:0 0 8px}
+  .cap-b{font-size:14.5px;line-height:1.6;color:var(--muted);margin:0}
+  .cap-chip{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--monodim);border:1px solid var(--line2);border-radius:6px;padding:4px 10px}
+  .cap-chip.red{color:var(--red);border-color:rgba(232,112,95,.4)}
+
+  /* controls */
+  .controls{display:flex;align-items:center;justify-content:space-between;margin-top:24px}
+  .btn{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--fg);background:none;border:1px solid var(--line2);border-radius:8px;padding:9px 16px;cursor:pointer;transition:border-color .2s,color .2s}
+  .btn:hover{border-color:var(--muted)}
+  .btn:disabled{opacity:.3;cursor:default}
+  .btn.primary{border-color:var(--blue);color:var(--blue)}
+  .btn.primary:hover{background:rgba(91,155,255,.08)}
+  .hint{font-family:var(--mono);font-size:10.5px;color:var(--dim);letter-spacing:.04em}
+
+  @media (max-width:520px){
+    .cap-h{font-size:17px}
+    .stamp{font-size:16px}
+  }
+  @media (prefers-reduced-motion:reduce){.reveal{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="stepno"><b id="cur">01</b> / 06</div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="panel">
+
+      <div class="pr">
+        <div class="pr-top">
+          <span class="pr-actor">coding-agent</span>
+          <span class="pr-bot">bot</span>
+          <span>opened a pull request</span>
+          <span class="pr-num">#248</span>
+        </div>
+        <div class="pr-title"><span class="kw">fix:</span> escape user input in /api/search</div>
+        <div class="scanner hidden" id="scan">
+          <span class="d"></span><span>Semgrep 1.80.0</span><span>·</span><b>0 findings</b>
+        </div>
+      </div>
+
+      <div class="assay hidden" id="assay">
+        <div class="eyebrow">
+          <span class="mark">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E8EAED" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+          </span>
+          Assay · independent verification
+        </div>
+
+        <div class="checks" id="checks">
+          <div class="check" data-c="1">
+            <span class="idx">01</span>
+            <span class="glyph pending" id="g1"></span>
+            <div>
+              <div class="c-name">Closed</div>
+              <div class="c-plain">Is the reported hole actually gone?</div>
+              <div class="c-detail hidden" id="d1">Reported sink removed. No suppression added.</div>
+            </div>
+          </div>
+          <div class="check" data-c="2">
+            <span class="idx">02</span>
+            <span class="glyph pending" id="g2"></span>
+            <div>
+              <div class="c-name">Behaviour held</div>
+              <div class="c-plain">Does it stop attacks we never showed the AI?</div>
+              <div class="c-detail hidden" id="d2">1 of 47 held-out payloads still injects. The patch blocked the exact string it was shown, not the whole class.</div>
+            </div>
+          </div>
+          <div class="check" data-c="3">
+            <span class="idx">03</span>
+            <span class="glyph pending" id="g3"></span>
+            <div>
+              <div class="c-name">No regression</div>
+              <div class="c-plain">Did the fix break anything that worked before?</div>
+              <div class="c-detail hidden" id="d3">No new findings in the diff. Benign inputs unchanged.</div>
+            </div>
+          </div>
+          <div class="check" data-c="4">
+            <span class="idx">04</span>
+            <span class="glyph pending" id="g4"></span>
+            <div>
+              <div class="c-name">Provenance clean</div>
+              <div class="c-plain">Was the change itself trustworthy?</div>
+              <div class="c-detail hidden" id="d4">Author, token scope, and blast radius within bounds.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="verdict hidden" id="verdict"><span class="stamp">Not verified</span></div>
+        <div class="kicker hidden" id="kicker">The alert went green. The bug didn't.</div>
+
+        <div class="foot hidden" id="foot">
+          <span>Method v1.0</span>
+          <a href="#">View evidence &rarr;</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="caption">
+    <h2 class="cap-h" id="capH"></h2>
+    <p class="cap-b" id="capB"></p>
+    <span class="cap-chip" id="capC"></span>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prev">&larr; Back</button>
+    <span class="hint" id="hint">Click anywhere to continue</span>
+    <button class="btn primary" id="next">Next &rarr;</button>
+  </div>
+
+</div>
+
+<script>
+const steps = [
+  {
+    h: "An AI just wrote a security fix.",
+    b: "A search box on this app has a hole: an attacker can type database commands into it and pull back data they should never see. An AI agent was shown one example of the attack and told to fix it. It opened this pull request.",
+    chip: "SQL injection · CWE-89 · /api/search", red:false
+  },
+  {
+    h: "The scanner re-runs and finds nothing.",
+    b: "The security scanner checks the patched code and reports zero findings. The alert is green. This is where almost everyone stops, merges the fix, and moves on. \u201CFound means fixed.\u201D",
+    chip: "Semgrep 1.80.0 · 0 findings", red:false
+  },
+  {
+    h: "Assay doesn't trust the scanner.",
+    b: "The scanner only re-checks the one thing the patch was written to satisfy, so it almost always goes green. Assay asks a harder question, using attacks the AI was never shown, and runs four independent checks.",
+    chip: "held-out testing · the AI saw one attack, we kept the rest hidden", red:false
+  },
+  {
+    h: "Four checks run.",
+    b: "Three ask the ordinary questions any careful team would ask. One asks the question nobody runs: does the fix stop the attacks it was never shown? Watch which one fails.",
+    chip: "resolving\u2026", red:false
+  },
+  {
+    h: "Three pass. One fails, and it's the one that matters.",
+    b: "The AI blocked the exact attack string it was shown. But 46 other versions of the same attack walk straight through and still leak the users table. It patched the example, not the vulnerability.",
+    chip: "1 of 47 held-out payloads still injects", red:true
+  },
+  {
+    h: "The alert went green. The bug didn't.",
+    b: "The scanner said zero findings. Two of the four checks a normal team runs also came back clean. And the hole is still wide open. That gap, between the fix looking done and being done, is the entire reason Assay exists.",
+    chip: "verdict: NOT VERIFIED", red:true
+  }
+];
+
+const N = steps.length;
+let i = 0;
+
+// build dots
+const dots = document.getElementById('dots');
+for (let k=0;k<N;k++){
+  const d = document.createElement('div');
+  d.className='dot'; d.dataset.k=k;
+  d.onclick = (e)=>{e.stopPropagation(); go(k);};
+  dots.appendChild(d);
+}
+
+const $ = id => document.getElementById(id);
+const show = (el,on)=> el.classList.toggle('hidden', !on);
+
+function render(){
+  $('cur').textContent = String(i+1).padStart(2,'0');
+  [...dots.children].forEach((d,k)=>{
+    d.className = 'dot' + (k===i?' on':(k<i?' done':''));
+  });
+
+  const s = steps[i];
+  $('capH').textContent = s.h;
+  $('capB').textContent = s.b;
+  const c = $('capC');
+  c.textContent = s.chip;
+  c.className = 'cap-chip' + (s.red?' red':'');
+
+  // panel assembly by step index (0-based)
+  show($('scan'),  i>=1);
+  show($('assay'), i>=2);
+
+  // checks: pending until step 4 (index 3), resolve at step 5 (index 4)
+  const resolved = i>=4;
+  const g = n => $('g'+n), d = n => $('d'+n);
+  [1,2,3,4].forEach(n=>{
+    g(n).className = 'glyph ' + (!resolved ? 'pending' : (n===2 ? 'fail':'pass'));
+    g(n).innerHTML = '';
+    if(resolved && n!==2) g(n).innerHTML =
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A0B0D" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>';
+    if(resolved && n===2) g(n).innerHTML =
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#E8705F" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+    show(d(n), resolved);
+  });
+  $('checks').querySelector('[data-c="2"]').classList.toggle('failed', resolved);
+
+  // on the final step, dim the passing checks so the failure carries the eye
+  [1,3,4].forEach(n=>{
+    $('checks').querySelector('[data-c="'+n+'"]').classList.toggle('dim', i>=5);
+  });
+
+  show($('verdict'), i>=5);
+  show($('kicker'),  i>=5);
+  show($('foot'),    i>=5);
+
+  $('prev').disabled = i===0;
+  $('next').textContent = i===N-1 ? 'Restart \u21BB' : 'Next \u2192';
+  $('hint').style.visibility = i===N-1 ? 'hidden':'visible';
+}
+
+function go(k){
+  const prev = i;
+  i = (k+N)%N;
+  render();
+  // re-trigger reveal animation on newly shown pieces
+  if(i>prev){
+    document.querySelectorAll('.panel .hidden').forEach(()=>{});
+  }
+}
+function next(){ i===N-1 ? go(0) : go(i+1); }
+function back(){ if(i>0) go(i-1); }
+
+$('stage').addEventListener('click', next);
+$('next').addEventListener('click', e=>{e.stopPropagation(); next();});
+$('prev').addEventListener('click', e=>{e.stopPropagation(); back();});
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); next(); }
+  if(e.key==='ArrowLeft') back();
+});
+
+render();
+</script>
+</body>
+</html>
