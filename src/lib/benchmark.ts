@@ -282,3 +282,21 @@ export function saveSubmitted(r: Result): void {
     /* storage unavailable: the result still lives in its URL */
   }
 }
+
+// ---- analytics -------------------------------------------------------------
+// GA4 custom events for the benchmark funnel. Fired from the client scripts
+// only. We send the event name and, where they apply, the finding id, the tool
+// name and the verdict, and nothing else: no patch content, no inputs, no IP,
+// nothing identifying. GA4 collects its own client-side signals; we add only
+// what is needed to count the funnel. Each event is documented in
+// src/data/benchmark/ANALYTICS.md.
+type TrackParams = { finding_id?: string; tool_name?: string; verdict?: string };
+
+export function track(event: string, params: TrackParams = {}): void {
+  try {
+    const g = (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag;
+    if (typeof g === 'function') g('event', event, params);
+  } catch {
+    /* analytics blocked or gtag absent: the page works regardless */
+  }
+}

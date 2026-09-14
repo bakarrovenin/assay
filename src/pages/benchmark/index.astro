@@ -165,7 +165,10 @@ const policy = [
 </style>
 
 <script>
-  import { aggregate, fetchLeaderboard, loadSubmitted } from '../../lib/benchmark';
+  import { aggregate, fetchLeaderboard, loadSubmitted, track } from '../../lib/benchmark';
+
+  // Funnel: someone reached the benchmark entry.
+  track('benchmark_view');
 
   // The submitted count comes from the server so it is real across everyone,
   // not just this browser. If the service is unreachable, fall back to this

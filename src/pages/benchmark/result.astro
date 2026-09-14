@@ -130,7 +130,7 @@ const CHECKS = [
 </BaseLayout>
 
 <script>
-  import { decodeResult, findingById } from '../../lib/benchmark';
+  import { decodeResult, findingById, track } from '../../lib/benchmark';
 
   const r = decodeResult(window.location.hash);
   const empty = document.querySelector<HTMLElement>('[data-empty]')!;
@@ -140,6 +140,8 @@ const CHECKS = [
     empty.hidden = false;
   } else {
     box.hidden = false;
+    // Funnel: a verdict was received and rendered. Tool and verdict only.
+    track('benchmark_verdict', { finding_id: r.finding, tool_name: r.tool, verdict: r.verdict });
     const f = findingById(r.finding);
     const c = r.checks;
     const pf = (ok: boolean) => (ok ? 'pass' : 'fail');
@@ -204,6 +206,8 @@ const CHECKS = [
     const field = document.querySelector<HTMLInputElement>('[data-share-url]')!;
     field.value = url;
     document.querySelector<HTMLButtonElement>('[data-copy-url]')?.addEventListener('click', async () => {
+      // Funnel: a result link was copied to share.
+      track('benchmark_share_copy', { finding_id: r.finding, tool_name: r.tool });
       try {
         await navigator.clipboard.writeText(url);
         field.select();

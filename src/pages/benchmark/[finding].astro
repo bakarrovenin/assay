@@ -161,19 +161,26 @@ const steps = [
 </style>
 
 <script>
-  import { findingById, resultUrl, saveSubmitted, submitScore } from '../../lib/benchmark';
+  import { findingById, resultUrl, saveSubmitted, submitScore, track } from '../../lib/benchmark';
 
   const data = JSON.parse(
     document.querySelector('[data-finding-source]')!.textContent || '{}',
   ) as { id: string; source: string };
   const finding = findingById(data.id)!;
 
+  // Funnel: someone opened this finding.
+  track('benchmark_finding_open', { finding_id: finding.id });
+
   // ---- copy buttons ----
   const copied = document.querySelector<HTMLElement>('[data-copied]');
   let timer: number | undefined;
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
     btn.addEventListener('click', async () => {
-      const text = btn.dataset.copy === 'module' ? data.source : finding.prompt;
+      const which = btn.dataset.copy === 'module' ? 'module' : 'prompt';
+      const text = which === 'module' ? data.source : finding.prompt;
+      track(which === 'module' ? 'benchmark_copy_module' : 'benchmark_copy_prompt', {
+        finding_id: finding.id,
+      });
       try {
         await navigator.clipboard.writeText(text);
         if (copied) {
@@ -211,6 +218,8 @@ const steps = [
       return;
     }
     if (error) error.hidden = true;
+    // Funnel: a patch was submitted for scoring. Tool name only, never the patch.
+    track('benchmark_submit', { finding_id: finding.id, tool_name: tool });
     const label = submitBtn?.textContent ?? 'Score the patch';
     if (submitBtn) {
       submitBtn.disabled = true;
