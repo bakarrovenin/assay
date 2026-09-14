@@ -11,12 +11,12 @@ export const site = {
 export const SECURITY_ADVISORY_URL =
   'https://github.com/bakarrovenin/assay/security/advisories/new';
 
+// Four entries. Research is the Index's working and is reached from
+// /the-index and the footer; the whitepaper and the methodology sit in the
+// footer. /research and /whitepaper keep their URLs.
 export const nav = [
   { label: 'Product', href: '/product' },
   { label: 'The Index', href: '/the-index' },
-  { label: 'Whitepaper', href: '/whitepaper' },
-  { label: 'Research', href: '/research' },
-  { label: 'Docs', href: '/methodology' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'About', href: '/about' },
 ] as const;
@@ -34,7 +34,8 @@ export const footerColumns = [
   {
     title: 'Research',
     links: [
-      { label: 'Blog', href: '/research' },
+      { label: 'Research', href: '/research' },
+      { label: 'Whitepaper', href: '/whitepaper' },
       { label: 'Methodology', href: '/methodology' },
     ],
   },

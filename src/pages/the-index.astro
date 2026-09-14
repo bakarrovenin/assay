@@ -7,6 +7,38 @@ import IndexTable from '../components/IndexTable.astro';
 import IndexSignup from '../components/IndexSignup.astro';
 import ConditionList from '../components/ConditionList.astro';
 
+// The research posts are the Index's working, so they are listed here and
+// reached from here. Same glob as /research, which keeps its URL.
+interface PostFrontmatter {
+  title: string;
+  description: string;
+  date: string;
+  readingTime: string;
+}
+const mdPosts = import.meta.glob<{ frontmatter: PostFrontmatter; url?: string }>(
+  './research/*.md',
+  { eager: true },
+);
+const astroPosts = import.meta.glob<{ frontmatter?: PostFrontmatter }>(
+  ['./research/*.astro', '!./research/index.astro'],
+  { eager: true },
+);
+const posts = [
+  ...Object.values(mdPosts)
+    .filter((post) => Boolean(post.url))
+    .map((post) => ({ url: post.url as string, frontmatter: post.frontmatter })),
+  ...Object.entries(astroPosts)
+    .filter(([, mod]) => Boolean(mod.frontmatter))
+    .map(([path, mod]) => ({
+      url: `/research/${path.replace(/^\.\/research\//, '').replace(/\.astro$/, '')}`,
+      frontmatter: mod.frontmatter as PostFrontmatter,
+    })),
+].sort(
+  (a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime(),
+);
+const filed = (value: string) => new Date(value).toISOString().slice(0, 10).replace(/-/g, '.');
+const issueOf = (index: number) => String(posts.length - index).padStart(2, '0');
+
 const columns = [
   {
     name: 'Fixes tested',
@@ -163,6 +195,45 @@ const rules = [
         ))
       }
     </ol>
+  </Section>
+
+  <Section id="research">
+    <Eyebrow class="reveal">Research</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">The Index&rsquo;s working.</h2>
+
+    <p class="reveal mt-9 text-[17px] leading-[1.62]" style="--reveal-delay:120ms;max-width:62ch">
+      Every number the Index will publish is backed by a pilot, a note, or a correction
+      written up here first, in the order it happened.
+    </p>
+
+    <ul class="mt-11 max-w-[80ch]">
+      {
+        posts.map((post, i) => (
+          <li class="reveal border-t border-line" style={`--reveal-delay:${i * 60}ms`}>
+            <a href={post.url} class="group grid grid-cols-1 gap-x-8 gap-y-2 py-6 sm:grid-cols-[minmax(0,190px)_minmax(0,1fr)]">
+              <span class="micro flex flex-wrap gap-x-3 gap-y-1">
+                <span>Issue {issueOf(i)}</span>
+                <span>
+                  <time datetime={post.frontmatter.date}>{filed(post.frontmatter.date)}</time>
+                </span>
+              </span>
+              <span>
+                <span class="block font-display text-[18px] font-bold leading-tight tracking-[-0.014em] transition-colors group-hover:text-accent">
+                  {post.frontmatter.title}
+                </span>
+                <span class="mt-1.5 block text-[14.5px] leading-[1.6] text-fg-2">
+                  {post.frontmatter.description}
+                </span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="reveal mt-10">
+      <a href="/research" class="link-inline text-[15px] font-medium">All research</a>
+    </p>
   </Section>
 
   <Section id="rules" tint>
