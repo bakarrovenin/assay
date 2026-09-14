@@ -32,6 +32,24 @@ const conditions = [
   'nothing suggests the tool was manipulated into writing it',
 ] as const;
 
+// Beneath the sheet: what the rows are and are not, and what has been
+// measured so far. Both are choices, stated as such.
+// Points at the research index until the Pilot 001 blind run report publishes;
+// swap to /research/pilot-001-blind-run then.
+const PILOT_REPORT = '/research';
+
+const notes = [
+  {
+    lead: 'Scope',
+    body: 'The Index measures the tools developers actually use to fix a flagged vulnerability, which today are general coding assistants rather than dedicated remediation products. Dedicated remediation tools such as Snyk, Pixee, Mobb and ZeroPath are out of scope for this edition, not absent from the market.',
+  },
+  {
+    lead: 'Measured so far',
+    body: 'Pilot 001\u2019s blind run put ChatGPT, Claude Code and Copilot Autofix through four SQL injection shapes. Pilot 001 is not the Index: the Index runs on real projects with real historical vulnerabilities, and the pilot runs on a corpus we seeded.',
+    link: { href: PILOT_REPORT, label: 'Read the Pilot 001 report' },
+  },
+] as const;
+
 const rules = [
   ['Corpus', 'Real vulnerabilities with known ground truth fixes, published by identifier so the selection can be audited.'],
   ['Equal treatment', 'No tool gets extra context, a tuned prompt, or a second attempt another did not get.'],
@@ -44,7 +62,7 @@ const rules = [
 
 <BaseLayout
   title="The Index"
-  description="An independent, quarterly comparison of every commercial AI fix agent, run on the same harness, with the free DARPA systems as the baseline. First edition in progress."
+  description="An independent, quarterly comparison of the coding assistants developers use to fix flagged vulnerabilities, run on the same harness, with the free DARPA systems as the baseline. First edition in progress."
   path="/the-index"
 >
   <PageHeader
@@ -61,6 +79,27 @@ const rules = [
     <div class="mt-11">
       <IndexTable />
     </div>
+
+    <dl class="mt-10 max-w-[80ch]">
+      {
+        notes.map((note, i) => (
+          <div
+            class="reveal grid grid-cols-1 gap-x-8 gap-y-1.5 border-t border-line py-5 sm:grid-cols-[minmax(0,190px)_minmax(0,1fr)]"
+            style={`--reveal-delay:${i * 40}ms`}
+          >
+            <dt class="font-display text-[15.5px] font-bold tracking-[-0.008em]">{note.lead}</dt>
+            <dd class="text-[15px] leading-[1.62] text-fg-2">
+              {note.body}
+              {'link' in note && (
+                <a href={note.link.href} class="link-inline ml-1 whitespace-nowrap font-medium text-fg">
+                  {note.link.label}
+                </a>
+              )}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
 
     <div class="mt-9">
       <IndexSignup />
