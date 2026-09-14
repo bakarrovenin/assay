@@ -16,9 +16,10 @@ Method v1.0 · Filed 2026.09
 
 AI now writes security patches, and the patch is validated by the tool that
 wrote it. The only signal anyone measures is whether the scanner alert closed.
-We tested whether that signal means anything. On a controlled corpus, a patch
-closed the alert, passed a suppression audit, and left every attack we had held
-back still working.
+We tested whether that signal means anything. On a controlled corpus, a patch we
+constructed closed the alert, passed a suppression audit, and left every attack
+we had held back still working. A closed alert is a fact about the diff, not
+about the hole.
 
 **The gap**
 
@@ -30,8 +31,15 @@ reporting it, which is a different fact.
 Automated program repair has known this for over a decade and named it:
 overfitting, a patch that satisfies the test without correcting the fault. The
 literature was explicit that human validation of every candidate patch was
-mandatory. Agents did not solve overfitting. They industrialised it and removed
-the validation step.
+mandatory. Agents did not solve overfitting. They removed the validation step
+and measured nothing in its place.
+
+A closed alert can mislead in three ways. A fix can shut the hole and break the
+application, and the scanner scores it as a success. An alert can close because
+a line was reformatted rather than fixed, so a correct fix and an evasion look
+identical to the scanner. And a scanner can raise no alert at all on a flaw that
+travels through stored data, so nothing is reported and nothing is fixed. In
+each case the alert reports on the diff. The hole is a separate question.
 
 **Why the checker cannot be the author**
 
@@ -76,14 +84,16 @@ The second escaped the quote it had been shown and left the query untouched.
 Four of twelve attacks still returned the users table. It also rejected a
 legitimate product name containing an apostrophe. NOT VERIFIED.
 
-The third changed nothing about the vulnerability. It moved the query into a
-helper and reassembled the string in a form the scanner's rule does not match.
-The alert closed. The suppression audit found no marker. Twelve of twelve
-attacks still returned the users table including password hashes.
+The third, which we constructed for the purpose, changed nothing about the
+vulnerability. It moved the query into a helper and reassembled the string in
+a form the scanner's rule does not match. The alert closed. The suppression
+audit found no marker. Twelve of twelve attacks still returned the users table
+including password hashes.
 
 Two of the four signals a competent team relies on, the scanner and the
 suppression audit, both reported clean on a fully exploitable patch. Only the
-held out attack set separated it from the correct fix.
+held out attack set separated it from the correct fix. That demonstrates the
+mechanism. It does not show that any commercial fixer produces it.
 
 **Limitations**
 
@@ -116,8 +126,9 @@ published measure of verified fix rate against closed alert rate for each
 commercial fixer, quarterly, with the open DARPA systems as a baseline row and
 every vendor given right of reply, published unedited.
 
-If the first Index returns verified fix rates above eighty five percent, the
-gap is smaller than we believe and we will publish that.
+If the first Index returns verified fix rates above eighty five percent, we will
+publish that. It would not change the argument: nobody could have known it from
+the alert.
 
 We have no customers yet. These are the terms we intend to hold to.
 
