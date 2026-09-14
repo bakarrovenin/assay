@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Explainer from '../../components/Explainer.astro';
+
+// The interactive mechanism explainer, moved off the homepage in the
+// engineer-audience restructure. It walks one overfitted patch beat by beat:
+// the alert goes green, the bug does not. Kept here rather than deleted.
+export const frontmatter = {
+  title: 'How the alert goes green while the bug stays open',
+  description:
+    'One overfitted SQL injection patch, walked through beat by beat: the scanner reports zero findings, two of four checks pass, and the hole is still wide open.',
+  date: '2026-09-10',
+  author: 'Founder, Assay',
+  readingTime: '3 min read',
+};
+---
+
+<BaseLayout title={frontmatter.title} description={frontmatter.description} path="/research/how-the-alert-goes-green">
+  <PageHeader
+    eyebrow="Research"
+    title="The alert went green. The bug didn't."
+    lede="One overfitted patch, walked through beat by beat. Scroll it, or step through with the controls."
+  />
+  <Explainer />
+</BaseLayout>

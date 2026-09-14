@@ -1,0 +1,36 @@
+---
+import Section from './Section.astro';
+import RuledRows from './RuledRows.astro';
+// Move 5. Six times a check of ours passed for a reason unrelated to the fix
+// being correct, each in the flattering direction. Number verified against the
+// blind-run report's "Six times" list (methodology notes 4, 6, 7, 9, 12, 12).
+const bugs = [
+  { lead: 'The app that would not start', body: 'A patch that failed to boot scored as a patch that shut the hole, because every attack failed to connect and every failed connection read as a blocked attack.' },
+  { lead: 'The guard that read the wrong tree', body: 'A pre-publication leak guard reported clean about the working tree while the answer key sat in an earlier commit, public forever.' },
+  { lead: 'The claim that was not in the code', body: 'A published note claimed a verification that did not exist in the scorer.' },
+  { lead: 'The correct fix we failed', body: 'Our own alert check failed a correct allow-list fix, because an allow-list cannot remove the pattern the rule matches.' },
+  { lead: 'The corpus that named its answer', body: 'The vulnerable modules carried comments naming the flaw and the fix, so every tool had been handed the answer.' },
+  { lead: 'The guard that was right by its own definition', body: 'A leak guard searched for payloads and fix code and found none, while explanatory prose describing the flaw walked straight past it.' },
+];
+---
+
+<Section id="credibility">
+  <h2 class="h2 reveal" style="max-width:22ch">Six times, our own check was wrong.</h2>
+
+  <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:66ch">
+    Each passed for a reason unrelated to the fix being correct, and every one failed in the
+    flattering direction. A check that wrongly accuses a good patch is investigated within the
+    hour; a check that wrongly clears a bad one is the answer nobody interrogates. All six are
+    written up in full.
+  </p>
+
+  <div class="reveal mt-11" style="--reveal-delay:60ms;max-width:80ch">
+    <RuledRows label="Found and closed, in the methodology notes" rows={bugs} />
+  </div>
+
+  <p class="reveal mt-8">
+    <a href="/methodology" class="link-inline text-[15px] font-medium">
+      How each was found and closed
+    </a>
+  </p>
+</Section>

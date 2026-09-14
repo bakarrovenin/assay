@@ -6,6 +6,13 @@ import Eyebrow from '../components/Eyebrow.astro';
 import IndexTable from '../components/IndexTable.astro';
 import IndexSignup from '../components/IndexSignup.astro';
 import ConditionList from '../components/ConditionList.astro';
+// Background, moved off the homepage in the engineer-audience restructure. The
+// landscape and the borrowed third-party numbers are context for the
+// measurement, not the argument, so they sit at the foot of the Index and never
+// lead.
+import EcosystemBar from '../components/EcosystemBar.astro';
+import StructuralProblem from '../components/StructuralProblem.astro';
+import VerificationGap from '../components/VerificationGap.astro';
 
 // The research posts are the Index's working, so they are listed here and
 // reached from here. Same glob as /research, which keeps its URL.
@@ -264,4 +271,16 @@ const rules = [
       </a>
     </p>
   </Section>
+
+  <Section id="background">
+    <h2 class="h2 reveal" style="max-width:22ch">Background, not evidence.</h2>
+    <p class="reveal mt-8 text-[16.5px] leading-[1.6] text-fg-2" style="--reveal-delay:60ms;max-width:66ch">
+      The numbers below are other people&rsquo;s. They are why an independent Index needs to
+      exist; they are not our finding. Ours is the measurement above and in the research.
+    </p>
+  </Section>
+
+  <EcosystemBar />
+  <StructuralProblem />
+  <VerificationGap />
 </BaseLayout>

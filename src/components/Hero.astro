@@ -1,8 +1,9 @@
 ---
-// Single column. The certificate used to sit beside the headline as the
-// hero's primary object; it now assembles beat by beat in the explainer
-// section directly below, so nothing is duplicated here and the headline
-// gets the width back.
+// Move 1. States the problem and points at the one thing that is real and
+// shipping today: the benchmark. The old primary CTA promised a pull-request
+// verifier we cannot run yet; that is now a labelled waitlist further down the
+// page. The certificate illustration that used to sit here is gone with the
+// explainer, so the headline keeps the width.
 ---
 
 <section class="hero">
@@ -15,17 +16,18 @@
       </h1>
 
       <p class="lede reveal mt-8" style="--reveal-delay:120ms">
-        Every AI security tool now writes its own patches and certifies its own work.
-        Assay is the third party that checks.
+        AI writes and merges its own security fixes now. The only thing checking them is a
+        scanner the fix was written to satisfy. Assay is the independent check on whether
+        the hole actually closed, using attacks the fixer never saw.
       </p>
 
       <div class="reveal mt-9 flex flex-wrap gap-3" style="--reveal-delay:180ms">
-        <button type="button" class="btn btn-primary" data-verify-cta>Verify a pull request</button>
-        <a href="/the-index" class="btn btn-secondary">Read the Index</a>
+        <a href="/the-index" class="btn btn-primary">Read the Index</a>
+        <button type="button" class="btn btn-secondary" data-verify-cta>Join the waitlist</button>
       </div>
 
       <p class="mono reveal mt-6 text-[12px] text-fg-2" style="--reveal-delay:240ms">
-        Free forever on public repositories &middot; Installs in under a minute
+        Independent &middot; Vendor neutral &middot; We do not write fixes
       </p>
     </div>
   </div>

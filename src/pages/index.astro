@@ -1,23 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import Explainer from '../components/Explainer.astro';
-import EcosystemBar from '../components/EcosystemBar.astro';
-import VerificationGap from '../components/VerificationGap.astro';
-import StructuralProblem from '../components/StructuralProblem.astro';
-import IndexSection from '../components/IndexSection.astro';
+import Setup from '../components/Setup.astro';
+import Checks from '../components/Checks.astro';
+import Credibility from '../components/Credibility.astro';
 import Compliance from '../components/Compliance.astro';
 import FinalCTA from '../components/FinalCTA.astro';
 import { site } from '../lib/site';
+
+// Six moves, each earning the next (see the restructure plan). Move 3, the
+// finding, is built as components/Finding.astro but HELD OFF this page until
+// vendor right of reply closes: the three mechanisms are identifiable from the
+// public evidence repo, so unnamed is a technicality, not a protection. On the
+// day, uncomment the import and the <Finding /> in the slot below and it drops
+// in between the setup and the product with no other change.
+//
+// import Finding from '../components/Finding.astro';
 ---
 
 <BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
   <Hero />
-  <Explainer />
-  <EcosystemBar />
-  <VerificationGap />
-  <StructuralProblem />
-  <IndexSection />
+  <Setup />
+  {/* MOVE 3 SLOT, held for right of reply: <Finding /> */}
+  <Checks />
+  <Credibility />
   <Compliance />
   <FinalCTA />
 </BaseLayout>

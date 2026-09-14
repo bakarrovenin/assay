@@ -1,0 +1,63 @@
+---
+import Section from './Section.astro';
+// Move 4. The product, condensed. The full walkthrough lives in the methodology;
+// this is the homepage version. Four checks, the sealed container, three
+// verdicts, and the line that makes the verdict worth anything.
+const checks = [
+  { n: '01', name: 'Closed', body: 'Re-scan after the patch. Is the reported finding actually gone, or did it move?' },
+  { n: '02', name: 'Hole shut', body: 'Fire attacks the fixer never saw. One that still lands is a failure.' },
+  { n: '03', name: 'Behaviour held', body: 'Every ordinary input still matches a known-correct reference.' },
+  { n: '04', name: 'Provenance clean', body: 'No suppression, no new finding, no alert closed while attacks still land.' },
+];
+---
+
+<Section id="checks" tint>
+  <h2 class="h2 reveal" style="max-width:20ch">Four checks, in a sealed container.</h2>
+
+  <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:64ch">
+    The patch is applied to a clean checkout and scored with no network egress, torn down
+    between patches. Three of the checks are the ordinary questions any careful team asks. The
+    second is the one nobody runs.
+  </p>
+
+  <ol class="reveal mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-[3px] border border-line bg-line sm:grid-cols-2" style="--reveal-delay:60ms">
+    {
+      checks.map((ch) => (
+        <li class="flex flex-col bg-bg p-6 lg:p-7">
+          <span class="mono text-[10px] uppercase tracking-[0.16em] text-accent">{ch.n}</span>
+          <h3 class="mt-3 font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">{ch.name}</h3>
+          <p class="mt-2 text-[14.5px] leading-[1.6] text-fg-2">{ch.body}</p>
+        </li>
+      ))
+    }
+  </ol>
+
+  <p class="mono reveal mt-8 border-l-2 border-line pl-5 text-[13px] leading-[1.7] text-fg-2" style="--reveal-delay:120ms;max-width:62ch">
+    If you let a student write their own exam, they will pass it. You test them on
+    questions they have not seen.
+  </p>
+
+  <div class="reveal mt-11 grid grid-cols-1 gap-x-8 gap-y-6 lg:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" style="--reveal-delay:60ms">
+    <div>
+      <p class="micro mb-3">Three verdicts</p>
+      <p class="text-[16px] leading-[1.62]">
+        <span class="text-accent">VERIFIED</span>,
+        <span class="text-fail">NOT VERIFIED</span>, and
+        <strong class="font-semibold text-fg">INSUFFICIENT EVIDENCE</strong>. The third is a
+        first-class verdict, reported rather than dropped. A result we cannot stand behind is
+        worth more than one we invent, and that is the point.
+      </p>
+    </div>
+    <div class="border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+      <p class="micro mb-3">Why the verdict is worth anything</p>
+      <p class="text-[16px] leading-[1.62]">
+        We do not write fixes. The thing being checked and the thing doing the checking are
+        never the same party. Independence is the whole product.
+      </p>
+    </div>
+  </div>
+
+  <p class="mono reveal mt-11 border-t border-line pt-6 text-[13px] leading-relaxed text-fg-2" style="--reveal-delay:60ms">
+    Works with any scanner and any fixer. SARIF in, verdict out.
+  </p>
+</Section>

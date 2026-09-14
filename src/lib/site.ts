@@ -13,9 +13,11 @@ export const SECURITY_ADVISORY_URL =
 
 // Four entries. Research is the Index's working and is reached from
 // /the-index and the footer; the whitepaper and the methodology sit in the
-// footer. /research and /whitepaper keep their URLs.
+// footer. /research and /whitepaper keep their URLs. The Benchmark entry is
+// held with the benchmark itself on a branch: until the scorer is real, a nav
+// link to it would be a dead link, so it is absent here rather than pointing
+// somewhere it cannot deliver.
 export const nav = [
-  { label: 'Product', href: '/product' },
   { label: 'The Index', href: '/the-index' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'About', href: '/about' },
@@ -25,7 +27,6 @@ export const footerColumns = [
   {
     title: 'Product',
     links: [
-      { label: 'Overview', href: '/product' },
       { label: 'Docs', href: '/methodology' },
       { label: 'Pricing', href: '/pricing' },
       { label: 'The Index', href: '/the-index' },

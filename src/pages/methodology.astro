@@ -11,6 +11,11 @@ import type { Row } from '../components/RuledRows.astro';
 import Terminal from '../components/Terminal.astro';
 import type { TerminalLine } from '../components/Terminal.astro';
 import { highlightJson } from '../lib/highlight';
+// The concrete worked examples and the depth-of-evidence drawing moved here
+// from the retired /product page (the restructure made Product the benchmark).
+import WorkedExample from '../components/WorkedExample.astro';
+import ResolvedExample from '../components/ResolvedExample.astro';
+import DepthOfEvidence from '../components/DepthOfEvidence.astro';
 import { METHOD_VERSION, SECURITY_ADVISORY_URL } from '../lib/site';
 
 const lastUpdated = new Date().toISOString().slice(0, 10);
@@ -634,6 +639,11 @@ const terms = [
       </p>
     </div>
   </Section>
+
+  <!-- 5b. Worked examples, moved from the retired /product page -->
+  <DepthOfEvidence />
+  <WorkedExample />
+  <ResolvedExample />
 
   <!-- 6. The artifact -->
   <Section id="artifact" tint>
