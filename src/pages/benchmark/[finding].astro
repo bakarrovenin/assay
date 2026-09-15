@@ -57,8 +57,6 @@ const steps = [
   />
 
   <Section id="submit" rule={false}>
-  {SCORING_LIVE ? (
-    <Fragment>
     <Eyebrow class="reveal">Paste the patch back</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Score it.</h2>
 
@@ -110,47 +108,35 @@ const steps = [
       </div>
 
       <div class="mt-6 flex flex-wrap items-center gap-3">
-        <button type="submit" class="btn btn-primary">Score the patch</button>
+        <button
+          type={SCORING_LIVE ? 'submit' : 'button'}
+          class={SCORING_LIVE ? 'btn btn-primary' : 'btn btn-secondary'}
+          {...(SCORING_LIVE
+            ? {}
+            : {
+                'data-notify': true,
+                'data-verify-cta': true,
+                'data-verify-group': 'benchmark-waitlist',
+                'data-verify-title': 'Notify me when scoring opens',
+                'data-verify-lede':
+                  "Scoring is not live yet. The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live.",
+              })}
+        >{SCORING_LIVE ? 'Score the patch' : 'Notify me when scoring opens'}</button>
         <span class="mono text-[11px] text-fail" data-error hidden></span>
       </div>
+
+      {!SCORING_LIVE && (
+        <p class="mono mt-3 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+          Scoring goes live shortly. Until then this button opens a notify signup instead of
+          scoring, and we will tell you the moment you can score a patch here.
+        </p>
+      )}
 
       <p class="mono mt-5 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
         The patch is scored by the harness in a sealed container with no network egress, torn
         down after the run. Nothing from your patch is kept beyond the result.
       </p>
     </form>
-    </Fragment>
-  ) : (
-    <Fragment>
-    <Eyebrow class="reveal">Scoring opens shortly</Eyebrow>
-    <h2 class="h2 reveal" style="--reveal-delay:60ms">Get the module now. The verdict is next.</h2>
-
-    <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:66ch">
-      The module and the prompt below are usable today: hand them to your fixer now. The
-      scorer that runs the four checks on the patch it returns, in a sealed container, comes
-      online shortly. Leave an address and we will tell you the moment you can paste a patch
-      back for a verdict.
-    </p>
-
-    <div class="reveal mt-9" style="--reveal-delay:120ms">
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-notify
-        data-verify-cta
-        data-verify-group="benchmark-waitlist"
-        data-verify-title="Notify me when scoring opens"
-        data-verify-lede="The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live."
-      >
-        Notify me when scoring opens
-      </button>
-    </div>
-
-    <p class="mono reveal mt-6 text-[11px] leading-relaxed text-fg-2" style="--reveal-delay:180ms;max-width:70ch">
-      The corpus, the prompts and the leaderboard are live now. Only the scoring step waits.
-    </p>
-    </Fragment>
-  )}
   </Section>
 
   <Section id="module" tint>
@@ -248,10 +234,11 @@ const steps = [
 
   // ---- score, or waitlist ----
   // THE SCORING SWITCH (lib/benchmark.ts SCORING_LIVE). While the scorer is not
-  // deployed, the page shows a waitlist and the notify button fires the same
-  // benchmark_submit funnel event, so we can count how many people reach the
-  // scoring step before it exists. The real service wiring below is left intact
-  // and runs the moment SCORING_LIVE is true; nothing else changes.
+  // deployed, the full form is shown but the button opens the waitlist and fires
+  // its own benchmark_score_waitlist event, kept distinct from the real submit so
+  // that once scoring is live a genuine benchmark_submit is never confused with a
+  // not-live waitlist click. The real service wiring below is left intact and runs
+  // the moment SCORING_LIVE is true; nothing else changes.
   if (SCORING_LIVE) {
     const form = document.querySelector<HTMLFormElement>('[data-submit]');
     const error = document.querySelector<HTMLElement>('[data-error]');
@@ -293,14 +280,19 @@ const steps = [
       }
     });
   } else {
-    // Waitlist mode: the notify button opens the shared Loops modal (its own
-    // benchmark-waitlist userGroup, set via data attributes on the button). We
-    // still fire benchmark_submit here: reaching the scoring step is the number
-    // worth counting before scoring exists.
+    // Scoring not live: the full form is shown so a visitor sees the real tool,
+    // but the submit button does not score. It carries the shared data-verify-cta
+    // attributes (benchmark-waitlist userGroup), so EmailModal opens the waitlist
+    // on click. Guard the form so Enter never triggers a native submit, and fire
+    // benchmark_score_waitlist (its own event, never benchmark_submit) so a not-live
+    // click stays distinguishable from a real submission once scoring is live.
+    document
+      .querySelector<HTMLFormElement>('[data-submit]')
+      ?.addEventListener('submit', (e) => e.preventDefault());
     document
       .querySelector<HTMLButtonElement>('[data-notify]')
       ?.addEventListener('click', () => {
-        track('benchmark_submit', { finding_id: finding.id });
+        track('benchmark_score_waitlist', { finding_id: finding.id });
       });
   }
 </script>
