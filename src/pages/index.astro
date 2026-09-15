@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Explainer from '../components/Explainer.astro';
-import Setup from '../components/Setup.astro';
 import Checks from '../components/Checks.astro';
 import Credibility from '../components/Credibility.astro';
 import Compliance from '../components/Compliance.astro';
@@ -23,10 +22,11 @@ import { site } from '../lib/site';
   <Hero />
   {/* The six-beat explainer, its own full-width section directly below the hero
       so the hero stays a single clean column. Also lives at
-      /research/how-the-alert-goes-green; it exists in both places on purpose. */}
+      /research/how-the-alert-goes-green; it exists in both places on purpose.
+      It demonstrates the thesis and closes on protected line 7, so the Setup
+      section that used to restate it is gone. */}
   <Explainer />
-  <Setup />
-  {/* MOVE 3 SLOT, held for right of reply: <Finding /> */}
+  {/* MOVE 3 SLOT, held for right of reply: <Finding /> (carries protected line 2) */}
   <Checks />
   <Credibility />
   <Compliance />
