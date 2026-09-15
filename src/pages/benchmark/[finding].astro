@@ -6,7 +6,7 @@ import Eyebrow from '../../components/Eyebrow.astro';
 import CodePanel from '../../components/CodePanel.astro';
 import ConditionList from '../../components/ConditionList.astro';
 import RuledRows from '../../components/RuledRows.astro';
-import { FINDINGS, findingById } from '../../lib/benchmark';
+import { FINDINGS, findingById, SCORING_LIVE } from '../../lib/benchmark';
 import { highlightPython } from '../../lib/highlight';
 
 import corpus01 from '../../data/benchmark/corpus/finding_b01.py?raw';
@@ -87,6 +87,8 @@ const steps = [
   </Section>
 
   <Section id="submit" tint>
+  {SCORING_LIVE ? (
+    <Fragment>
     <Eyebrow class="reveal">Paste the patch back</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Score it.</h2>
 
@@ -138,12 +140,42 @@ const steps = [
       </div>
 
       <p class="mono mt-5 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
-        In this pass the scorer is a stub that runs in your browser: it reads the patch and
-        does not start the app, fire an attack or run the scanner. The result is marked
-        UNVERIFIED and stored in this browser only. A real scoring service replaces one
-        function.
+        The patch is scored by the harness in a sealed container with no network egress, torn
+        down after the run. Nothing from your patch is kept beyond the result.
       </p>
     </form>
+    </Fragment>
+  ) : (
+    <Fragment>
+    <Eyebrow class="reveal">Scoring opens shortly</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Get the module now. The verdict is next.</h2>
+
+    <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:66ch">
+      The module and the prompt above are usable today: hand them to your fixer now. The
+      scorer that runs the four checks on the patch it returns, in a sealed container, comes
+      online shortly. Leave an address and we will tell you the moment you can paste a patch
+      back for a verdict.
+    </p>
+
+    <div class="reveal mt-9" style="--reveal-delay:120ms">
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-notify
+        data-verify-cta
+        data-verify-group="benchmark-waitlist"
+        data-verify-title="Notify me when scoring opens"
+        data-verify-lede="The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live."
+      >
+        Notify me when scoring opens
+      </button>
+    </div>
+
+    <p class="mono reveal mt-6 text-[11px] leading-relaxed text-fg-2" style="--reveal-delay:180ms;max-width:70ch">
+      The corpus, the prompts and the leaderboard are live now. Only the scoring step waits.
+    </p>
+    </Fragment>
+  )}
   </Section>
 
   <script is:inline type="application/json" data-finding-source set:html={JSON.stringify({ id: finding.id, source })} />
@@ -161,7 +193,7 @@ const steps = [
 </style>
 
 <script>
-  import { findingById, resultUrl, saveSubmitted, submitScore, track } from '../../lib/benchmark';
+  import { findingById, resultUrl, saveSubmitted, submitScore, track, SCORING_LIVE } from '../../lib/benchmark';
 
   const data = JSON.parse(
     document.querySelector('[data-finding-source]')!.textContent || '{}',
@@ -194,47 +226,61 @@ const steps = [
     });
   }
 
-  // ---- score ----
-  // Posts the patch to the scoring service, which runs the real harness in a
-  // sealed container and returns the verdict and the four checks. The result is
-  // also encoded into the shareable URL and kept in this browser as a fallback.
-  const form = document.querySelector<HTMLFormElement>('[data-submit]');
-  const error = document.querySelector<HTMLElement>('[data-error]');
-  const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
-    const tool = String(fd.get('tool') || '').trim();
-    const version = String(fd.get('version') || '').trim();
-    const patch = String(fd.get('patch') || '');
-    const fail = (msg: string) => {
-      if (error) {
-        error.textContent = msg;
-        error.hidden = false;
+  // ---- score, or waitlist ----
+  // THE SCORING SWITCH (lib/benchmark.ts SCORING_LIVE). While the scorer is not
+  // deployed, the page shows a waitlist and the notify button fires the same
+  // benchmark_submit funnel event, so we can count how many people reach the
+  // scoring step before it exists. The real service wiring below is left intact
+  // and runs the moment SCORING_LIVE is true; nothing else changes.
+  if (SCORING_LIVE) {
+    const form = document.querySelector<HTMLFormElement>('[data-submit]');
+    const error = document.querySelector<HTMLElement>('[data-error]');
+    const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const tool = String(fd.get('tool') || '').trim();
+      const version = String(fd.get('version') || '').trim();
+      const patch = String(fd.get('patch') || '');
+      const fail = (msg: string) => {
+        if (error) {
+          error.textContent = msg;
+          error.hidden = false;
+        }
+      };
+      if (!tool || !version || !patch.trim()) {
+        fail('Tool, version and patch are all required. A result without a tool and version is not citable.');
+        return;
       }
-    };
-    if (!tool || !version || !patch.trim()) {
-      fail('Tool, version and patch are all required. A result without a tool and version is not citable.');
-      return;
-    }
-    if (error) error.hidden = true;
-    // Funnel: a patch was submitted for scoring. Tool name only, never the patch.
-    track('benchmark_submit', { finding_id: finding.id, tool_name: tool });
-    const label = submitBtn?.textContent ?? 'Score the patch';
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Scoring in a container, this takes a moment';
-    }
-    try {
-      const { result } = await submitScore({ finding: finding.id, patch, tool, version });
-      saveSubmitted(result);
-      window.location.href = resultUrl(result, window.location.origin);
-    } catch (err) {
-      fail(err instanceof Error ? err.message : 'scoring failed, try again shortly');
+      if (error) error.hidden = true;
+      // Funnel: a patch was submitted for scoring. Tool name only, never the patch.
+      track('benchmark_submit', { finding_id: finding.id, tool_name: tool });
+      const label = submitBtn?.textContent ?? 'Score the patch';
       if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = label;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Scoring in a container, this takes a moment';
       }
-    }
-  });
+      try {
+        const { result } = await submitScore({ finding: finding.id, patch, tool, version });
+        saveSubmitted(result);
+        window.location.href = resultUrl(result, window.location.origin);
+      } catch (err) {
+        fail(err instanceof Error ? err.message : 'scoring failed, try again shortly');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = label;
+        }
+      }
+    });
+  } else {
+    // Waitlist mode: the notify button opens the shared Loops modal (its own
+    // benchmark-waitlist userGroup, set via data attributes on the button). We
+    // still fire benchmark_submit here: reaching the scoring step is the number
+    // worth counting before scoring exists.
+    document
+      .querySelector<HTMLButtonElement>('[data-notify]')
+      ?.addEventListener('click', () => {
+        track('benchmark_submit', { finding_id: finding.id });
+      });
+  }
 </script>

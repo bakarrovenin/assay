@@ -22,7 +22,7 @@ still works.
 | `benchmark_finding_open` | a finding page loads | `finding_id` |
 | `benchmark_copy_module` | the "Copy module" button is clicked | `finding_id` |
 | `benchmark_copy_prompt` | the "Copy prompt" button is clicked | `finding_id` |
-| `benchmark_submit` | a patch is submitted for scoring | `finding_id`, `tool_name` |
+| `benchmark_submit` | the scoring step is reached: a patch is submitted (scoring live) or the "Notify me when scoring opens" button is clicked (waitlist) | `finding_id`, and `tool_name` when scoring is live |
 | `benchmark_verdict` | a result page renders a verdict | `finding_id`, `tool_name`, `verdict` |
 | `benchmark_share_copy` | the "Copy link" button on a result is clicked | `finding_id`, `tool_name` |
 

@@ -105,6 +105,14 @@ export const FINDINGS: readonly Finding[] = [
 // end has no backend wired and the submit form says so rather than pretending.
 export const BENCHMARK_API = (import.meta.env.PUBLIC_BENCHMARK_API as string) || '';
 
+// THE SCORING SWITCH. Off by default: the scorer is not deployed yet, so the
+// finding page shows a waitlist instead of a submit form, and the real wiring
+// below (submitScore) is left in place but not reached. To turn scoring on
+// later, deploy the service and build with PUBLIC_BENCHMARK_SCORING=1 (and
+// PUBLIC_BENCHMARK_API set). That is the one change; nothing else moves.
+export const SCORING_LIVE =
+  import.meta.env.PUBLIC_BENCHMARK_SCORING === '1' && BENCHMARK_API !== '';
+
 /** POST a patch to the scoring service. Returns the stored result. */
 export async function submitScore(input: {
   finding: string;
