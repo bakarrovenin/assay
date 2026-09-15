@@ -9,13 +9,10 @@ import FinalCTA from '../components/FinalCTA.astro';
 import { site } from '../lib/site';
 
 // Six moves, each earning the next (see the restructure plan). Move 3, the
-// finding, is built as components/Finding.astro but HELD OFF this page until
-// vendor right of reply closes: the three mechanisms are identifiable from the
-// public evidence repo, so unnamed is a technicality, not a protection. On the
-// day, uncomment the import and the <Finding /> in the slot below and it drops
-// in between the setup and the product with no other change.
-//
-// import Finding from '../components/Finding.astro';
+// finding, is components/Finding.astro. It names no vendor and shows no per-tool
+// verdict, so it ships unedited; it now sits in the slot below, between the
+// explainer and the checks.
+import Finding from '../components/Finding.astro';
 ---
 
 <BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
@@ -26,7 +23,8 @@ import { site } from '../lib/site';
       It demonstrates the thesis and closes on protected line 7, so the Setup
       section that used to restate it is gone. */}
   <Explainer />
-  {/* MOVE 3 SLOT, held for right of reply: <Finding /> (carries protected line 2) */}
+  {/* MOVE 3, the finding (carries protected line 2) */}
+  <Finding />
   <Checks />
   <Credibility />
   <Compliance />

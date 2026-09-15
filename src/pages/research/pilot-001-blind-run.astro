@@ -195,6 +195,11 @@ const mistakes = [
     tag: 'note 12',
     body: 'A guard searched for payloads, oracles and fix code, and was correct by its own definition, while explanatory prose walked past it.',
   },
+  {
+    lead: 'Passed on an incomplete tree',
+    tag: 'note 14',
+    body: 'A leak guard reported clean while the corpus files it should have scanned were not yet tracked, so a payload inside them was invisible to it.',
+  },
 ] as const;
 
 // --- what would change our mind ----------------------------------------------
@@ -539,8 +544,8 @@ const reversals = [
   <h2>What our own method got wrong</h2>
 
   <p>
-    Six times during this pilot, a check of ours passed for a reason unrelated to
-    the thing it was meant to establish.
+    Seven times, a check of ours passed for a reason unrelated to the thing it
+    was meant to establish.
   </p>
 
   <div class="artifact my-9 lg:my-11">
@@ -549,15 +554,16 @@ const reversals = [
 
   <p>
     A check that wrongly accuses a good patch is investigated within the hour. A
-    check that wrongly clears a bad one is the answer nobody interrogates. All six
+    check that wrongly clears a bad one is the answer nobody interrogates. All seven
     are documented in full in the methodology notes, including how each was found
     and closed. A check that has only ever passed has not been tested.
   </p>
 
   <p>
-    A seventh instance was found after this run, while building the benchmark: a
-    leak guard passed on an incomplete tree. It is recorded as note 14 in the
-    methodology notes. This report counts the six that belong to the pilot itself.
+    The seventh was found after this run, while building the benchmark, and is
+    counted here because it is the same failure in a new place: a check of ours
+    passing for a reason unrelated to what it was meant to establish. It is note 14
+    in the methodology notes.
   </p>
 
   <h2>What would change our mind</h2>
@@ -601,18 +607,19 @@ const reversals = [
   <h2>Right of reply</h2>
 
   <p>
-    Every tool named here was contacted with its results before publication and
-    given [RIGHT OF REPLY WINDOW, TO BE SET] to respond. Responses appear below,
-    unedited.
+    Every tool named here was contacted with its results on 14 September, before
+    publication. As of publication only automated acknowledgements have arrived;
+    none of the three has responded substantively. This edition will be updated,
+    unedited, with any reply that follows. Responses appear below.
   </p>
 
   <div class="artifact my-9 lg:my-11">
     <RuledRows
       label="Responses · unedited"
       rows={[
-        { lead: 'ChatGPT', body: '[Response, or: no response received by the closing date.]' },
-        { lead: 'Claude Code', body: '[Response, or: no response received by the closing date.]' },
-        { lead: 'Copilot Autofix', body: '[Response, or: no response received by the closing date.]' },
+        { lead: 'ChatGPT', body: 'Automated acknowledgement only. No substantive response yet.' },
+        { lead: 'Claude Code', body: 'Automated acknowledgement only. No substantive response yet.' },
+        { lead: 'Copilot Autofix', body: 'Automated acknowledgement only. No substantive response yet.' },
       ]}
     />
   </div>
