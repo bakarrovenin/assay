@@ -165,11 +165,19 @@ export type Tally = {
   scored: number;
   alertClosed: number;
   verified: number;
+  /** Check B passed: the hole was shut, no held-out attack got through. */
+  holeShut: number;
+  /** Check C passed: the fix kept every benign input working. */
+  behaviourHeld: number;
+  /** Scored patches that shut the hole but failed check C. Same data, counted. */
+  brokeBehaviour: number;
   noAlert: number;
   insufficient: number;
   /** Rates over scored. null when scored is 0, never 0%. */
   alertClosedRate: number | null;
   verifiedRate: number | null;
+  holeShutRate: number | null;
+  behaviourHeldRate: number | null;
   /** alert closed minus verified, in percentage points. */
   gapPp: number | null;
 };
@@ -180,6 +188,8 @@ export function aggregate(records: readonly Result[]): Tally {
   let scored = 0;
   let alertClosed = 0;
   let verified = 0;
+  let holeShut = 0;
+  let behaviourHeld = 0;
   let noAlert = 0;
   let insufficient = 0;
   for (const r of records) {
@@ -193,6 +203,8 @@ export function aggregate(records: readonly Result[]): Tally {
     }
     scored++;
     if (r.checks.A.pass) alertClosed++;
+    if (r.checks.B.pass) holeShut++;
+    if (r.checks.C.pass) behaviourHeld++;
     if (r.verdict === 'VERIFIED') verified++;
   }
   const a = pct(alertClosed, scored);
@@ -201,10 +213,15 @@ export function aggregate(records: readonly Result[]): Tally {
     scored,
     alertClosed,
     verified,
+    holeShut,
+    behaviourHeld,
+    brokeBehaviour: scored - behaviourHeld,
     noAlert,
     insufficient,
     alertClosedRate: a,
     verifiedRate: v,
+    holeShutRate: pct(holeShut, scored),
+    behaviourHeldRate: pct(behaviourHeld, scored),
     gapPp: a === null || v === null ? null : a - v,
   };
 }

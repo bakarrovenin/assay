@@ -31,7 +31,7 @@ import { METHOD_VERSION } from '../lib/site';
 const beats = [
   {
     h: 'A security fix just landed.',
-    b: 'We constructed this patch to show the mechanism. It is not the output of any tool we grade. A search box on this app has a hole: an attacker can type database commands into it and pull back data they should never see. The patch was written the way a lazy fix gets written: against the one example of the attack in the ticket.',
+    b: 'We constructed this patch to show the mechanism. It is not the output of any tool we grade. A search box on this app has a hole: an attacker can type database commands into it and pull back data they should never see. The patch was written the way an over-broad fix gets written: it refuses anything that looks dangerous, so it does close the hole.',
     chip: 'SQL injection · CWE-89 · /api/search',
     red: false,
   },
@@ -43,28 +43,28 @@ const beats = [
   },
   {
     h: 'Assay doesn’t trust the scanner.',
-    b: 'A green alert means the scanner no longer matches the diff. That says nothing about the hole, and the scanner cannot tell a real fix from a line that was merely tidied. Assay asks a harder question, using attacks the fixer was never shown, and runs four independent checks.',
-    chip: 'held-out testing · the AI saw one attack, we kept the rest hidden',
+    b: 'A green alert means the scanner no longer matches the diff. That says nothing about the product, and the scanner cannot tell a real fix from one that closed the hole by breaking something else. Assay asks a harder question, using inputs the fixer was never shown, and runs four independent checks.',
+    chip: 'held-out testing · the AI saw one example, we kept the rest hidden',
     red: false,
   },
   {
     h: 'Four checks run.',
-    b: 'Three ask the ordinary questions any careful team would ask. One asks the question nobody runs: does the fix stop the attacks it was never shown? Watch which one fails.',
+    b: 'Three ask the ordinary questions any careful team would ask. One asks the question nobody runs: does the fix still accept the legitimate input it was never shown? Watch which one fails.',
     chip: 'resolving…',
     red: false,
   },
   {
     h: 'Three pass. One fails, and it’s the one that matters.',
-    b: 'The patch blocked the exact attack string it was shown. But 46 other versions of the same attack walk straight through and still leak the users table. It patched the example, not the vulnerability.',
-    chip: '46 of 47 held-out payloads still inject',
+    b: 'The patch closed the hole: every one of the 47 held-out attacks is blocked. But it also rejects a legitimate value it was never shown, the customer named O’Brien, whose apostrophe the fix now refuses. Every ordinary test passed, because not one of them used that name.',
+    chip: 'hole shut · one legitimate input now rejected',
     red: true,
   },
   {
-    // Carries protected line 7 verbatim as its closing thesis, moved here when
-    // the Setup section was dropped. The demonstration ends on the line the
-    // section used to state.
-    h: 'The alert went green. The bug didn’t.',
-    b: 'The scanner said zero findings. Two of the four checks a normal team runs also came back clean, and the hole is still wide open. The alert turning green and the bug being fixed are two different events. The industry measures the first one.',
+    // Carries protected line 5 verbatim as its closing thesis. The demonstration
+    // now ends on the behaviour failure: the hole is shut and the product broke,
+    // and a test suite is a sample that never covered the input the fix rejects.
+    h: 'The scanner passed. The tests passed. The product broke.',
+    b: 'The alert went green, the hole is shut, and three of the four checks a normal team runs came back clean. The fix still refuses a customer the product is supposed to serve, and nothing in the pipeline caught it, because a test is a sample, not a specification.',
     chip: 'verdict: NOT VERIFIED',
     red: true,
   },
@@ -82,18 +82,19 @@ const checks = [
   },
   {
     n: '02',
-    name: 'Behaviour held',
+    name: 'Hole shut',
     plain: 'Does it stop attacks we never showed the AI?',
     detail:
-      '46 of 47 held-out payloads still inject. The patch blocked the exact string it was shown, not the whole class.',
-    failed: true,
+      'All 47 held-out attacks blocked. The fix closed the hole, which is the part that mostly goes right.',
+    failed: false,
   },
   {
     n: '03',
-    name: 'No regression',
-    plain: 'Did the fix break anything that worked before?',
-    detail: 'No new findings in the diff. Benign inputs unchanged.',
-    failed: false,
+    name: 'Behaviour held',
+    plain: 'Does it still accept the input it should?',
+    detail:
+      'A legitimate value the fixer never saw now returns an error. The fix is over-broad, and no ordinary test used that value.',
+    failed: true,
   },
   {
     n: '04',
@@ -180,7 +181,7 @@ const N = beats.length;
                 </div>
 
                 <div class="verdict piece piece-final"><span class="stamp">Not verified</span></div>
-                <div class="kicker piece piece-final">The alert went green. The bug didn&rsquo;t.</div>
+                <div class="kicker piece piece-final">The hole is shut. The product isn&rsquo;t working.</div>
 
                 <div class="foot piece piece-final">
                   <span>Method v{METHOD_VERSION}</span>

@@ -61,7 +61,7 @@ const policy = [
 
   <Section id="tally" rule={false}>
     <Eyebrow class="reveal">The running count</Eyebrow>
-    <h2 class="h2 reveal" style="--reveal-delay:60ms">The gap is the finding.</h2>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Every fix shut the hole. Not every fix left the product working.</h2>
 
     <div class="reveal mt-11 tally" style="--reveal-delay:120ms">
       <DefinitionPair
@@ -69,16 +69,16 @@ const policy = [
         terms={[
           { term: String(ours.scored), definition: 'patches scored.' },
           {
-            term: rate(ours.alertClosedRate),
-            definition: `closed the alert. ${ours.alertClosed} of ${ours.scored}.`,
+            term: `${ours.holeShut} of ${ours.scored}`,
+            definition: 'shut the hole. Every held-out attack blocked, no fixer left it open.',
           },
           {
-            term: rate(ours.verifiedRate),
-            definition: `actually verified. ${ours.verified} of ${ours.scored}.`,
+            term: `${ours.behaviourHeld} of ${ours.scored}`,
+            definition: `left the product working. The other ${ours.brokeBehaviour} closed the hole and rejected a legitimate input.`,
           },
         ]}
-        footer="Alert closed minus verified · "
-        footerTerm={ours.gapPp === null ? 'no cells' : `${ours.gapPp} pp`}
+        footer="Alert closed then verified, and the gap between · "
+        footerTerm={ours.gapPp === null ? 'no cells' : `${ours.alertClosed} of ${ours.scored} to ${ours.verified} of ${ours.scored}, ${ours.gapPp} pp`}
       />
     </div>
 
@@ -87,10 +87,10 @@ const policy = [
         label="Submitted · UNVERIFIED · self-reported, scored by the stub, stored in this browser only"
         terms={[
           { term: '0', definition: 'patches scored.' },
-          { term: 'none', definition: 'closed the alert.' },
-          { term: 'none', definition: 'actually verified.' },
+          { term: 'none', definition: 'shut the hole.' },
+          { term: 'none', definition: 'left the product working.' },
         ]}
-        footer="Alert closed minus verified · "
+        footer="Alert closed then verified, and the gap between · "
         footerTerm="no cells"
       />
     </div>

@@ -6,7 +6,7 @@ import Section from './Section.astro';
 const checks = [
   { n: '01', name: 'Closed', body: 'Re-scan after the patch. Is the reported finding actually gone, or did it move?' },
   { n: '02', name: 'Hole shut', body: 'Fire attacks the fixer never saw. One that still lands is a failure.' },
-  { n: '03', name: 'Behaviour held', body: 'Every ordinary input still matches a known-correct reference.' },
+  { n: '03', name: 'Behaviour held', body: 'Every ordinary input still works, matched against a known-correct reference. A legitimate value the fix now rejects is a failure.' },
   { n: '04', name: 'Provenance clean', body: 'No suppression, no new finding, no alert closed while attacks still land.' },
 ];
 ---
@@ -17,7 +17,8 @@ const checks = [
   <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:64ch">
     The patch is applied to a clean checkout and scored with no network egress, torn down
     between patches. Three of the checks are the ordinary questions any careful team asks. The
-    second is the one nobody runs.
+    two that catch real failures run inputs the fixer never saw: attacks the hole must still
+    block, and legitimate values it must still accept.
   </p>
 
   <ol class="reveal mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-[3px] border border-line bg-line sm:grid-cols-2" style="--reveal-delay:60ms">

@@ -21,21 +21,26 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const data = JSON.parse(readFileSync(join(ROOT, 'src/data/benchmark/assay-runs.json'), 'utf8'));
 
 function recount(runs) {
-  let scored = 0, alert = 0, verified = 0, noAlert = 0;
+  let scored = 0, alert = 0, verified = 0, holeShut = 0, behaviourHeld = 0, noAlert = 0;
   for (const r of runs) {
     if (r.verdict === 'NO ALERT') { noAlert++; continue; }
     if (!r.checks) continue;
     scored++;
     if (r.checks.A.pass) alert++;
+    if (r.checks.B.pass) holeShut++;
+    if (r.checks.C.pass) behaviourHeld++;
     if (r.verdict === 'VERIFIED') verified++;
   }
   const pct = (n) => (scored ? Math.round((n / scored) * 100) : null);
-  return { scored, alert, verified, noAlert, alertRate: pct(alert), verifiedRate: pct(verified) };
+  return {
+    scored, alert, verified, holeShut, behaviourHeld, broke: scored - behaviourHeld, noAlert,
+    alertRate: pct(alert), verifiedRate: pct(verified),
+  };
 }
 
 const t = recount(data.runs);
 console.log(`stored assay runs: ${data.runs.length}`);
-console.log(`  scored ${t.scored}  alert closed ${t.alert} (${t.alertRate}%)  verified ${t.verified} (${t.verifiedRate}%)  no alert ${t.noAlert}`);
+console.log(`  scored ${t.scored}  hole shut ${t.holeShut}  product working ${t.behaviourHeld}  alert closed ${t.alert} (${t.alertRate}%)  verified ${t.verified} (${t.verifiedRate}%)  no alert ${t.noAlert}`);
 
 // Negative control: flip one verified cell and require a different count.
 const corrupted = JSON.parse(JSON.stringify(data.runs));
@@ -55,10 +60,12 @@ const text = (p) => readFileSync(join(ROOT, p), 'utf8').replace(/<[^>]+>/g, ' ')
 
 const expect = [
   ['dist/benchmark/index.html', `${t.scored} patches scored.`],
-  ['dist/benchmark/index.html', `${t.alertRate}%`],
-  ['dist/benchmark/index.html', `closed the alert. ${t.alert} of ${t.scored}.`],
-  ['dist/benchmark/index.html', `actually verified. ${t.verified} of ${t.scored}.`],
-  ['dist/benchmark/index.html', `${t.alertRate - t.verifiedRate} pp`],
+  ['dist/benchmark/index.html', `${t.holeShut} of ${t.scored}`],
+  ['dist/benchmark/index.html', `shut the hole.`],
+  ['dist/benchmark/index.html', `${t.behaviourHeld} of ${t.scored}`],
+  ['dist/benchmark/index.html', `left the product working.`],
+  ['dist/benchmark/index.html', `The other ${t.broke} closed the hole`],
+  ['dist/benchmark/index.html', `${t.alert} of ${t.scored} to ${t.verified} of ${t.scored}, ${t.alertRate - t.verifiedRate} pp`],
   ['dist/benchmark/leaderboard/index.html', `${t.scored} scored cells`],
   ['dist/benchmark/leaderboard/index.html', `alert closed ${t.alert} of ${t.scored}`],
   ['dist/benchmark/leaderboard/index.html', `verified ${t.verified} of ${t.scored}`],
