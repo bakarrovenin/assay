@@ -1,0 +1,636 @@
+---
+import PostLayout from '../../layouts/PostLayout.astro';
+import Diff from '../../components/Diff.astro';
+import type { DiffLine } from '../../components/Diff.astro';
+import DefinitionPair from '../../components/DefinitionPair.astro';
+import ConditionList from '../../components/ConditionList.astro';
+import RuledRows from '../../components/RuledRows.astro';
+
+// Read by src/pages/research/index.astro, which globs the posts in this
+// directory. Same shape as the frontmatter block of the markdown posts.
+export const frontmatter = {
+  title: 'Pilot 001, second edition: what a blind run found',
+  description:
+    'Three tools, four SQL injection shapes, attacks the tools never saw. Every tool shut the hole. What failed was the measurement.',
+  date: '2026-09-14',
+  author: 'Founder, Assay',
+  readingTime: '8 min read',
+};
+
+const REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence';
+
+// Every figure below is read off the pilot repository's committed artifacts:
+// results/RESULTS.md, results/summary.json, the per-cell evidence under
+// results/<finding>/, the no-alert sidecar, patches/TOOLS.md, and
+// METHODOLOGY-NOTES.md. Nothing is reconstructed.
+
+// Tokenised by hand with the .tok-* spans CodePanel defines. No runtime
+// highlighter ships to the browser. Diff lines are verbatim from the
+// committed patches and the stripped modules they apply to.
+const k = (s: string) => `<span class="tok-kw">${s}</span>`;
+const f = (s: string) => `<span class="tok-fn">${s}</span>`;
+const t = (s: string) => `<span class="tok-str">${s}</span>`;
+
+const Q = '&quot;';
+
+// --- the results matrix ----------------------------------------------------
+// Standing cells only. Provisional cells, produced against the corpus that
+// named its own fix, are published in the repository and appear nowhere in
+// these figures.
+const tools = ['ChatGPT', 'Claude Code', 'Copilot Autofix'] as const;
+
+type Cell = 'VERIFIED' | 'NOT VERIFIED' | 'no alert raised' | 'not supplied';
+
+const matrix: { shape: string; finding: string; cells: readonly Cell[] }[] = [
+  { shape: 'Quoted string', finding: '01', cells: ['VERIFIED', 'VERIFIED', 'not supplied'] },
+  { shape: 'Numeric context', finding: '04', cells: ['VERIFIED', 'NOT VERIFIED', 'VERIFIED'] },
+  {
+    shape: 'ORDER BY identifier',
+    finding: '08',
+    cells: ['NOT VERIFIED', 'VERIFIED', 'NOT VERIFIED'],
+  },
+  { shape: 'Second order', finding: '13', cells: ['VERIFIED', 'VERIFIED', 'no alert raised'] },
+];
+
+const cellClass = (cell: Cell) =>
+  cell === 'VERIFIED'
+    ? 'text-accent'
+    : cell === 'NOT VERIFIED'
+      ? 'text-fail'
+      : 'text-fg-3';
+
+// --- the four shapes -------------------------------------------------------
+const shapes = [
+  {
+    lead: 'Quoted string',
+    body: 'Single parameter. The baseline case.',
+  },
+  {
+    lead: 'Numeric context',
+    body: 'No quotes anywhere in the query, so a patch that escapes or strips quotes does nothing.',
+  },
+  {
+    lead: 'ORDER BY identifier',
+    body: 'A column name cannot be a bound parameter. The only correct defence is an allow-list.',
+  },
+  {
+    lead: 'Second order',
+    body: 'The input is stored safely in one function and reaches the vulnerable query in another.',
+  },
+] as const;
+
+// --- the four checks -------------------------------------------------------
+const checks = [
+  'A. Alert closed. Does the scanner still report the finding.',
+  'B. Hole shut. Does any held-out attack still succeed. One success is a failure.',
+  'C. Behaviour preserved. Does every ordinary input still match a baseline captured from a known correct reference.',
+  'D. Provenance clean. Suppression markers, new findings, or an alert closed while attacks still succeed.',
+] as const;
+
+// --- the tools, as pinned in patches/TOOLS.md and batch.json ---------------
+const versions = [
+  {
+    lead: 'ChatGPT',
+    body: 'Model ChatGPT Think. 2026-09-14. Findings 01, 04, 08, 13.',
+  },
+  {
+    lead: 'Claude Code',
+    body: 'Claude Code 2.1.270, model Opus 5. 2026-09-14. Findings 01, 04, 08, 13.',
+  },
+  {
+    lead: 'Copilot Autofix',
+    body: 'GitHub Copilot Autofix on CodeQL 2.27.0, default suite, threat model remote. 2026-09-14. Findings 04, 08, 13.',
+  },
+  {
+    lead: 'Cursor',
+    body: 'Attempted. The blind batch could not be completed within this edition’s window. Its earlier results are published marked provisional and count in no figure here.',
+    tag: 'not counted',
+  },
+] as const;
+
+// --- finding two: the reformat, verbatim from patches/finding-08/chatgpt-blind.patch
+const before: DiffLine[] = [
+  { n: 38, html: `    conn = ${f('get_connection')}()` },
+  { n: 39, html: `    cur = conn.${f('cursor')}()` },
+  { n: 40, html: '' },
+  {
+    n: 41,
+    mark: '-',
+    html: `    query = ${t(`f${Q}SELECT id, name, {column} AS featured FROM products ORDER BY {column} {direction}${Q}`)}`,
+  },
+  { n: 46, mark: '+', html: `    query = (` },
+  {
+    n: 47,
+    mark: '+',
+    html: `        ${t(`f${Q}SELECT id, name, {column} AS featured ${Q}`)}`,
+  },
+  {
+    n: 48,
+    mark: '+',
+    html: `        ${t(`f${Q}FROM products ORDER BY {column} {direction}${Q}`)}`,
+  },
+  { n: 49, mark: '+', html: `    )` },
+  { n: 50, html: `    rows = cur.${f('execute')}(query).${f('fetchall')}()` },
+];
+
+// The 2x2 from METHODOLOGY-NOTES.md note 13: the pinned rule run over four
+// versions of the finding-08 module. Rows are the hole, columns are the
+// formatting, cells are Semgrep findings.
+const grid = [
+  { hole: 'Hole open', one: '1', two: '0' },
+  { hole: 'Hole shut', one: '1', two: '0' },
+] as const;
+
+// --- the tension: patches/finding-04/claude-code-blind.patch ---------------
+const cast: DiffLine[] = [
+  { n: 29, mark: '-', html: `    pid = request.args.${f('get')}(${t(`${Q}id${Q}`)}, ${t(`${Q}0${Q}`)})` },
+  { n: 29, mark: '+', html: `    ${k('try')}:` },
+  {
+    n: 30,
+    mark: '+',
+    html: `        pid = ${f('int')}(request.args.${f('get')}(${t(`${Q}id${Q}`)}, ${t(`${Q}0${Q}`)}))`,
+  },
+  { n: 31, mark: '+', html: `    ${k('except')} ValueError:` },
+  {
+    n: 32,
+    mark: '+',
+    html: `        ${k('return')} ${f('jsonify')}({${t(`${Q}error${Q}`)}: ${t(`${Q}id must be an integer${Q}`)}}), 400`,
+  },
+  { n: 41, html: `    results = [${f('dict')}(row) ${k('for')} row ${k('in')} rows]` },
+  {
+    n: 42,
+    html: `    ${k('return')} ${f('jsonify')}({${t(`${Q}query_id${Q}`)}: pid, ${t(`${Q}count${Q}`)}: ${f('len')}(results), ${t(`${Q}results${Q}`)}: results})`,
+  },
+];
+
+// --- what our own method got wrong, one line each, METHODOLOGY-NOTES.md ----
+const mistakes = [
+  {
+    lead: 'App never started',
+    tag: 'note 4',
+    body: 'A patch that failed to start scored as a patch that shut the hole, because every attack failed to connect and every failure was recorded as an attack that did not succeed.',
+  },
+  {
+    lead: 'Guard read the tree',
+    tag: 'note 6',
+    body: 'A guard reported no leak before publication, correctly, about the working tree, while the answer key sat in an earlier commit that would have been public permanently.',
+  },
+  {
+    lead: 'Claimed, not coded',
+    tag: 'note 7',
+    body: 'A published note claimed a verification that did not exist in code.',
+  },
+  {
+    lead: 'Check A false fail',
+    tag: 'note 9',
+    body: 'A correct fix was failed by our own check A, because an allow-list cannot remove the pattern the rule matches.',
+  },
+  {
+    lead: 'Answer in prose',
+    tag: 'note 12',
+    body: 'The corpus handed the fixer the answer in prose.',
+  },
+  {
+    lead: 'Correct by definition',
+    tag: 'note 12',
+    body: 'A guard searched for payloads, oracles and fix code, and was correct by its own definition, while explanatory prose walked past it.',
+  },
+] as const;
+
+// --- what would change our mind ----------------------------------------------
+const reversals = [
+  {
+    lead: 'Holes left open',
+    body: 'If a broader corpus shows tools leaving holes open at any material rate, the original framing was right and we will say so.',
+  },
+  {
+    lead: 'No reproduction',
+    body: 'If the behavioural failures do not reproduce on other flaw classes, the over-broad result is a curiosity about one shape rather than a finding.',
+  },
+  {
+    lead: 'Second order tracked',
+    body: 'If a scanner tracks second-order flow reliably, that gap closes.',
+  },
+] as const;
+---
+
+<PostLayout frontmatter={frontmatter}>
+  <p>
+    We gave three AI tools the same four SQL injection flaws and asked each to fix
+    them. Then we attacked the patched code with payloads the tools had never seen,
+    and compared ordinary behaviour against a known correct reference.
+  </p>
+
+  <p>
+    <strong>Every tool shut the hole. Not one held-out attack succeeded against any
+    patch.</strong>
+  </p>
+
+  <p>
+    What failed was the measurement. A patch broke the application while the
+    scanner reported success. A scanner alert closed because a line had been
+    reformatted rather than fixed. And on one flaw the scanner raised no alert at
+    all, so nothing was reported and nothing was repaired.
+  </p>
+
+  <p>A closed alert is a fact about the diff. It is not a fact about the hole.</p>
+
+  <h2>Results</h2>
+
+  <div class="my-9 overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[560px] border-collapse text-left">
+        <caption class="sr-only">
+          Verdict per tool per finding across the standing blind cells.
+        </caption>
+        <thead>
+          <tr class="border-b border-line">
+            <th
+              scope="col"
+              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+            >
+              Finding
+            </th>
+            {
+              tools.map((tool) => (
+                <th
+                  scope="col"
+                  class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+                >
+                  {tool}
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            matrix.map((row, i) => (
+              <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
+                <th scope="row" class="whitespace-nowrap px-3 py-3 text-[13px] font-medium sm:px-4">
+                  <span class="mono">{row.shape}</span>
+                  <span class="mono ml-2 text-[11px] text-fg-3">{row.finding}</span>
+                </th>
+                {row.cells.map((cell) => (
+                  <td class={`mono whitespace-nowrap px-3 py-3 text-[13px] sm:px-4 ${cellClass(cell)}`}>
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
+      10 scored cells &middot; alert closed 9 of 10 &middot; verified 7 of 10 &middot; 117
+      held-out attacks fired, 0 succeeded
+    </p>
+  </div>
+
+  <p>
+    Every NOT VERIFIED verdict was earned on behaviour or on the scanner, never on
+    the hole.
+  </p>
+
+  <h2>What we tested</h2>
+
+  <p>
+    A small Flask application with a SQLite database, carrying four deliberately
+    written SQL injection flaws. We wrote the flaws, so the correct fix for each is
+    known.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows label="Four shapes · a patch that works on one often fails on another" rows={shapes} />
+  </div>
+
+  <p>
+    For each flaw we wrote a held-out attack set and a set of ordinary inputs that
+    must keep working. The fixer was given the file, the scanner finding, and
+    exactly one reported payload. Nothing else. After the patch is applied, four
+    checks run inside a container with no network egress, destroyed between
+    patches.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <ConditionList label="Scored on every patch, mechanically" conditions={checks} />
+  </div>
+
+  <p>
+    VERIFIED requires all four. NO ALERT and INSUFFICIENT EVIDENCE are reported
+    outcomes, not silent failures.
+  </p>
+
+  <h2>The tools</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows label="As pinned in the evidence repository" rows={versions} />
+  </div>
+
+  <h2>Finding one: the fix is secure and the application is broken</h2>
+
+  <p>
+    The ORDER BY flaw can only be fixed with an allow-list, and the table has five
+    sortable columns, all of them in the seed file every tool was given.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <DefinitionPair
+      label="The allow-list each tool wrote · finding 08"
+      terms={[
+        {
+          term: 'id, name, price',
+          definition: 'Copilot Autofix. ChatGPT. The same three columns, the same two missing.',
+        },
+        {
+          term: 'id, name, price, category, sku',
+          definition: 'Claude Code. All five.',
+        },
+      ]}
+      footer="Check C failed on the four inputs that sort by the missing columns and on nothing else · "
+      footerTerm="b07, b08, b09, b10"
+    />
+  </div>
+
+  <p>
+    Sorting by either omitted column now fails, silently in one case and with a
+    rejection in the other, and the scanner reported both patches clean. This
+    reproduced three times across two vendors, on the contaminated corpus and the
+    blind one, and did not occur with the third tool.
+  </p>
+
+  <h2>Finding two: the alert closed because the line was reformatted</h2>
+
+  <p>
+    Two tools closed the scanner alert on the ORDER BY flaw by splitting one
+    formatted string into two adjacent ones, with the interpolation unchanged.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Diff
+      file="app/finding_08.py"
+      tag="chatgpt-blind"
+      added={4}
+      removed={1}
+      lines={before}
+      footer="Semgrep before: 1 finding · after: 0 findings · the column is still formatted into the SQL in two places"
+    />
+  </div>
+
+  <div class="my-9 overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[300px] border-collapse text-left">
+        <caption class="sr-only">
+          Semgrep findings on four versions of the module: hole open or shut, query
+          as one string or two.
+        </caption>
+        <thead>
+          <tr class="border-b border-line">
+            <th
+              scope="col"
+              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+            >
+              Semgrep findings
+            </th>
+            <th
+              scope="col"
+              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+            >
+              One string
+            </th>
+            <th
+              scope="col"
+              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
+            >
+              Two strings
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            grid.map((row, i) => (
+              <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
+                <th scope="row" class="mono whitespace-nowrap px-3 py-3 text-[13px] font-medium sm:px-4">
+                  {row.hole}
+                </th>
+                <td class="mono whitespace-nowrap px-3 py-3 text-[13px] text-fail sm:px-4">{row.one}</td>
+                <td class="mono whitespace-nowrap px-3 py-3 text-[13px] text-accent sm:px-4">{row.two}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
+      The result follows the column, never the row.
+    </p>
+  </div>
+
+  <p>
+    Neither tool was evading anything; both tidied a long line while shutting the
+    hole with the allow-list. The same mechanism would produce an identical green
+    alert on a patch that fixed nothing, and until now we had only shown it with a
+    patch we constructed for the purpose.
+  </p>
+
+  <h2>Finding three: no alert at all</h2>
+
+  <p>
+    On the second-order flaw, where the input is stored by one function and used
+    by another, the scan completed normally.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <DefinitionPair
+      label="CodeQL 2.27.0 · default suite · threat model remote · finding 13"
+      terms={[
+        { term: '43', definition: 'rules run.' },
+        { term: '0', definition: 'results returned.' },
+      ]}
+      footer="The rule that did not fire · "
+      footerTerm="py/sql-injection"
+    />
+  </div>
+
+  <p>
+    The result was identical on the corpus with every comment describing the flaw
+    removed, so the silence is a property of the analysis. Two of the three tools
+    fixed this flaw correctly when they were told about it; the third was never
+    told.
+  </p>
+
+  <h2>A tension worth stating</h2>
+
+  <p>
+    On the numeric flaw, one tool bound the parameter and nothing else. Another
+    bound the parameter and also validated the input as an integer.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <Diff
+      file="app/finding_04.py"
+      tag="claude-code-blind"
+      added={4}
+      removed={1}
+      lines={cast}
+      footer={'Line 42 unchanged: query_id now echoes 3 where the baseline echoes "3" · 14 of 14 benign inputs regressed'}
+    />
+  </div>
+
+  <p>
+    The minimal fix passed and the stricter one failed check C, because the check
+    compares responses exactly and the response contract changed. The check is
+    correct, a reader may still feel the stricter fix was the better engineering,
+    and we would rather publish the tension than quietly resolve it.
+  </p>
+
+  <h2>What this does not show</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows
+      label="Stated by us, before anyone else states them"
+      rows={[
+        {
+          lead: 'One of everything',
+          body: 'One weakness class. One language. One small application. Four flaws. Three tools. Ten scored cells.',
+        },
+        {
+          lead: 'A signal, not a rate',
+          body: 'No ranking should be read from it. The strongest result here, the narrow allow-list, reproduced across two vendors and is still a single flaw shape.',
+        },
+        {
+          lead: 'Not holes left open',
+          body: 'On this corpus the tools did not leave a vulnerability open, once.',
+        },
+        {
+          lead: 'The easiest case',
+          body: 'A sixty line file with the flaw on screen. A fixer that succeeds here may not succeed where the sink is a thousand lines from the input.',
+        },
+        {
+          lead: 'A real advantage',
+          body: 'Every tool was told where to look, with a reported payload.',
+        },
+        {
+          lead: 'Assumed, not observed',
+          body: 'Results assume each tool worked from the material it was given and did not search for this corpus, which is public. We cannot observe a hosted tool’s browsing.',
+        },
+      ]}
+    />
+  </div>
+
+  <h2>Why every earlier result was discarded</h2>
+
+  <p>
+    An earlier run of the same experiment produced similar numbers. We discarded
+    it. The vulnerable files carried comments explaining the flaw and, in one
+    case, naming the correct fix, so every tool had been handed the answer. We
+    found this while preparing a second run, stripped the corpus, rebuilt the
+    handoff material, and ran everything again.
+  </p>
+
+  <p>
+    The earlier results are published, marked provisional, with the reason: a
+    valid test of the harness and an invalid measurement of the tools. For one
+    tool the blind result was identical to the contaminated one, check for check.
+    That is a useful data point and not a general one.
+  </p>
+
+  <h2>What our own method got wrong</h2>
+
+  <p>
+    Six times during this pilot, a check of ours passed for a reason unrelated to
+    the thing it was meant to establish.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows label="Each failed in the flattering direction" rows={mistakes} />
+  </div>
+
+  <p>
+    A check that wrongly accuses a good patch is investigated within the hour. A
+    check that wrongly clears a bad one is the answer nobody interrogates. All six
+    are documented in full in the methodology notes, including how each was found
+    and closed. A check that has only ever passed has not been tested.
+  </p>
+
+  <p>
+    A seventh instance was found after this run, while building the benchmark: a
+    leak guard passed on an incomplete tree. It is recorded as note 14 in the
+    methodology notes. This report counts the six that belong to the pilot itself.
+  </p>
+
+  <h2>What would change our mind</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows label="Stated before the next edition, not after" rows={reversals} />
+  </div>
+
+  <p>
+    None of that would change the central claim, which does not depend on how well
+    the tools perform. A closed alert would still be a fact about the diff.
+  </p>
+
+  <h2>What is published</h2>
+
+  <div class="artifact my-9 lg:my-11">
+    <DefinitionPair
+      label="Pilot 001 evidence"
+      terms={[
+        {
+          term: 'Published',
+          definition:
+            'The harness, the corpus, the scorer, every patch diff, the per-check evidence, the pinned versions, and the methodology notes.',
+        },
+        {
+          term: 'Withheld',
+          definition:
+            'The held-out attack sets, because publishing them allows a patch to be tuned against them.',
+        },
+      ]}
+      footer="That is the only thing we hold back · "
+      footerTerm="and this is the reason"
+    />
+  </div>
+
+  <p>
+    The repository is public at{' '}
+    <a href={REPO} rel="noopener">{REPO.replace('https://', '')}</a>.
+  </p>
+
+  <h2>Right of reply</h2>
+
+  <p>
+    Every tool named here was contacted with its results before publication and
+    given [RIGHT OF REPLY WINDOW, TO BE SET] to respond. Responses appear below,
+    unedited.
+  </p>
+
+  <div class="artifact my-9 lg:my-11">
+    <RuledRows
+      label="Responses · unedited"
+      rows={[
+        { lead: 'ChatGPT', body: '[Response, or: no response received by the closing date.]' },
+        { lead: 'Claude Code', body: '[Response, or: no response received by the closing date.]' },
+        { lead: 'Copilot Autofix', body: '[Response, or: no response received by the closing date.]' },
+      ]}
+    />
+  </div>
+
+  <p class="mono text-[13px] text-fg-2">Nullius in verba.</p>
+</PostLayout>
+
+<style>
+  /* Diff renders its rows inside <code>, and .longform styles bare <code> as
+     an inline chip: light background, border, 0.87em, nowrap. Inside a dark
+     panel that washes the untokenised text out and breaks the wrapping.
+     Inline code in the prose around them keeps the chip. */
+  .artifact :global(code) {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-size: inherit;
+    white-space: inherit;
+  }
+</style>
