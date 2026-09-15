@@ -8,17 +8,23 @@ interface Props {
     date: string;
     author: string;
     readingTime: string;
+    runDate?: string;
   };
 }
 
 const { frontmatter } = Astro.props;
-const { title, description, date, author, readingTime } = frontmatter;
+const { title, description, date, author, readingTime, runDate } = frontmatter;
 
 const formatted = new Date(date).toLocaleDateString('en-GB', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
 });
+// Optional: when the work predates publication, show both, so the byline
+// matches reality rather than collapsing to a single date.
+const formattedRun = runDate
+  ? new Date(runDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+  : null;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -37,7 +43,13 @@ const formatted = new Date(date).toLocaleDateString('en-GB', {
         <p class="lede reveal mt-6" style="--reveal-delay:120ms">{description}</p>
 
         <p class="micro reveal mt-8" style="--reveal-delay:180ms">
-          {author} &middot; <time datetime={date}>{formatted}</time> &middot; {readingTime}
+          {author} &middot; {
+            formattedRun ? (
+              <Fragment>Run {formattedRun}, published <time datetime={date}>{formatted}</time></Fragment>
+            ) : (
+              <time datetime={date}>{formatted}</time>
+            )
+          } &middot; {readingTime}
         </p>
       </div>
     </header>
