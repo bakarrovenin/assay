@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import Explainer from '../components/Explainer.astro';
 import Setup from '../components/Setup.astro';
 import Checks from '../components/Checks.astro';
 import Credibility from '../components/Credibility.astro';
@@ -20,6 +21,10 @@ import { site } from '../lib/site';
 
 <BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
   <Hero />
+  {/* The six-beat explainer, its own full-width section directly below the hero
+      so the hero stays a single clean column. Also lives at
+      /research/how-the-alert-goes-green; it exists in both places on purpose. */}
+  <Explainer />
   <Setup />
   {/* MOVE 3 SLOT, held for right of reply: <Finding /> */}
   <Checks />
