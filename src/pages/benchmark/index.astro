@@ -151,6 +151,25 @@ const policy = [
         Results by tool and version
       </a>
     </p>
+
+    {/* The product waitlist (verify-pr), kept distinct from the benchmark
+        waitlist on the finding and leaderboard pages: this is the verifier on
+        your own repositories, not the self-service corpus. */}
+    <div class="reveal mt-12 border-t border-line pt-6" style="max-width:70ch">
+      <p class="micro mb-3">The product</p>
+      <p class="text-[15.5px] leading-[1.6] text-fg-2">
+        This benchmark is a fixed corpus you score against by hand. The verifier it comes from
+        runs the same four checks on every pull request, on your own repositories.
+        <button
+          type="button"
+          class="link-inline font-medium text-fg"
+          data-verify-cta
+          data-verify-group="verify-pr"
+          data-verify-title="Join the product waitlist"
+          data-verify-lede="A verifier that runs the four checks on every pull request, on your own repositories, is in development. Leave an address and we will tell you when it is ready."
+        >Join the product waitlist.</button>
+      </p>
+    </div>
   </Section>
 </BaseLayout>
 

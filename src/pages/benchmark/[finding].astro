@@ -70,6 +70,21 @@ const steps = [
       <span class="mono text-[11px] text-fg-3" data-copied hidden>copied</span>
     </div>
 
+    {/* Highest-intent moment: right after they take the module to a fixer.
+        benchmark-waitlist, same segment as the submit-step notify button. */}
+    <p class="reveal mono mt-4 text-[11px] leading-relaxed text-fg-2" style="--reveal-delay:220ms;max-width:70ch">
+      Taking this to a fixer?{' '}
+      <button
+        type="button"
+        class="link-inline font-medium text-fg"
+        data-verify-cta
+        data-verify-group="benchmark-waitlist"
+        data-verify-title="Notify me when scoring opens"
+        data-verify-lede="The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live."
+      >Get told when scoring opens</button>{' '}
+      so you know to come back with the patch.
+    </p>
+
     <div class="reveal mt-6 artifact" style="--reveal-delay:240ms">
       <CodePanel label={`Prompt · the only line the fixer is given`} html={`<span class="tok-str">${finding.prompt.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`} />
     </div>

@@ -160,6 +160,23 @@ const toolName = (k: string) => ASSAY_RUNS.find((r) => r.toolKey === k)!.tool;
     <p class="reveal mt-6">
       <a href="/benchmark/" class="link-inline text-[15px] font-medium">Score a patch</a>
     </p>
+
+    {/* The corpus rotates each edition; this is the moment to catch someone who
+        cares about the results. benchmark-waitlist, same segment as the rest. */}
+    <div class="reveal mt-12 border-t border-line pt-6" style="max-width:70ch">
+      <p class="micro mb-3">Next edition</p>
+      <p class="text-[15.5px] leading-[1.6] text-fg-2">
+        The corpus rotates each edition so a published benchmark cannot be tuned against.
+        <button
+          type="button"
+          class="link-inline font-medium text-fg"
+          data-verify-cta
+          data-verify-group="benchmark-waitlist"
+          data-verify-title="Get the next edition"
+          data-verify-lede="The benchmark corpus rotates each edition. Leave an address and we will send you the next one when it publishes."
+        >Send me the next edition when it publishes.</button>
+      </p>
+    </div>
   </Section>
 </BaseLayout>
 
