@@ -56,58 +56,18 @@ const steps = [
     subLede={`${finding.file} · ${finding.attacks.length} held-out attacks · ${finding.benign.length} benign inputs`}
   />
 
-  <Section id="module" rule={false}>
-    <Eyebrow class="reveal">The module</Eyebrow>
-    <h2 class="h2 reveal" style="--reveal-delay:60ms">What the fixer gets.</h2>
-
-    <div class="reveal mt-11" style="--reveal-delay:120ms">
-      <ConditionList label="Three steps" conditions={steps} />
-    </div>
-
-    <div class="reveal mt-9 flex flex-wrap items-center gap-3" style="--reveal-delay:180ms">
-      <button type="button" class="btn btn-secondary btn-sm" data-copy="module">Copy module</button>
-      <button type="button" class="btn btn-secondary btn-sm" data-copy="prompt">Copy prompt</button>
-      <span class="mono text-[11px] text-fg-3" data-copied hidden>copied</span>
-    </div>
-
-    {/* Highest-intent moment: right after they take the module to a fixer.
-        benchmark-waitlist, same segment as the submit-step notify button. */}
-    <p class="reveal mono mt-4 text-[11px] leading-relaxed text-fg-2" style="--reveal-delay:220ms;max-width:70ch">
-      Taking this to a fixer?{' '}
-      <button
-        type="button"
-        class="link-inline font-medium text-fg"
-        data-verify-cta
-        data-verify-group="benchmark-waitlist"
-        data-verify-title="Notify me when scoring opens"
-        data-verify-lede="The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live."
-      >Get told when scoring opens</button>{' '}
-      so you know to come back with the patch.
-    </p>
-
-    <div class="reveal mt-6 artifact" style="--reveal-delay:240ms">
-      <CodePanel label={`Prompt · the only line the fixer is given`} html={`<span class="tok-str">${finding.prompt.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`} />
-    </div>
-
-    <div class="reveal mt-6 artifact" style="--reveal-delay:300ms">
-      <CodePanel label={`${finding.file} · unpatched`} html={html} />
-    </div>
-
-    <div class="reveal mt-9" style="--reveal-delay:60ms;max-width:80ch">
-      <RuledRows
-        label={`Held-out attacks · by id and class · ${finding.attacks.length} fired after the patch`}
-        rows={attackRows}
-      />
-    </div>
-  </Section>
-
-  <Section id="submit" tint>
+  <Section id="submit" rule={false}>
   {SCORING_LIVE ? (
     <Fragment>
     <Eyebrow class="reveal">Paste the patch back</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Score it.</h2>
 
-    <form class="reveal mt-11 max-w-[80ch]" data-submit style="--reveal-delay:120ms" novalidate>
+    <p class="reveal mt-8 text-[15.5px] leading-[1.6] text-fg-2" style="--reveal-delay:90ms;max-width:66ch">
+      First time here? Hand the module and prompt below to any fixer, then paste the patch it
+      returns to score it against the held-out attacks.
+    </p>
+
+    <form class="reveal mt-9 max-w-[80ch]" data-submit style="--reveal-delay:120ms" novalidate>
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label for="tool" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">Tool</label>
@@ -166,7 +126,7 @@ const steps = [
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Get the module now. The verdict is next.</h2>
 
     <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:66ch">
-      The module and the prompt above are usable today: hand them to your fixer now. The
+      The module and the prompt below are usable today: hand them to your fixer now. The
       scorer that runs the four checks on the patch it returns, in a sealed container, comes
       online shortly. Leave an address and we will tell you the moment you can paste a patch
       back for a verdict.
@@ -191,6 +151,51 @@ const steps = [
     </p>
     </Fragment>
   )}
+  </Section>
+
+  <Section id="module" tint>
+    <Eyebrow class="reveal">The module</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">What the fixer gets.</h2>
+
+    <div class="reveal mt-11" style="--reveal-delay:120ms">
+      <ConditionList label="Three steps" conditions={steps} />
+    </div>
+
+    <div class="reveal mt-9 flex flex-wrap items-center gap-3" style="--reveal-delay:180ms">
+      <button type="button" class="btn btn-secondary btn-sm" data-copy="module">Copy module</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-copy="prompt">Copy prompt</button>
+      <span class="mono text-[11px] text-fg-3" data-copied hidden>copied</span>
+    </div>
+
+    {/* Highest-intent moment: right after they take the module to a fixer.
+        benchmark-waitlist, same segment as the submit-step notify button. */}
+    <p class="reveal mono mt-4 text-[11px] leading-relaxed text-fg-2" style="--reveal-delay:220ms;max-width:70ch">
+      Taking this to a fixer?{' '}
+      <button
+        type="button"
+        class="link-inline font-medium text-fg"
+        data-verify-cta
+        data-verify-group="benchmark-waitlist"
+        data-verify-title="Notify me when scoring opens"
+        data-verify-lede="The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live."
+      >Get told when scoring opens</button>{' '}
+      so you know to come back with the patch.
+    </p>
+
+    <div class="reveal mt-6 artifact" style="--reveal-delay:240ms">
+      <CodePanel label={`Prompt · the only line the fixer is given`} html={`<span class="tok-str">${finding.prompt.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`} />
+    </div>
+
+    <div class="reveal mt-6 artifact" style="--reveal-delay:300ms">
+      <CodePanel label={`${finding.file} · unpatched`} html={html} />
+    </div>
+
+    <div class="reveal mt-9" style="--reveal-delay:60ms;max-width:80ch">
+      <RuledRows
+        label={`Held-out attacks · by id and class · ${finding.attacks.length} fired after the patch`}
+        rows={attackRows}
+      />
+    </div>
   </Section>
 
   <script is:inline type="application/json" data-finding-source set:html={JSON.stringify({ id: finding.id, source })} />
