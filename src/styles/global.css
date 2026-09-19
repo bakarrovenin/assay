@@ -584,6 +584,11 @@
 
   .input::placeholder { color: var(--fg-3); }
   .input:focus { border-color: var(--acc); outline: none; }
+  textarea.input { line-height: 1.6; resize: vertical; font-size: var(--t-desc); }
+  .input[readonly] { color: var(--fg-2); }
+
+  /* Field label above an input. */
+  .label { display: block; margin-bottom: 8px; }
 
   /* ---- chip: bordered inline label, mono ---- */
   .chip {
@@ -657,11 +662,12 @@
   .longform > h2 + *, .longform > h3 + * { margin-top: 0.7em; }
   .longform .lead-in { color: var(--fg-2); }
 
-  /* ---- syntax tokens, inside any terminal panel ---- */
+  /* ---- syntax tokens, inside any terminal panel ----
+     Greys only. The accent is signal, and a string literal is not. */
   .tok-com { color: var(--fg-3); font-style: italic; }
   .tok-kw  { color: var(--fg-2); }
-  .tok-fn  { color: var(--fg); }
-  .tok-str { color: var(--acc); }
+  .tok-fn  { color: var(--fg); font-weight: 500; }
+  .tok-str { color: var(--fg); }
   .tok-var { color: var(--fg); }
   .tok-mut { color: var(--fg-2); }
   .tok-bad { color: var(--fail); }
@@ -1035,6 +1041,10 @@
 
   .row:last-child { border-bottom: none; }
   .row:nth-child(even) { background: var(--bg-2); }
+  a.row { transition: background-color 150ms ease-out; }
+  a.row:hover { background: var(--acc-dim); }
+  a.row:hover .v { color: var(--acc); }
+  .disc b { color: var(--acc); font-weight: 500; }
 
   .row .k { color: var(--fg-2); font-size: var(--t-small); }
 
@@ -1056,8 +1066,15 @@
     text-align: right;
   }
 
+  /* Figure-first rows: the value leads, then the key, then the note. */
+  .rows.is-lead .row { grid-template-columns: minmax(96px, max-content) 1fr auto; }
+  .rows.is-lead .row .v { text-align: left; }
+
   /* Text-value rows: the value is a sentence, not a figure. */
   .rows.is-text .row { grid-template-columns: minmax(0, 200px) 1fr; align-items: baseline; }
+  .rows.is-text .row:has(.t) { grid-template-columns: minmax(0, 200px) 1fr auto; }
+  .rows.is-text.is-narrow .row { grid-template-columns: max-content 1fr; }
+  .rows .v .disc { margin-top: 8px; }
   .rows.is-text .row .k { font-size: var(--t-desc); text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-3); }
   .rows.is-text .row .v { font-size: var(--t-body); font-weight: 400; letter-spacing: 0; white-space: normal; line-height: 1.6; }
 
@@ -1065,9 +1082,64 @@
 
   @media (max-width: 720px) {
     .row { grid-template-columns: 1fr auto; padding: 14px 16px; }
+    .rows.is-lead .row { grid-template-columns: max-content 1fr; }
     .row .t { display: none; }
     .rows.is-text .row { grid-template-columns: 1fr; gap: 4px; }
   }
+
+  /* ---- data table ----
+     For columns that genuinely compare. Same frame as the report rows. */
+  .table-wrap {
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    overflow: hidden;
+    font-family: var(--font-mono);
+  }
+
+  .table-scroll { overflow-x: auto; }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--t-desc);
+  }
+
+  .table th,
+  .table td {
+    padding: 12px 16px;
+    white-space: nowrap;
+    vertical-align: top;
+  }
+
+  .table thead th {
+    font-size: var(--t-meta);
+    font-weight: 400;
+    letter-spacing: var(--t-meta-track);
+    text-transform: uppercase;
+    color: var(--fg-3);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+
+  .table tbody th { font-weight: 500; color: var(--fg); }
+  .table tbody td { color: var(--fg-2); }
+  .table tbody tr + tr { border-top: 1px solid var(--line); }
+  .table tbody tr:nth-child(even) { background: var(--bg-2); }
+  .table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .table .is-pass { color: var(--acc); font-weight: 700; }
+  .table .is-fail { color: var(--fail); font-weight: 700; }
+  .table .is-dim  { color: var(--fg-3); }
+
+  .table-foot {
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    font-size: var(--t-meta);
+    line-height: 1.6;
+    color: var(--fg-2);
+  }
+
+  .table-foot::before { content: "// "; }
 
   /* ---- statement strip ---- */
   .strip {

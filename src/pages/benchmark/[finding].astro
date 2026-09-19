@@ -3,9 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import Section from '../../components/Section.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
-import CodePanel from '../../components/CodePanel.astro';
-import ConditionList from '../../components/ConditionList.astro';
-import RuledRows from '../../components/RuledRows.astro';
+import TermPanel from '../../components/system/TermPanel.astro';
+import ReportRows from '../../components/system/ReportRows.astro';
 import { FINDINGS, findingById, SCORING_LIVE } from '../../lib/benchmark';
 import { highlightPython } from '../../lib/highlight';
 
@@ -33,8 +32,8 @@ const html = highlightPython(source);
 // Attacks by class, ids only. The payloads are not on this page.
 const classes = [...new Set(finding.attacks.map((a) => a.class))];
 const attackRows = classes.map((c) => ({
-  lead: c,
-  body: finding.attacks.filter((a) => a.class === c).map((a) => a.id).join(', '),
+  k: c,
+  v: finding.attacks.filter((a) => a.class === c).map((a) => a.id).join(', '),
 }));
 
 const steps = [
@@ -60,7 +59,7 @@ const steps = [
     <Eyebrow class="reveal">Paste the patch back</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Score it.</h2>
 
-    <p class="reveal mt-8 text-[15.5px] leading-[1.6] text-fg-2" style="--reveal-delay:90ms;max-width:66ch">
+    <p class="reveal body mt-8 text-fg-2" style="--reveal-delay:90ms;max-width:66ch">
       First time here? Hand the module and prompt below to any fixer, then paste the patch it
       returns to score it against the held-out attacks.
     </p>
@@ -68,7 +67,7 @@ const steps = [
     <form class="reveal mt-9 max-w-[80ch]" data-submit style="--reveal-delay:120ms" novalidate>
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label for="tool" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">Tool</label>
+          <label for="tool" class="hd label">Tool</label>
           <input
             id="tool"
             name="tool"
@@ -76,11 +75,11 @@ const steps = [
             required
             autocomplete="off"
             placeholder="e.g. Claude Code"
-            class="mt-2 w-full rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+            class="input"
           />
         </div>
         <div>
-          <label for="version" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">Version</label>
+          <label for="version" class="hd label">Version</label>
           <input
             id="version"
             name="version"
@@ -88,13 +87,13 @@ const steps = [
             required
             autocomplete="off"
             placeholder="e.g. 2.1.270, Opus 5"
-            class="mt-2 w-full rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+            class="input"
           />
         </div>
       </div>
 
       <div class="mt-5">
-        <label for="patch" class="mono block text-[11px] uppercase tracking-[0.14em] text-fg-2">
+        <label for="patch" class="hd label">
           Patch · unified diff or the whole patched file
         </label>
         <textarea
@@ -103,7 +102,7 @@ const steps = [
           required
           rows="14"
           spellcheck="false"
-          class="mono mt-2 w-full rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[13px] leading-[1.6] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+          class="input"
           placeholder="--- a/app/finding_04.py&#10;+++ b/app/finding_04.py"></textarea>
       </div>
 
@@ -122,17 +121,17 @@ const steps = [
                   "Scoring is not live yet. The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live.",
               })}
         >{SCORING_LIVE ? 'Score the patch' : 'Notify me when scoring opens'}</button>
-        <span class="mono text-[11px] text-fail" data-error hidden></span>
+        <span class="failr text-[13px] font-normal" data-error hidden></span>
       </div>
 
       {!SCORING_LIVE && (
-        <p class="mono mt-3 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+        <p class="note mt-4" style="max-width:70ch">
           Scoring goes live shortly. Until then this button opens a notify signup instead of
           scoring, and we will tell you the moment you can score a patch here.
         </p>
       )}
 
-      <p class="mono mt-5 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+      <p class="note mt-5" style="max-width:70ch">
         The patch is scored by the harness in a sealed container with no network egress, torn
         down after the run. Nothing from your patch is kept beyond the result.
       </p>
@@ -143,23 +142,23 @@ const steps = [
     <Eyebrow class="reveal">The module</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">What the fixer gets.</h2>
 
-    <div class="reveal mt-11" style="--reveal-delay:120ms">
-      <ConditionList label="Three steps" conditions={steps} />
+    <div class="reveal mt-10" style="--reveal-delay:120ms">
+      <ReportRows label="Three steps" text narrow rows={steps.map((v, i) => ({ k: String(i + 1).padStart(2, '0'), v }))} />
     </div>
 
     <div class="reveal mt-9 flex flex-wrap items-center gap-3" style="--reveal-delay:180ms">
       <button type="button" class="btn btn-secondary btn-sm" data-copy="module">Copy module</button>
       <button type="button" class="btn btn-secondary btn-sm" data-copy="prompt">Copy prompt</button>
-      <span class="mono text-[11px] text-fg-3" data-copied hidden>copied</span>
+      <span class="cmt text-[13px]" data-copied hidden>copied</span>
     </div>
 
     {/* Highest-intent moment: right after they take the module to a fixer.
         benchmark-waitlist, same segment as the submit-step notify button. */}
-    <p class="reveal mono mt-4 text-[11px] leading-relaxed text-fg-2" style="--reveal-delay:220ms;max-width:70ch">
+    <p class="reveal note mt-5" style="--reveal-delay:220ms;max-width:70ch">
       Taking this to a fixer?{' '}
       <button
         type="button"
-        class="link-inline font-medium text-fg"
+        class="link-inline"
         data-verify-cta
         data-verify-group="benchmark-waitlist"
         data-verify-title="Notify me when scoring opens"
@@ -168,35 +167,29 @@ const steps = [
       so you know to come back with the patch.
     </p>
 
-    <div class="reveal mt-6 artifact" style="--reveal-delay:240ms">
-      <CodePanel label={`Prompt · the only line the fixer is given`} html={`<span class="tok-str">${finding.prompt.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`} />
+    <div class="reveal mt-8" style="--reveal-delay:240ms">
+      <TermPanel path="Prompt · the only line the fixer is given">
+        <div class="ln cmd" set:html={finding.prompt.replace(/&/g, '&amp;').replace(/</g, '&lt;')} />
+      </TermPanel>
     </div>
 
-    <div class="reveal mt-6 artifact" style="--reveal-delay:300ms">
-      <CodePanel label={`${finding.file} · unpatched`} html={html} />
+    <div class="reveal mt-6" style="--reveal-delay:300ms">
+      <TermPanel path={`${finding.file} · unpatched`}>
+        <pre class="term-block" set:html={html} />
+      </TermPanel>
     </div>
 
-    <div class="reveal mt-9" style="--reveal-delay:60ms;max-width:80ch">
-      <RuledRows
+    <div class="reveal mt-10" style="--reveal-delay:60ms">
+      <ReportRows
         label={`Held-out attacks · by id and class · ${finding.attacks.length} fired after the patch`}
         rows={attackRows}
+        text
       />
     </div>
   </Section>
 
   <script is:inline type="application/json" data-finding-source set:html={JSON.stringify({ id: finding.id, source })} />
 </BaseLayout>
-
-<style>
-  .artifact :global(code) {
-    background: none;
-    border: 0;
-    border-radius: 0;
-    padding: 0;
-    font-size: inherit;
-    white-space: inherit;
-  }
-</style>
 
 <script>
   import { findingById, resultUrl, saveSubmitted, submitScore, track, SCORING_LIVE } from '../../lib/benchmark';

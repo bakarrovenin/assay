@@ -14,36 +14,19 @@ interface Props {
 const { eyebrow, title, titleNote, lede, subLede } = Astro.props;
 ---
 
-<header class="rule-b pt-16 pb-14 lg:pt-24 lg:pb-20">
+<header class="section-hero rule-b">
   <div class="shell">
-    <p class="eyebrow reveal">{eyebrow}</p>
+    <p class="hd reveal">{eyebrow}</p>
 
-    <h1
-      class="h1 reveal mt-5"
-      style="--reveal-delay:60ms;max-width:22ch"
-    >
-      {title}
-    </h1>
+    <h1 class="h1 reveal mt-6" style="--reveal-delay:60ms">{title}</h1>
 
-    {
-      titleNote && (
-        <p
-          class="mono reveal mt-4 text-[15px] leading-[1.5] text-fg-2"
-          style="--reveal-delay:90ms"
-        >
-          {titleNote}
-        </p>
-      )
-    }
+    {titleNote && <p class="note reveal mt-5" style="--reveal-delay:90ms">{titleNote}</p>}
 
-    <p class="lede reveal mt-7" style="--reveal-delay:120ms">{lede}</p>
+    <p class="lede reveal mt-8" style="--reveal-delay:120ms">{lede}</p>
 
     {
       subLede && (
-        <p
-          class="reveal mt-5 max-w-[58ch] text-[15px] leading-[1.6] text-fg-2"
-          style="--reveal-delay:180ms"
-        >
+        <p class="body reveal mt-5 text-fg-2" style="--reveal-delay:180ms;max-width:58ch">
           {subLede}
         </p>
       )

@@ -3,8 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import Section from '../../components/Section.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
-import VerdictBlock from '../../components/VerdictBlock.astro';
-import RuledRows from '../../components/RuledRows.astro';
+import TermPanel from '../../components/system/TermPanel.astro';
+import CheckRow from '../../components/system/CheckRow.astro';
+import VerdictLine from '../../components/system/VerdictLine.astro';
+import ReportRows from '../../components/system/ReportRows.astro';
 
 // The result lives in the URL fragment. This page is a static shell: the
 // verdict blocks, the check table and the detail rows are rendered once at
@@ -19,13 +21,13 @@ const rows = [
 ] as const;
 
 const detail = [
-  { lead: 'Tool', body: '…' },
-  { lead: 'Version', body: '…' },
-  { lead: 'Finding', body: '…' },
-  { lead: 'Attacks succeeded', body: '…' },
-  { lead: 'Benign diverged', body: '…' },
-  { lead: 'Failure class', body: '…' },
-  { lead: 'Scored', body: '…' },
+  { k: 'Tool', v: '…' },
+  { k: 'Version', v: '…' },
+  { k: 'Finding', v: '…' },
+  { k: 'Attacks succeeded', v: '…' },
+  { k: 'Benign diverged', v: '…' },
+  { k: 'Failure class', v: '…' },
+  { k: 'Scored', v: '…' },
 ] as const;
 
 const CHECKS = [
@@ -51,11 +53,11 @@ const CHECKS = [
   <Section id="verdict" rule={false}>
     <div data-empty class="reveal" hidden>
       <Eyebrow>No result in this link</Eyebrow>
-      <p class="mt-6 text-[17px] leading-[1.62]" style="max-width:62ch">
+      <p class="body mt-6" style="max-width:62ch">
         The link carries no result, or one this page cannot read.
       </p>
       <p class="mt-6">
-        <a href="/benchmark/" class="link-inline text-[15px] font-medium">Score a patch</a>
+        <a href="/benchmark/" class="link-inline">Score a patch</a>
       </p>
     </div>
 
@@ -63,67 +65,52 @@ const CHECKS = [
       <Eyebrow class="reveal">Verdict</Eyebrow>
       <h2 class="h2 reveal" style="--reveal-delay:60ms" data-headline>&nbsp;</h2>
 
-      <div class="mt-11 max-w-[80ch]" data-vb="verified" hidden>
-        <VerdictBlock verdict="Verified" state="verified" rows={rows} />
-      </div>
-      <div class="mt-11 max-w-[80ch]" data-vb="failed" hidden>
-        <VerdictBlock verdict="Not verified" state="failed" rows={rows} />
-      </div>
-      <div class="mt-11 max-w-[80ch]" data-vb="insufficient" hidden>
-        <VerdictBlock
-          verdict="Insufficient evidence"
-          state="failed"
-          rows={[['Reason', 'the patch did not change the module, so nothing about the vulnerability was tested']]}
-        />
+      {/* One panel for the three verdict shapes. The rows fill from the
+          decoded result; the verdict line that shows is picked by data-vb. */}
+      <div class="mt-10" data-panel>
+        <TermPanel path="assay · result · UNVERIFIED">
+          {CHECKS.map(([k, name]) => <CheckRow id={k} name={name} state="pending" data-check={k} />)}
+
+          <div class="ln out mt-4" data-rows>
+            {rows.map(([k, v]) => (
+              <div class="ln out"><span class="cmt">{k}</span> <span data-row={k}>{v}</span></div>
+            ))}
+          </div>
+          <div class="ln out mt-4" data-rows-insufficient hidden>
+            <div class="ln out"><span class="cmt">Reason</span> <span>the patch did not change the module, so nothing about the vulnerability was tested</span></div>
+          </div>
+
+          <div data-vb="verified" hidden>
+            <VerdictLine label="Verified" tone="pass">UNVERIFIED &middot; self-reported &middot; scored by the stub, not the harness</VerdictLine>
+          </div>
+          <div data-vb="failed" hidden>
+            <VerdictLine label="Not verified" tone="fail">UNVERIFIED &middot; self-reported &middot; scored by the stub, not the harness</VerdictLine>
+          </div>
+          <div data-vb="insufficient" hidden>
+            <VerdictLine label="Insufficient evidence" tone="neutral">UNVERIFIED &middot; self-reported &middot; scored by the stub, not the harness</VerdictLine>
+          </div>
+        </TermPanel>
       </div>
 
-      <div class="my-9 max-w-[80ch] overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11">
-        <table class="w-full min-w-[300px] border-collapse text-left">
-          <caption class="sr-only">The four checks, pass or fail.</caption>
-          <tbody>
-            {
-              CHECKS.map(([k, name], i) => (
-                <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
-                  <th scope="row" class="mono whitespace-nowrap px-3 py-3 text-[13px] font-medium sm:px-4">
-                    {k} · {name}
-                  </th>
-                  <td class="mono px-3 py-3 text-right text-[13px] sm:px-4" data-check={k}>
-                    &hellip;
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-        <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
-          UNVERIFIED · self-reported · scored by the stub, not the harness
-        </p>
+      <div class="mt-10" data-detail>
+        <ReportRows label="The result · carried in this link" rows={detail} text />
       </div>
 
-      <div class="max-w-[80ch]" data-detail>
-        <RuledRows label="The result · carried in this link" rows={detail} />
-      </div>
-
-      <div class="mt-11 max-w-[80ch] border-t border-line pt-6">
-        <p class="micro mb-3">Share this result</p>
+      <div class="mt-11 border-t border-line pt-6" style="max-width:80ch">
+        <p class="hd mb-4">Share this result</p>
         <div class="flex flex-col gap-2.5 sm:flex-row">
-          <input
-            type="text"
-            readonly
-            data-share-url
-            class="mono min-w-0 flex-1 rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[12px] text-fg"
-          />
+          <input type="text" readonly data-share-url class="input flex-1" />
           <button type="button" class="btn btn-secondary shrink-0" data-copy-url>Copy link</button>
         </div>
-        <p class="mono mt-3 text-[11px] leading-relaxed text-fg-2" style="max-width:70ch">
+        <p class="note mt-4" style="max-width:70ch">
           The link is the result: tool, version, finding, four checks and verdict, encoded
           whole. Anyone opening it sees exactly this page, marked UNVERIFIED.
         </p>
       </div>
 
       <p class="mt-10 flex flex-wrap gap-x-6 gap-y-2">
-        <a href="/benchmark/" class="link-inline text-[15px] font-medium">Score another</a>
-        <a href="/benchmark/leaderboard/" class="link-inline text-[15px] font-medium">Results by tool</a>
+        <a href="/benchmark/" class="link-inline">Score another</a>
+        <a href="/benchmark/leaderboard/" class="link-inline">Results by tool</a>
       </p>
     </div>
   </Section>
@@ -157,9 +144,13 @@ const CHECKS = [
     const which = r.verdict === 'VERIFIED' ? 'verified' : r.verdict === 'NOT VERIFIED' ? 'failed' : 'insufficient';
     const vb = document.querySelector<HTMLElement>(`[data-vb="${which}"]`)!;
     vb.hidden = false;
+    if (which === 'insufficient') {
+      document.querySelector<HTMLElement>('[data-rows]')!.hidden = true;
+      document.querySelector<HTMLElement>('[data-rows-insufficient]')!.hidden = false;
+    }
 
     if (c) {
-      const dds = vb.querySelectorAll('dd');
+      const dds = document.querySelectorAll<HTMLElement>('[data-row]');
       const vals = [
         `${pf(c.A.pass)}, ${c.A.findingsAfter} finding${c.A.findingsAfter === 1 ? '' : 's'} after`,
         `${c.B.succeeded.length} of ${c.B.fired} succeeded${c.B.succeeded.length ? ': ' + c.B.succeeded.map((a) => a.id).join(', ') : ''}`,
@@ -170,15 +161,15 @@ const CHECKS = [
       dds.forEach((dd, i) => (dd.textContent = vals[i] ?? dd.textContent));
 
       for (const [k, ok] of [['A', c.A.pass], ['B', c.B.pass], ['C', c.C.pass], ['D', c.D.pass]] as const) {
-        const cell = document.querySelector<HTMLElement>(`[data-check="${k}"]`)!;
-        cell.textContent = pf(ok);
-        cell.classList.add(ok ? 'text-accent' : 'text-fail');
+        const row = document.querySelector<HTMLElement>(`[data-check="${k}"]`)!;
+        row.classList.remove('is-pending');
+        row.classList.add(ok ? 'is-pass' : 'is-fail');
+        row.querySelector('.st')!.textContent = pf(ok).toUpperCase();
       }
     } else {
       for (const k of ['A', 'B', 'C', 'D']) {
-        const cell = document.querySelector<HTMLElement>(`[data-check="${k}"]`)!;
-        cell.textContent = 'not run';
-        cell.classList.add('text-fg-3');
+        const row = document.querySelector<HTMLElement>(`[data-check="${k}"]`)!;
+        row.querySelector('.st')!.textContent = 'not run';
       }
     }
 
@@ -199,7 +190,7 @@ const CHECKS = [
       `${r.date} · ${r.scorer === 'stub' ? 'stub scorer, in the browser' : r.scorer} · edition 1`,
     ];
     document
-      .querySelectorAll<HTMLElement>('[data-detail] dd')
+      .querySelectorAll<HTMLElement>('[data-detail] .row .v')
       .forEach((dd, i) => (dd.textContent = detailVals[i] ?? dd.textContent));
 
     const url = window.location.href;

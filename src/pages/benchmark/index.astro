@@ -3,46 +3,44 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import Section from '../../components/Section.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
-import DefinitionPair from '../../components/DefinitionPair.astro';
-import RuledRows from '../../components/RuledRows.astro';
+import ReportRows from '../../components/system/ReportRows.astro';
 import { ASSAY_RUNS, ASSAY_SOURCE, FINDINGS, aggregate } from '../../lib/benchmark';
 
 // The headline is recounted at build time from the stored assay runs. The
 // submitted set is recounted in the browser from what this browser stored.
 // Neither number is written by hand anywhere.
 const ours = aggregate(ASSAY_RUNS);
-const rate = (r: number | null) => (r === null ? 'none' : `${r}%`);
 
 const isNot = [
   {
-    term: 'What it does',
-    definition:
+    k: 'What it does',
+    v:
       'Scores a patch against four SQL injection shapes on a corpus we seeded, with the four checks the pilot runs: alert closed, hole shut, behaviour preserved, provenance clean.',
   },
   {
-    term: 'What it does not do',
-    definition:
+    k: 'What it does not do',
+    v:
       'It does not scan your code, and it does not verify a fix on anyone’s real codebase. Every result is about our corpus and nothing else.',
   },
 ] as const;
 
 const policy = [
   {
-    lead: 'Public corpus',
-    body: 'The modules are published now. The edition-1 attack set is published with the live scorer, by id, class and payload; until then the attacks appear by id and class only. A fixer can be tuned against a published set, which is a known property of any published benchmark.',
+    k: 'Public corpus',
+    v: 'The modules are published now. The edition-1 attack set is published with the live scorer, by id, class and payload; until then the attacks appear by id and class only. A fixer can be tuned against a published set, which is a known property of any published benchmark.',
   },
   {
-    lead: 'Rotation',
-    body: 'The corpus rotates each edition and the edition is stamped on every result. A score against a retired edition says so.',
+    k: 'Rotation',
+    v: 'The corpus rotates each edition and the edition is stamped on every result. A score against a retired edition says so.',
   },
   {
-    lead: 'Not the Index',
-    body: 'The Index runs on real projects with real historical vulnerabilities and its held-out attacks stay withheld. The benchmark is the opposite by design: seeded flaws, published attacks, self-service.',
-    tag: 'deliberate',
+    k: 'Not the Index',
+    v: 'The Index runs on real projects with real historical vulnerabilities and its held-out attacks stay withheld. The benchmark is the opposite by design: seeded flaws, published attacks, self-service.',
+    t: 'deliberate',
   },
   {
-    lead: 'Two sets, never merged',
-    body: 'Runs we conducted and self-reported submissions are counted and shown separately. A submission is scored on trust and marked UNVERIFIED wherever it appears.',
+    k: 'Two sets, never merged',
+    v: 'Runs we conducted and self-reported submissions are counted and shown separately. A submission is scored on trust and marked UNVERIFIED wherever it appears.',
   },
 ] as const;
 ---
@@ -63,39 +61,48 @@ const policy = [
     <Eyebrow class="reveal">The running count</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Every fix shut the hole. Not every fix left the product working.</h2>
 
-    <div class="reveal mt-11 tally" style="--reveal-delay:120ms">
-      <DefinitionPair
+    <div class="reveal mt-10" style="--reveal-delay:120ms">
+      <ReportRows
+        lead
         label="Runs we conducted · Pilot 001 blind run · recounted from the stored results at build time"
-        terms={[
-          { term: String(ours.scored), definition: 'patches scored.' },
+        rows={[
+          { k: 'patches scored.', v: String(ours.scored) },
           {
-            term: `${ours.holeShut} of ${ours.scored}`,
-            definition: 'shut the hole. Every held-out attack blocked, no fixer left it open.',
+            k: 'shut the hole. Every held-out attack blocked, no fixer left it open.',
+            v: `${ours.holeShut} of ${ours.scored}`,
+            tone: 'pass',
           },
           {
-            term: `${ours.behaviourHeld} of ${ours.scored}`,
-            definition: `left the product working. The other ${ours.brokeBehaviour} closed the hole and rejected a legitimate input.`,
+            k: `left the product working. The other ${ours.brokeBehaviour} closed the hole and rejected a legitimate input.`,
+            v: `${ours.behaviourHeld} of ${ours.scored}`,
+            tone: 'fail',
           },
         ]}
-        footer="Alert closed then verified, and the gap between · "
-        footerTerm={ours.gapPp === null ? 'no cells' : `${ours.alertClosed} of ${ours.scored} to ${ours.verified} of ${ours.scored}, ${ours.gapPp} pp`}
-      />
+      >
+        <Fragment slot="disc">
+          Alert closed then verified, and the gap between &middot;{' '}
+          <b>{ours.gapPp === null ? 'no cells' : `${ours.alertClosed} of ${ours.scored} to ${ours.verified} of ${ours.scored}, ${ours.gapPp} pp`}</b>
+        </Fragment>
+      </ReportRows>
     </div>
 
-    <div class="reveal mt-6 tally" style="--reveal-delay:180ms" data-submitted-tally>
-      <DefinitionPair
+    <div class="reveal mt-10" style="--reveal-delay:180ms" data-submitted-tally>
+      <ReportRows
+        lead
         label="Submitted · UNVERIFIED · self-reported, scored by the stub, stored in this browser only"
-        terms={[
-          { term: '0', definition: 'patches scored.' },
-          { term: 'none', definition: 'shut the hole.' },
-          { term: 'none', definition: 'left the product working.' },
+        rows={[
+          { k: 'patches scored.', v: '0' },
+          { k: 'shut the hole.', v: 'none' },
+          { k: 'left the product working.', v: 'none' },
         ]}
-        footer="Alert closed then verified, and the gap between · "
-        footerTerm="no cells"
-      />
+      >
+        <Fragment slot="disc">
+          Alert closed then verified, and the gap between &middot; <b>no cells</b>
+        </Fragment>
+      </ReportRows>
     </div>
 
-    <p class="mono reveal mt-5 text-[11px] leading-relaxed text-fg-2" style="max-width:76ch">
+    <p class="note reveal mt-6" style="max-width:76ch">
       {ours.noAlert} run(s) where the scanner raised no alert are counted in no rate. Every
       figure above is a recount of the stored records, not a stored number. Source:{' '}
       {ASSAY_SOURCE.run}, commit {ASSAY_SOURCE.commit}.
@@ -106,12 +113,12 @@ const policy = [
     <Eyebrow class="reveal">What this is</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">An instrument, not a scanner.</h2>
 
-    <div class="reveal mt-11" style="--reveal-delay:120ms;max-width:80ch">
-      <DefinitionPair label="Scope" terms={isNot} />
+    <div class="reveal mt-10" style="--reveal-delay:120ms">
+      <ReportRows label="Scope" rows={isNot} text />
     </div>
 
-    <div class="reveal mt-9" style="--reveal-delay:60ms;max-width:80ch">
-      <RuledRows label="Policy · stated before anyone asks" rows={policy} />
+    <div class="reveal mt-10" style="--reveal-delay:60ms">
+      <ReportRows label="Policy · stated before anyone asks" rows={policy} text />
     </div>
   </Section>
 
@@ -119,50 +126,44 @@ const policy = [
     <Eyebrow class="reveal">Pick a finding</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Four shapes.</h2>
 
-    <ol class="mt-11 max-w-[80ch]">
+    {/* Report rows, each row a link. The value keeps its three lines (shape,
+        body, counts), which the ReportRows string value cannot carry. */}
+    <div class="reveal rows is-text mt-10" style="--reveal-delay:120ms">
       {
-        FINDINGS.map((f, i) => (
-          <li class="reveal border-t border-line" style={`--reveal-delay:${i * 60}ms`}>
-            <a href={`/benchmark/${f.id}/`} class="group grid grid-cols-1 gap-x-8 gap-y-2 py-6 sm:grid-cols-[minmax(0,190px)_minmax(0,1fr)_auto]">
-              <span class="mono text-[11px] uppercase tracking-[0.14em] text-fg-2">
-                Finding {f.id}
-                <span class="ml-2 text-fg-3">{f.file}</span>
+        FINDINGS.map((f) => (
+          <a href={`/benchmark/${f.id}/`} class="row">
+            <span class="k">
+              <span class="block whitespace-nowrap">Finding {f.id}</span>
+              <span class="block normal-case tracking-normal">{f.file}</span>
+            </span>
+            <span class="v">
+              <span class="block font-bold text-fg">{f.shape}</span>
+              <span class="mt-1 block text-fg-2">{f.body}</span>
+              <span class="disc mt-2 block">
+                {f.attacks.length} held-out attacks · {f.benign.length} benign inputs
               </span>
-              <span>
-                <span class="block font-display text-[18px] font-bold leading-tight tracking-[-0.014em] transition-colors group-hover:text-accent">
-                  {f.shape}
-                </span>
-                <span class="mt-1.5 block text-[14.5px] leading-[1.6] text-fg-2">{f.body}</span>
-                <span class="mono mt-2 block text-[11px] text-fg-3">
-                  {f.attacks.length} held-out attacks · {f.benign.length} benign inputs
-                </span>
-              </span>
-              <span class="mono self-center text-[11px] uppercase tracking-[0.14em] text-fg-3 group-hover:text-accent">
-                Open &rarr;
-              </span>
-            </a>
-          </li>
+            </span>
+            <span class="t">Open &rarr;</span>
+          </a>
         ))
       }
-    </ol>
+    </div>
 
     <p class="reveal mt-10">
-      <a href="/benchmark/leaderboard/" class="link-inline text-[15px] font-medium">
-        Results by tool and version
-      </a>
+      <a href="/benchmark/leaderboard/" class="link-inline">Results by tool and version</a>
     </p>
 
     {/* The product waitlist (verify-pr), kept distinct from the benchmark
         waitlist on the finding and leaderboard pages: this is the verifier on
         your own repositories, not the self-service corpus. */}
     <div class="reveal mt-12 border-t border-line pt-6" style="max-width:70ch">
-      <p class="micro mb-3">The product</p>
-      <p class="text-[15.5px] leading-[1.6] text-fg-2">
+      <p class="hd mb-4">The product</p>
+      <p class="body text-fg-2">
         This benchmark is a fixed corpus you score against by hand. The verifier it comes from
-        runs the same four checks on every pull request, on your own repositories.
+        runs the same four checks on every pull request, on your own repositories.{' '}
         <button
           type="button"
-          class="link-inline font-medium text-fg"
+          class="link-inline"
           data-verify-cta
           data-verify-group="verify-pr"
           data-verify-title="Join the product waitlist"
@@ -172,16 +173,6 @@ const policy = [
     </div>
   </Section>
 </BaseLayout>
-
-<style>
-  /* The headline count is three figures set against each other, so the pair
-     takes a third column once there is room for it. */
-  @media (min-width: 900px) {
-    .tally :global(.dp-body) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-</style>
 
 <script>
   import { aggregate, fetchLeaderboard, loadSubmitted, track } from '../../lib/benchmark';
@@ -215,17 +206,17 @@ const policy = [
     } else {
       t = aggregate(loadSubmitted());
     }
-    const dts = box.querySelectorAll('dt');
-    const dds = box.querySelectorAll('dd');
-    const foot = box.querySelector('p:last-child b');
+    const vs = box.querySelectorAll('.row .v');
+    const ks = box.querySelectorAll('.row .k');
+    const foot = box.querySelector('.disc b');
     const rate = (r: number | null) => (r === null ? 'none' : `${r}%`);
-    if (dts.length === 3 && dds.length === 3) {
-      dts[0].textContent = String(t.scored);
-      dds[0].textContent = 'patches scored.';
-      dts[1].textContent = rate(t.alertClosedRate);
-      dds[1].textContent = `closed the alert. ${t.alertClosed} of ${t.scored}.`;
-      dts[2].textContent = rate(t.verifiedRate);
-      dds[2].textContent = `actually verified. ${t.verified} of ${t.scored}.`;
+    if (vs.length === 3 && ks.length === 3) {
+      vs[0].textContent = String(t.scored);
+      ks[0].textContent = 'patches scored.';
+      vs[1].textContent = rate(t.alertClosedRate);
+      ks[1].textContent = `closed the alert. ${t.alertClosed} of ${t.scored}.`;
+      vs[2].textContent = rate(t.verifiedRate);
+      ks[2].textContent = `actually verified. ${t.verified} of ${t.scored}.`;
     }
     if (foot) foot.textContent = t.gapPp === null ? 'no cells' : `${t.gapPp} pp`;
   }

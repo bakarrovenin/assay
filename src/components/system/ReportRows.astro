@@ -1,6 +1,7 @@
 ---
 // Report rows: ruled, zebra striped, key / value / note. With a figure
 // value the row reads as a metric; with `text` set the value is a sentence.
+// A row with an href is a link.
 
 export type ReportRow = {
   k: string;
@@ -9,34 +10,45 @@ export type ReportRow = {
   tone?: 'pass' | 'fail' | 'warn';
   /** Dim note on the right. Hidden on narrow screens. */
   t?: string;
+  /** Render the row as a link. */
+  href?: string;
 };
 
 interface Props {
   /** Section label, rendered as // LABEL. */
   label?: string;
   rows: readonly ReportRow[];
-  /** Footnote under the rows, rendered as // NOTE. */
+  /** Footnote under the rows, rendered as // NOTE. The disc slot overrides it. */
   disc?: string;
   /** Values are sentences rather than figures. */
   text?: boolean;
+  /** Keys are short (a number, a code), so the key column hugs them. */
+  narrow?: boolean;
+  /** The figure leads: value first, then the key, so "10 patches scored." reads as written. */
+  lead?: boolean;
   class?: string;
 }
 
-const { label, rows, disc, text = false, class: className = '' } = Astro.props;
+const { label, rows, disc, text = false, narrow = false, lead = false, class: className = '' } = Astro.props;
 ---
 
 <div class={className}>
   {label && <p class="hd">{label}</p>}
-  <div class={`rows ${text ? 'is-text' : ''}`}>
+  <div class={`rows ${text ? 'is-text' : ''} ${narrow ? 'is-narrow' : ''} ${lead ? 'is-lead' : ''}`}>
     {
-      rows.map((r) => (
-        <div class="row">
-          <span class="k">{r.k}</span>
-          <span class={`v ${r.tone ? `is-${r.tone}` : ''}`}>{r.v}</span>
-          {r.t && <span class="t">{r.t}</span>}
-        </div>
-      ))
+      rows.map((r) => {
+        const Tag = r.href ? 'a' : 'div';
+        const v = <span class={`v ${r.tone ? `is-${r.tone}` : ''}`}>{r.v}</span>;
+        return (
+          <Tag class="row" href={r.href}>
+            {lead && v}
+            <span class="k">{r.k}</span>
+            {!lead && v}
+            {r.t && <span class="t">{r.t}</span>}
+          </Tag>
+        );
+      })
     }
   </div>
-  {disc && <p class="disc">{disc}</p>}
+  {Astro.slots.has('disc') ? <p class="disc"><slot name="disc" /></p> : disc && <p class="disc">{disc}</p>}
 </div>

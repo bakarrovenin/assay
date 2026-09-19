@@ -10,6 +10,7 @@ import VerdictLine from '../components/system/VerdictLine.astro';
 import ReportRows from '../components/system/ReportRows.astro';
 import Strip from '../components/system/Strip.astro';
 import DiffRow from '../components/system/DiffRow.astro';
+import Table from '../components/system/Table.astro';
 
 const colours = [
   ['--bg', 'page'],
@@ -254,6 +255,26 @@ query = f<span class="tok-str">"... ORDER BY &#123;column&#125;"</span></pre>
 
       <div class="mt-16">
         <ReportRows label="Found and closed, in the methodology notes" rows={notes} text />
+      </div>
+
+      <div class="mt-16">
+        <ReportRows lead label="Figure first, where the number leads the sentence" rows={[{ k: 'patches scored.', v: '10' }, { k: 'shut the hole.', v: '10 of 10', tone: 'pass' }]} />
+      </div>
+
+      <div class="mt-16">
+        <ReportRows label="Rows as links" text rows={[{ k: 'Finding 08', v: 'ORDER BY identifier', t: 'Open', href: '/benchmark/08/' }]} />
+      </div>
+
+      <p class="hd mt-16">Table, for columns that genuinely compare</p>
+      <div class="mt-6">
+        <Table
+          columns={[{ label: 'Tool' }, { label: 'Version' }, { label: 'Cells', num: true }, { label: 'Verified', num: true }, { label: 'Gap', num: true }]}
+          caption="Sample table."
+          foot="10 scored cells across 3 tools."
+        >
+          <tr><th scope="row">Claude Code</th><td>2.1.270, Opus 5</td><td class="num">4</td><td class="num is-pass">75% (3 of 4)</td><td class="num is-fail">25 pp</td></tr>
+          <tr><th scope="row">GitHub Copilot Autofix</th><td>CodeQL 2.27.0, default suite</td><td class="num">2 + 1 no alert</td><td class="num is-pass">50% (1 of 2)</td><td class="num">0 pp</td></tr>
+        </Table>
       </div>
     </div>
   </section>

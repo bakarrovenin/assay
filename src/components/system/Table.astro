@@ -1,0 +1,36 @@
+---
+// A data table, for columns that genuinely compare. Same frame as the
+// report rows. The caller writes the rows; the header and the footer are
+// props. Cells take .num for figures, .is-pass, .is-fail and .is-dim for
+// state.
+
+interface Props {
+  /** Column headings. */
+  columns: readonly { label: string; num?: boolean }[];
+  /** Read to screen readers as the table caption. */
+  caption: string;
+  /** Footnote under the table, rendered as // NOTE. */
+  foot?: string;
+  /** Minimum width before the table scrolls sideways. */
+  minWidth?: number;
+  class?: string;
+  [key: `data-${string}`]: string | undefined;
+}
+
+const { columns, caption, foot, minWidth = 640, class: className = '', ...rest } = Astro.props;
+---
+
+<div class={`table-wrap ${className}`}>
+  <div class="table-scroll">
+    <table class="table" style={`min-width:${minWidth}px`}>
+      <caption class="sr-only">{caption}</caption>
+      <thead>
+        <tr>
+          {columns.map((c) => <th scope="col" class={c.num ? 'num' : ''}>{c.label}</th>)}
+        </tr>
+      </thead>
+      <tbody {...rest}><slot /></tbody>
+    </table>
+  </div>
+  {Astro.slots.has('foot') ? <p class="table-foot"><slot name="foot" /></p> : foot && <p class="table-foot">{foot}</p>}
+</div>
