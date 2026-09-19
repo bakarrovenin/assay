@@ -87,7 +87,9 @@
    Token layer, terminal system. Single source of truth.
    Transcribed from terminal-mockup.html at the repo root.
 
-   Dark is the default and is the mockup verbatim. Light is derived:
+   Dark is the default and follows the mockup, with two departures:
+   the accent is a cool blue rather than terminal green, and --fg-3 is
+   lifted to clear WCAG AA. Light is derived:
    the same three-grey ladder and the same single accent role, with
    the values re-picked so each role keeps its contrast job on paper.
    One accent only, --acc, and it is used for signal (a pass, the
@@ -106,19 +108,21 @@
 
   /* Foreground, three greys */
   --fg:        #D6E0DC;
-  --fg-2:      #7E8B87;
-  --fg-3:      #4E5A56;
+  --fg-2:      #8A9793;   /* one step up from the mockup, to stay a rung above --fg-3 */
+  /* Lifted from the mockup's #4E5A56, which measured 2.7:1. This value
+     clears 4.5:1 on every dark surface; the worst case is --bg-2. */
+  --fg-3:      #748079;
 
-  /* Signal */
-  --acc:       #3BE8B0;
-  --acc-dim:   rgba(59, 232, 176, 0.10);
-  --acc-ink:   #04120C;   /* text on a solid accent fill */
+  /* Signal. A cool blue into cyan, taken from the reference gradient. */
+  --acc:       #45BDF5;
+  --acc-dim:   rgba(69, 189, 245, 0.10);
+  --acc-ink:   #04121A;   /* text on a solid accent fill */
   --fail:      #FF5C49;
   --fail-dim:  rgba(255, 92, 73, 0.12);
   --amber:     #F5B544;
   --amber-dim: rgba(245, 181, 68, 0.12);
 
-  --selection: rgba(59, 232, 176, 0.24);
+  --selection: rgba(69, 189, 245, 0.24);
   --shadow-term: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
   --scanline:  rgba(255, 255, 255, 0.014);
 
@@ -171,18 +175,18 @@
   --line-2:    #C3CCC8;
 
   --fg:        #0F1513;
-  --fg-2:      #5A6763;
-  --fg-3:      #74817D;
+  --fg-2:      #4B5854;
+  --fg-3:      #5F6C68;
 
-  --acc:       #0B7A56;
-  --acc-dim:   rgba(11, 122, 86, 0.10);
+  --acc:       #0A6BB5;
+  --acc-dim:   rgba(10, 107, 181, 0.10);
   --acc-ink:   #FFFFFF;
   --fail:      #C8372A;
   --fail-dim:  rgba(200, 55, 42, 0.10);
   --amber:     #8A5A00;
   --amber-dim: rgba(138, 90, 0, 0.12);
 
-  --selection: rgba(11, 122, 86, 0.20);
+  --selection: rgba(10, 107, 181, 0.20);
   --shadow-term: 0 24px 60px -30px rgba(15, 21, 19, 0.35);
   --scanline:  rgba(0, 0, 0, 0.018);
 
@@ -813,11 +817,11 @@
     --line:    #1E2624;
     --line-2:  #2A3431;
     --fg:      #D6E0DC;
-    --fg-2:    #7E8B87;
-    --fg-3:    #4E5A56;
-    --acc:     #3BE8B0;
-    --acc-dim: rgba(59, 232, 176, 0.10);
-    --acc-ink: #04120C;
+    --fg-2:    #8A9793;
+    --fg-3:    #748079;
+    --acc:     #45BDF5;
+    --acc-dim: rgba(69, 189, 245, 0.10);
+    --acc-ink: #04121A;
     --fail:    #FF5C49;
     --fail-dim: rgba(255, 92, 73, 0.12);
     --amber:   #F5B544;
