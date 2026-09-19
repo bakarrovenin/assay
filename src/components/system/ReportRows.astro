@@ -12,6 +12,10 @@ export type ReportRow = {
   t?: string;
   /** Render the row as a link. */
   href?: string;
+  /** Bold first line of a text value. */
+  title?: string;
+  /** Inline link after a text value. */
+  link?: { href: string; label: string };
 };
 
 interface Props {
@@ -38,7 +42,13 @@ const { label, rows, disc, text = false, narrow = false, lead = false, class: cl
     {
       rows.map((r) => {
         const Tag = r.href ? 'a' : 'div';
-        const v = <span class={`v ${r.tone ? `is-${r.tone}` : ''}`}>{r.v}</span>;
+        const v = (
+          <span class={`v ${r.tone ? `is-${r.tone}` : ''}`}>
+            {r.title && <span class="title">{r.title}</span>}
+            {r.title ? <span>{r.v}</span> : r.v}
+            {r.link && <a href={r.link.href} class="link-inline">{r.link.label}</a>}
+          </span>
+        );
         return (
           <Tag class="row" href={r.href}>
             {lead && v}

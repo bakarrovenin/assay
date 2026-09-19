@@ -1,15 +1,14 @@
 ---
 import Section from './Section.astro';
 import Eyebrow from './Eyebrow.astro';
-import StatCard from './StatCard.astro';
-import VerificationChart from './VerificationChart.astro';
-import DefinitionPair from './DefinitionPair.astro';
+import ReportRows from './system/ReportRows.astro';
+import Strip from './system/Strip.astro';
 
 // The two terms of art the repair literature separates. Shown rather than
 // explained: the gap between the words is the argument.
 const terms = [
-  { term: 'Plausible', definition: 'Passes every test it was given.' },
-  { term: 'Correct', definition: 'Fixes the bug.' },
+  { k: 'Plausible', v: 'Passes every test it was given.' },
+  { k: 'Correct', v: 'Fixes the bug.' },
 ] as const;
 
 const bars = [
@@ -61,95 +60,62 @@ const stats = [
 
 <Section id="verification-gap">
   <Eyebrow class="reveal">The verification gap</Eyebrow>
-
   <h2 class="h2 reveal" style="--reveal-delay:60ms">
     A patch can pass every test and leave the hole wide open.
   </h2>
 
-  <p class="reveal mt-10 text-[17px] leading-[1.6] lg:text-[18px]" style="--reveal-delay:120ms;max-width:74ch">
+  <p class="reveal body mt-8" style="--reveal-delay:120ms;max-width:74ch">
     A test is{' '}
-    <strong class="font-semibold text-fg">a sample, not a specification</strong>. The field
+    <strong class="font-medium text-fg">a sample, not a specification</strong>. The field
     has a word for the patches that satisfy the sample.
   </p>
 
-  <div class="reveal mt-11" style="--reveal-delay:60ms">
-    <DefinitionPair
-      label="Automated program repair · terms of art"
-      terms={terms}
-      footer="The distance between them is called "
-      footerTerm="overfitting"
-    />
+  <div class="reveal mt-10" style="--reveal-delay:60ms">
+    <ReportRows label="Automated program repair · terms of art" text rows={terms}>
+      <Fragment slot="disc">The distance between them is called <b>overfitting</b></Fragment>
+    </ReportRows>
   </div>
 
-  <div class="mt-14 grid grid-cols-1 gap-14 lg:mt-16 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,1fr)] lg:gap-16">
+  <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-16">
     <div class="space-y-8">
-      {/* The one struck layer on the sheet. The remedy is not wrong, it was
-          removed, so it is set as a line ruled through rather than deleted. */}
-      <p class="reveal text-[17px] leading-[1.6]">
+      {/* The remedy is not wrong, it was removed, so it is set as a line ruled
+          through rather than deleted. */}
+      <p class="reveal body">
         That literature was explicit about the remedy:{' '}
         <span class="struck">a human validates every candidate before anyone trusts it</span>.
       </p>
-
       {/* The conclusion of the whole section, so it carries weight rather than
-          trailing off beside a full-height chart. */}
-      <p
-        class="reveal font-display text-[22px] font-bold leading-[1.25] tracking-[-0.016em] text-fg-2 lg:text-[26px]"
-        style="--reveal-delay:60ms;max-width:22ch"
-      >
+          trailing off beside the figures. */}
+      <p class="h2 reveal text-fg-2" style="--reveal-delay:60ms;max-width:22ch">
         AI agents did not solve overfitting.{' '}
         <span class="text-fg">They deleted the validation step and measured nothing in its place.</span>
       </p>
     </div>
 
-    <VerificationChart
-      title="Test-passing patches that were actually correct"
-      caption="Sources: Qi et al. via Invalidator (arXiv 2301.01113) · D4C 2024 · independent CVE study, May 2026"
-      bars={bars}
-      class="lg:pt-1"
-    />
+    <div class="reveal">
+      <ReportRows
+        lead
+        label="Test-passing patches that were actually correct"
+        rows={bars.map((b) => ({ k: b.label, v: b.display, t: b.note, tone: b.value <= 2 ? 'fail' : undefined }))}
+        disc="Sources: Qi et al. via Invalidator (arXiv 2301.01113) · D4C 2024 · independent CVE study, May 2026"
+      />
+    </div>
   </div>
 
-  {/* Spec sheet. Numbered zones, each figure carried out on a leader line. */}
-  <div class="reveal mt-20 border-t border-line lg:mt-24">
-    {
-      stats.map((stat, i) => (
-        <StatCard
-          n={String(i + 1).padStart(2, '0')}
-          value={stat.value}
-          label={stat.label}
-          emphasise={stat.emphasise}
-          source={stat.source}
-        />
-      ))
-    }
+  {/* Spec sheet: the figure leads, the source rides on the right. */}
+  <div class="reveal mt-14">
+    <ReportRows lead rows={stats.map((st) => ({ k: st.label, v: st.value, t: st.source }))} />
   </div>
 
-  <div
-    class="reveal mt-14 border-t border-line pt-6 lg:mt-16"
-    style="max-width:76ch"
-  >
-    <p class="micro mb-3">Why a better model does not fix this</p>
-    <p class="text-[16.5px] leading-[1.62]">
+  <div class="reveal mt-12 border-t border-line pt-6" style="max-width:76ch">
+    <p class="hd mb-4">Why a better model does not fix this</p>
+    <p class="body">
       You cannot wait this out: the lever is governance, not model capability.
     </p>
   </div>
-
-  <blockquote
-    class="reveal mt-20 border-l-2 border-accent pl-6 lg:mt-24 lg:pl-8"
-  >
-    <p class="font-display text-[22px] font-bold leading-[1.3] tracking-[-0.018em] lg:text-[27px]" style="max-width:28ch">
-      &ldquo;The alert turning green and the bug being fixed are two different events.
-      The industry measures the first one.&rdquo;
-    </p>
-  </blockquote>
-
-  <style>
-    /* Struck, not deleted: the step was removed from practice, not disproved. */
-    .struck {
-      text-decoration: line-through;
-      text-decoration-thickness: 1px;
-      text-decoration-color: var(--fg-3);
-      color: var(--fg-2);
-    }
-  </style>
 </Section>
+
+<Strip>
+  &ldquo;The alert turning green and the bug being fixed are two different events.{' '}
+  <span class="q">The industry measures the first one.</span>&rdquo;
+</Strip>

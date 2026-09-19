@@ -434,6 +434,14 @@
 
   .disc::before { content: "// "; }
 
+  /* Struck, not deleted: a step removed from practice, not disproved. */
+  .struck {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--fg-3);
+    color: var(--fg-2);
+  }
+
   /* A commented line at body size: an aside the reader is meant to read. */
   .note {
     font-family: var(--font-mono);
@@ -901,6 +909,19 @@
     line-height: 1.6;
   }
 
+  /* Check rows directly in a body share one set of columns, so ids and
+     names of different widths still line up down the panel. */
+  .term-body:has(> .chk) {
+    display: grid;
+    grid-template-columns: minmax(22px, max-content) minmax(150px, max-content) 1fr auto;
+  }
+  .term-body:has(> .chk) > * { grid-column: 1 / -1; }
+  .term-body:has(> .chk) > .chk { grid-template-columns: subgrid; }
+
+  @media (max-width: 720px) {
+    .term-body:has(> .chk) { grid-template-columns: 20px 1fr auto; }
+  }
+
   .term-body > .ln + .ln { margin-top: 6px; }
   .term-body > .ln + .chk,
   .term-body > .ln + .term-block { margin-top: 18px; }
@@ -965,6 +986,8 @@
   .chk.is-warn .st { color: var(--amber); }
   .chk.is-pending .st { color: var(--fg-3); font-weight: 400; }
   .chk.is-fail .nm { color: var(--fail); }
+  /* The row the section is about: lifted into the accent. */
+  .chk.is-mark .id, .chk.is-mark .nm, .chk.is-mark .ds { color: var(--acc); }
 
   /* A resolving row: pending until a script adds .is-resolved, then it
      takes the state in data-resolves. The animated explainer uses this. */
@@ -1075,6 +1098,9 @@
   .rows.is-text .row:has(.t) { grid-template-columns: minmax(0, 200px) 1fr auto; }
   .rows.is-text.is-narrow .row { grid-template-columns: max-content 1fr; }
   .rows .v .disc { margin-top: 8px; }
+  .rows .v .title { display: block; font-weight: 700; color: var(--fg); }
+  .rows .v .title + span { display: block; margin-top: 4px; color: var(--fg-2); }
+  .rows .v .link-inline { margin-left: 6px; white-space: nowrap; }
   .rows.is-text .row .k { font-size: var(--t-desc); text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-3); }
   .rows.is-text .row .v { font-size: var(--t-body); font-weight: 400; letter-spacing: 0; white-space: normal; line-height: 1.6; }
 
@@ -1149,7 +1175,8 @@
     padding-block: var(--s-9);
   }
 
-  .strip p {
+  .strip p,
+  .statement {
     font-family: var(--font-mono);
     font-size: var(--t-strip);
     line-height: 1.25;
@@ -1158,7 +1185,8 @@
     text-wrap: balance;
   }
 
-  .strip .q { color: var(--acc); }
+  .strip .q,
+  .statement .q { color: var(--acc); }
 
   @media (max-width: 720px) {
     .strip { padding-block: 48px; }

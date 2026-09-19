@@ -9,21 +9,21 @@ import RoleDiagram from './RoleDiagram.astro';
 
   <h2 class="h2 reveal" style="--reveal-delay:60ms">Every vendor grades its own homework.</h2>
 
-  <div class="mt-12 lg:mt-14">
+  <div class="reveal mt-10" style="--reveal-delay:120ms">
     <RoleDiagram />
   </div>
 
-  <div class="mt-14 grid grid-cols-1 gap-12 lg:mt-16 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-16">
-    <p class="reveal text-[17px] leading-[1.62]">
+  <div class="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-16">
+    <p class="reveal body">
       Aardvark writes the patch with Codex, then scans its own patch. CodeMender, Snyk,
       Pixee, Mobb and ZeroPath all certify their own work. Google still puts a human
       researcher on every CodeMender patch before it ships: the best resourced team on
       earth does not trust its own fixer.
     </p>
 
-    <div class="reveal border-t border-line pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0" style="--reveal-delay:60ms">
-      <p class="micro mb-3">Second beat</p>
-      <p class="text-[15px] leading-[1.6] text-fg-2">
+    <div class="reveal border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0" style="--reveal-delay:60ms">
+      <p class="hd mb-4">Second beat</p>
+      <p class="body text-fg-2">
         The human backstop broke too. Developers using AI ship three to four times more
         code. Review capacity did not.
       </p>
@@ -32,10 +32,7 @@ import RoleDiagram from './RoleDiagram.astro';
 
   {/* The conclusion the diagram and the vendor list both arrive at, standing
       on its own rather than trailing the paragraph. */}
-  <p
-    class="reveal mt-14 font-display text-[24px] font-bold leading-[1.25] tracking-[-0.018em] lg:mt-16 lg:text-[30px]"
-    style="--reveal-delay:60ms;max-width:26ch"
-  >
-    Independence is the one thing an author can never sell you.
+  <p class="statement reveal mt-14" style="--reveal-delay:60ms">
+    Independence is the one thing <span class="q">an author can never sell you.</span>
   </p>
 </Section>
