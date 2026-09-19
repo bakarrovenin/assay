@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assay — terminal mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E0D;
+    --bg-2:#0F1413;
+    --panel:#0E1211;
+    --line:#1E2624;
+    --line-2:#2A3431;
+    --fg:#D6E0DC;
+    --fg-2:#7E8B87;
+    --fg-3:#4E5A56;
+    --acc:#3BE8B0;       /* terminal green, the signal */
+    --acc-dim:rgba(59,232,176,0.10);
+    --fail:#FF5C49;
+    --amber:#F5B544;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sans{font-family:'Inter',sans-serif;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+
+  /* subtle scanline texture, very faint */
+  body:before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,0.014) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+
+  /* ---- top status bar, like a tool header ---- */
+  .statusbar{
+    border-bottom:1px solid var(--line);
+    font-size:12.5px;color:var(--fg-3);
+    background:var(--bg-2);
+  }
+  .statusbar .wrap{display:flex;justify-content:space-between;align-items:center;height:38px;}
+  .statusbar .l{display:flex;gap:22px;align-items:center;}
+  .statusbar .dot{color:var(--acc);}
+
+  /* ---- nav ---- */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:22px 28px;max-width:1120px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:0.02em;}
+  .brand .sq{width:20px;height:20px;border:1.5px solid var(--acc);border-radius:4px;display:grid;place-items:center;color:var(--acc);font-size:12px;}
+  .navlinks{display:flex;gap:30px;font-size:14px;color:var(--fg-2);}
+  .navlinks a{text-decoration:none;}
+  .run{border:1px solid var(--acc);color:var(--acc);padding:9px 16px;border-radius:6px;font-size:13.5px;text-decoration:none;font-weight:500;}
+  .run:hover{background:var(--acc-dim);}
+
+  /* ---- hero: a live command + huge headline ---- */
+  .hero{padding:80px 0 60px;position:relative;z-index:2;}
+  .prompt{color:var(--fg-3);font-size:14px;margin-bottom:28px;}
+  .prompt .c{color:var(--acc);}
+  .prompt .cursor{display:inline-block;width:8px;height:16px;background:var(--acc);vertical-align:-2px;margin-left:2px;animation:blink 1.1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  h1{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(40px,6.6vw,88px);
+    line-height:1.0;
+    letter-spacing:-0.03em;
+    font-weight:800;
+    max-width:16ch;
+  }
+  h1 .g{color:var(--acc);}
+  .lede{font-size:17px;color:var(--fg-2);max-width:60ch;margin-top:30px;line-height:1.7;}
+  .lede b{color:var(--fg);font-weight:500;}
+  .cta{display:flex;gap:12px;margin-top:38px;align-items:center;}
+  .btn{background:var(--acc);color:#04120C;padding:12px 20px;border-radius:6px;font-weight:700;font-size:14px;text-decoration:none;}
+  .btn-2{border:1px solid var(--line-2);color:var(--fg);padding:12px 20px;border-radius:6px;font-size:14px;text-decoration:none;}
+
+  /* ---- the signature: a scanner-output verdict block ---- */
+  .verdict{margin:70px 0 110px;position:relative;z-index:2;}
+  .term{
+    border:1px solid var(--line-2);border-radius:10px;overflow:hidden;
+    background:var(--panel);
+    box-shadow:0 24px 60px -30px rgba(0,0,0,0.8);
+  }
+  .term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg-2);}
+  .term-bar .tl{display:flex;gap:7px;}
+  .term-bar .tl i{width:11px;height:11px;border-radius:50%;background:#2A3431;display:block;}
+  .term-bar .path{margin-left:10px;font-size:12.5px;color:var(--fg-3);}
+  .term-body{padding:22px 22px 26px;font-size:14px;}
+  .ln{white-space:pre-wrap;}
+  .cmt{color:var(--fg-3);}
+  .cmd{color:var(--fg);}
+  .cmd .c{color:var(--acc);}
+  .out{color:var(--fg-2);}
+  .chk{display:grid;grid-template-columns:22px 150px 1fr auto;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);}
+  .chk:last-of-type{border-bottom:none;}
+  .chk .id{color:var(--fg-3);}
+  .chk .nm{color:var(--fg);}
+  .chk .ds{color:var(--fg-2);font-size:13px;}
+  .pass{color:var(--acc);font-weight:700;}
+  .failr{color:var(--fail);font-weight:700;}
+  .verdictline{margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);display:flex;align-items:center;gap:14px;}
+  .badge{background:rgba(255,92,73,0.12);color:var(--fail);border:1px solid var(--fail);border-radius:6px;padding:7px 14px;font-weight:700;letter-spacing:0.08em;font-size:13px;}
+  .verdictline .why{color:var(--fg-2);font-size:13.5px;}
+
+  /* ---- statement strip ---- */
+  .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2);padding:70px 0;position:relative;z-index:2;}
+  .strip p{font-size:clamp(22px,3vw,38px);line-height:1.25;letter-spacing:-0.02em;max-width:26ch;}
+  .strip .q{color:var(--acc);}
+
+  /* ---- dense metric row, like a report summary ---- */
+  .report{padding:80px 0 100px;position:relative;z-index:2;}
+  .report .hd{font-size:12.5px;letter-spacing:0.16em;color:var(--fg-3);margin-bottom:26px;}
+  .rows{border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .row{display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);}
+  .row:last-child{border-bottom:none;}
+  .row:nth-child(even){background:var(--bg-2);}
+  .row .k{color:var(--fg-2);font-size:14px;}
+  .row .v{font-size:26px;font-weight:800;letter-spacing:-0.02em;}
+  .row .v.g{color:var(--acc);}
+  .row .t{color:var(--fg-3);font-size:12.5px;text-align:right;}
+  .disc{margin-top:16px;font-size:12.5px;color:var(--fg-3);letter-spacing:0.04em;}
+
+  @media(max-width:720px){
+    .navlinks{display:none;}
+    .statusbar .l{gap:12px;}
+    .chk{grid-template-columns:20px 1fr;gap:6px;}
+    .chk .ds,.chk .st{grid-column:2;}
+    .row{grid-template-columns:1fr auto;}
+    .row .t{display:none;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- tool-style status bar -->
+  <div class="statusbar">
+    <div class="wrap">
+      <div class="l">
+        <span><span class="dot">●</span> assay · harness v1.0</span>
+        <span>semgrep 1.90.0</span>
+        <span>container: network-none</span>
+      </div>
+      <div>7 checks self-audited · all published</div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="brand"><span class="sq">▚</span> ASSAY</div>
+    <div class="navlinks sans">
+      <a href="#">benchmark</a>
+      <a href="#">the index</a>
+      <a href="#">research</a>
+      <a href="#">pricing</a>
+    </div>
+    <a class="run" href="#">run the benchmark →</a>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="prompt">$ assay verify ./patch.diff <span class="cursor"></span></div>
+      <h1>Verify <span class="g">AI-authored</span> fixes</h1>
+      <p class="lede">Your AI fixed it. We check whether it actually did. Most fixes close the hole. The dangerous one closes the hole and <b>quietly breaks something your tests never checked</b>, and the scanner still goes green.</p>
+      <div class="cta">
+        <a class="btn" href="#">run the benchmark</a>
+        <a class="btn-2" href="#">read the finding →</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- SIGNATURE: scanner-output verdict -->
+  <section class="verdict">
+    <div class="wrap">
+      <div class="term">
+        <div class="term-bar">
+          <div class="tl"><i></i><i></i><i></i></div>
+          <span class="path">assay · finding-08 · copilot-autofix.patch</span>
+        </div>
+        <div class="term-body">
+          <div class="ln cmd"><span class="c">$</span> assay verify --held-out finding-08 copilot-autofix.patch</div>
+          <div class="ln out" style="margin:6px 0 18px;">running four checks in sealed container (network-none)...</div>
+
+          <div class="chk">
+            <span class="id">01</span><span class="nm">alert_closed</span>
+            <span class="ds">scanner no longer reports the finding</span>
+            <span class="pass">PASS</span>
+          </div>
+          <div class="chk">
+            <span class="id">02</span><span class="nm">hole_shut</span>
+            <span class="ds">0 of 11 held-out attacks succeeded</span>
+            <span class="pass">PASS</span>
+          </div>
+          <div class="chk">
+            <span class="id">03</span><span class="nm">behaviour_preserved</span>
+            <span class="ds">4 of 10 legitimate inputs now rejected</span>
+            <span class="failr">FAIL</span>
+          </div>
+          <div class="chk">
+            <span class="id">04</span><span class="nm">no_suppression</span>
+            <span class="ds">no markers, nothing hidden</span>
+            <span class="pass">PASS</span>
+          </div>
+
+          <div class="verdictline">
+            <span class="badge">NOT VERIFIED</span>
+            <span class="why">// closed the hole, then broke a legitimate input. Scanner stayed green.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATEMENT -->
+  <section class="strip">
+    <div class="wrap">
+      <p>AI writes your security fixes now. <span class="q">Who checks them?</span></p>
+    </div>
+  </section>
+
+  <!-- REPORT ROWS -->
+  <section class="report">
+    <div class="wrap">
+      <div class="hd">// BLIND RUN · 3 TOOLS · 4 SHAPES · 10 SCORED CELLS</div>
+      <div class="rows">
+        <div class="row">
+          <span class="k">patches that closed the scanner alert</span>
+          <span class="v g">9 / 10</span>
+          <span class="t">everyone measures this</span>
+        </div>
+        <div class="row">
+          <span class="k">patches that actually left the product working</span>
+          <span class="v">7 / 10</span>
+          <span class="t">nobody measures this</span>
+        </div>
+        <div class="row">
+          <span class="k">held-out attacks that succeeded against any patch</span>
+          <span class="v g">0</span>
+          <span class="t">the fixers did close the hole</span>
+        </div>
+        <div class="row">
+          <span class="k">fixes that shut the hole and broke a real input</span>
+          <span class="v" style="color:var(--fail)">3</span>
+          <span class="t">green the whole way</span>
+        </div>
+      </div>
+      <div class="disc">// SIGNAL, NOT A RATE. ONE WEAKNESS CLASS. FOUR SHAPES. THREE TOOLS. FULL EVIDENCE PUBLISHED.</div>
+    </div>
+  </section>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+---
+// The terminal panel: a bar with three dots and a path, then a body.
+// Used for every verdict, transcript, diff and code block on the site.
+// Dark in both themes, because it depicts a tool.
+
+interface Props {
+  /** Shown in the bar, e.g. "assay · finding-08 · patch.diff". */
+  path: string;
+  /** Mono footer under the body. */
+  footer?: string;
+  /** Accessible description; when set, the panel is announced as one image. */
+  label?: string;
+  class?: string;
+}
+
+const { path, footer, label, class: className = '' } = Astro.props;
+---
+
+<div class={`term ${className}`} role={label ? 'img' : undefined} aria-label={label}>
+  <div class="term-bar">
+    <div class="tl" aria-hidden="true"><i></i><i></i><i></i></div>
+    <span class="path">{path}</span>
+  </div>
+  <div class="term-body"><slot /></div>
+  {footer && <div class="term-foot">{footer}</div>}
+</div>

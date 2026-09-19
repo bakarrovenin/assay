@@ -1,0 +1,42 @@
+---
+// Report rows: ruled, zebra striped, key / value / note. With a figure
+// value the row reads as a metric; with `text` set the value is a sentence.
+
+export type ReportRow = {
+  k: string;
+  v: string;
+  /** Colour of the value. Default is the foreground. */
+  tone?: 'pass' | 'fail' | 'warn';
+  /** Dim note on the right. Hidden on narrow screens. */
+  t?: string;
+};
+
+interface Props {
+  /** Section label, rendered as // LABEL. */
+  label?: string;
+  rows: readonly ReportRow[];
+  /** Footnote under the rows, rendered as // NOTE. */
+  disc?: string;
+  /** Values are sentences rather than figures. */
+  text?: boolean;
+  class?: string;
+}
+
+const { label, rows, disc, text = false, class: className = '' } = Astro.props;
+---
+
+<div class={className}>
+  {label && <p class="hd">{label}</p>}
+  <div class={`rows ${text ? 'is-text' : ''}`}>
+    {
+      rows.map((r) => (
+        <div class="row">
+          <span class="k">{r.k}</span>
+          <span class={`v ${r.tone ? `is-${r.tone}` : ''}`}>{r.v}</span>
+          {r.t && <span class="t">{r.t}</span>}
+        </div>
+      ))
+    }
+  </div>
+  {disc && <p class="disc">{disc}</p>}
+</div>

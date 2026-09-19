@@ -1,0 +1,12 @@
+---
+// The near-empty statement strip: one sentence on the raised surface.
+// Mark the phrase that carries the signal with <span class="q">.
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<section class={`strip ${className}`}>
+  <div class="shell"><p><slot /></p></div>
+</section>

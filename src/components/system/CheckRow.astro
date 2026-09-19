@@ -1,0 +1,24 @@
+---
+// One check: id, name, description, and its state on the right.
+
+interface Props {
+  id: string;
+  name: string;
+  desc?: string;
+  state: 'pass' | 'fail' | 'warn' | 'pending';
+  /** Override the state word. Defaults to PASS, FAIL, WARN, or an ellipsis. */
+  status?: string;
+  class?: string;
+}
+
+const { id, name, desc, state, status, class: className = '' } = Astro.props;
+const word =
+  status ?? { pass: 'PASS', fail: 'FAIL', warn: 'WARN', pending: '…' }[state];
+---
+
+<div class={`chk is-${state} ${className}`}>
+  <span class="id">{id}</span>
+  <span class="nm">{name}</span>
+  {desc ? <span class="ds">{desc}</span> : <span class="ds"></span>}
+  <span class="st">{word}</span>
+</div>

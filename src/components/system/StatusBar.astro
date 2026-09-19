@@ -1,0 +1,27 @@
+---
+// The tool-style status bar above the nav. Every string here is a fact the
+// site already states elsewhere, read from src/lib/site where one exists.
+import { METHOD_VERSION } from '../../lib/site';
+
+interface Props {
+  /** Left-hand fields after the live dot. */
+  fields?: readonly string[];
+  /** Right-hand field. */
+  right?: string;
+}
+
+const {
+  fields = ['container: no network egress'],
+  right = '7 self-audits, all published',
+} = Astro.props;
+---
+
+<div class="statusbar" role="note" aria-label="Status">
+  <div class="shell">
+    <div class="l">
+      <span><span class="dot" aria-hidden="true">&#9679;</span> assay &middot; method v{METHOD_VERSION}</span>
+      {fields.map((f) => <span>{f}</span>)}
+    </div>
+    <div class="r">{right}</div>
+  </div>
+</div>

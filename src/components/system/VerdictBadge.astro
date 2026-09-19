@@ -1,0 +1,14 @@
+---
+// The verdict word in a bordered badge. The caller supplies the word; the
+// tone is the only thing this decides.
+
+interface Props {
+  label: string;
+  tone: 'pass' | 'fail' | 'amber' | 'neutral';
+  class?: string;
+}
+
+const { label, tone, class: className = '' } = Astro.props;
+---
+
+<span class={`badge badge-${tone} ${className}`}>{label}</span>

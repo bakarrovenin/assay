@@ -14,7 +14,8 @@ export default defineConfig({
     // the explanatory material also lives on at /methodology.
     '/product': '/benchmark',
   },
-  integrations: [sitemap()],
+  // The component sheet is a working document, not a page.
+  integrations: [sitemap({ filter: (page) => !page.includes('/design-system') })],
   vite: {
     plugins: [tailwindcss()],
   },

@@ -1,0 +1,247 @@
+---
+// The component sheet. Every token and component the site is built from,
+// rendered once, with real site copy as the sample text. Not in the sitemap
+// and not indexed. Toggle the theme in the nav to see the light set.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TermPanel from '../components/system/TermPanel.astro';
+import CheckRow from '../components/system/CheckRow.astro';
+import VerdictBadge from '../components/system/VerdictBadge.astro';
+import VerdictLine from '../components/system/VerdictLine.astro';
+import ReportRows from '../components/system/ReportRows.astro';
+import Strip from '../components/system/Strip.astro';
+
+const colours = [
+  ['--bg', 'page'],
+  ['--bg-2', 'raised surface, strip, zebra'],
+  ['--panel', 'terminal body'],
+  ['--line', 'hairline'],
+  ['--line-2', 'panel edge, outlined control'],
+  ['--fg', 'text'],
+  ['--fg-2', 'secondary text'],
+  ['--fg-3', 'meta, prompt, ids'],
+  ['--acc', 'signal: pass, live prompt, one phrase'],
+  ['--fail', 'fail'],
+  ['--amber', 'no alert, warn'],
+] as const;
+
+const type = [
+  ['h1', 'var(--t-h1)', '800', 'clamp(40, 6.6vw, 88)', 'Verify AI-authored fixes'],
+  ['strip', 'var(--t-strip)', '400', 'clamp(22, 3vw, 38)', 'Every vendor grades its own homework.'],
+  ['h2', 'var(--t-h2)', '700', 'clamp(26, 3.2vw, 40)', 'Four checks, in a sealed container.'],
+  ['value', 'var(--t-value)', '800', '26', '43'],
+  ['h3', 'var(--t-h3)', '700', '18', 'The allow-list that reads as clean'],
+  ['lede', 'var(--t-lede)', '400', '17', 'AI writes your security fixes now, and most of them work.'],
+  ['body', 'var(--t-body)', '400', '15', 'The patch is applied to a clean checkout and scored with no network egress.'],
+  ['small', 'var(--t-small)', '400', '14', 'Free and open. Four SQL injection flaws. Bring any fixer.'],
+  ['note', 'var(--t-note)', '400', '13.5', 'The hole is shut. The product is not working.'],
+  ['desc', 'var(--t-desc)', '400', '13', 'Reported sink removed. No suppression added.'],
+  ['meta', 'var(--t-meta)', '400', '12.5', 'FOUND AND CLOSED, IN THE METHODOLOGY NOTES'],
+] as const;
+
+const spacing = [4, 8, 12, 16, 22, 28, 38, 60, 70, 80, 100, 110];
+
+// The four checks, as the homepage names them, with the detail each one
+// reports in the explainer.
+const checks = [
+  { id: '01', name: 'Closed', desc: 'Reported sink removed. No suppression added.', state: 'pass' },
+  { id: '02', name: 'Hole shut', desc: 'All 47 held-out attacks blocked.', state: 'pass' },
+  { id: '03', name: 'Behaviour held', desc: 'A legitimate value the fixer never saw now returns an error.', state: 'fail' },
+  { id: '04', name: 'Provenance clean', desc: 'Author, token scope, and blast radius within bounds.', state: 'pass' },
+] as const;
+
+const metrics = [
+  { k: 'rules ran to completion', v: '43', t: 'CodeQL default suite, Python' },
+  { k: 'results', v: '0', tone: 'fail', t: 'the rule that did not fire: py/sql-injection' },
+  { k: 'held-out attacks blocked', v: '47', tone: 'pass', t: 'the fix closed the hole' },
+] as const;
+
+const notes = [
+  { k: 'The app that would not start', v: 'A patch that failed to boot scored as a patch that shut the hole, because every attack failed to connect and every failed connection read as a blocked attack.' },
+  { k: 'The guard that read the wrong tree', v: 'A pre-publication leak guard reported clean about the working tree while the answer key sat in an earlier commit, public forever.' },
+  { k: 'The claim that was not in the code', v: 'A published note claimed a verification that did not exist in the scorer.' },
+] as const;
+---
+
+<BaseLayout title="Design system" description="Component sheet for the Assay terminal system." path="/design-system" noindex>
+  <section class="section-hero">
+    <div class="shell">
+      <p class="hd">Component sheet</p>
+      <h1 class="h1 mt-6">Terminal <span class="g">system</span></h1>
+      <p class="lede mt-8">
+        Every token and component on the site, rendered once. Dark is the default. Use the
+        toggle in the nav to see the light set.
+      </p>
+    </div>
+  </section>
+
+  {/* ---- tokens ---- */}
+  <section class="section rule-t" id="tokens">
+    <div class="shell">
+      <p class="hd">Colour</p>
+      <div class="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-line bg-line sm:grid-cols-3 lg:grid-cols-4">
+        {
+          colours.map(([name, role]) => (
+            <div class="bg-bg p-4">
+              <div class="h-14 rounded-[6px] border border-line" style={`background:var(${name})`} />
+              <p class="mt-3 text-[13px] text-fg">{name}</p>
+              <p class="text-[12.5px] text-fg-2">{role}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <p class="hd mt-16">Type</p>
+      <div class="mt-6 rows">
+        {
+          type.map(([role, size, weight, px, sample]) => (
+            <div class="row" style="grid-template-columns:minmax(0,1fr);gap:8px">
+              <span class="flex flex-wrap gap-x-5 text-[12.5px] text-fg-3">
+                <span>.{role}</span>
+                <span>{px}px</span>
+                <span>w{weight}</span>
+              </span>
+              <span
+                class="block text-fg"
+                style={`font-size:${size};font-weight:${weight};line-height:1.15;letter-spacing:${Number(px.split(',')[0].replace(/\D/g, '')) >= 26 ? '-0.02em' : '0'}`}
+              >
+                {sample}
+              </span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="disc">Mono throughout. Inter appears only in .longform prose and the nav links.</p>
+
+      <p class="hd mt-16">Spacing</p>
+      <div class="mt-6 flex flex-wrap items-end gap-3">
+        {
+          spacing.map((s, i) => (
+            <div class="flex flex-col items-center gap-2">
+              <div class="w-4 bg-acc" style={`height:${s}px`} />
+              <span class="text-[11px] text-fg-3">--s-{i + 1}</span>
+              <span class="text-[11px] text-fg-2">{s}</span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="disc">Sections: 80 top, 100 bottom. Hero: 80, 60. Strip: 70. Mobile takes two thirds.</p>
+
+      <p class="hd mt-16">Controls</p>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <a href="#" class="btn btn-primary">Run the benchmark</a>
+        <a href="#" class="btn btn-secondary">Read the Index &rarr;</a>
+        <a href="#" class="btn btn-run">Run the benchmark &rarr;</a>
+        <a href="#" class="btn btn-secondary btn-sm">Next &rarr;</a>
+        <span class="chip">SQL injection &middot; CWE-89 &middot; /api/search</span>
+        <span class="chip is-fail">verdict: NOT VERIFIED</span>
+        <a href="#" class="link-inline">How each was found and closed</a>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- hero pattern ---- */}
+  <section class="section rule-t" id="hero">
+    <div class="shell">
+      <p class="hd">Hero: prompt, headline, lede, controls</p>
+      <div class="mt-10">
+        <p class="prompt"><span class="c">$</span> assay verify ./patch.diff <span class="cursor"></span></p>
+        <h2 class="h1 mt-7">Verify <span class="g">AI-authored</span> fixes</h2>
+        <p class="lede mt-8">
+          Your AI fixed it. We check whether it actually did.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- terminal panel ---- */}
+  <section class="section rule-t" id="terminal">
+    <div class="shell">
+      <p class="hd">Terminal panel, check rows, verdict line</p>
+      <div class="mt-10">
+        <TermPanel path="assay · #248 · fix: escape user input in /api/search">
+          <div class="ln cmd"><span class="c">$</span> assay verify --held-out ./patch.diff</div>
+          <div class="ln out">Four checks, in a sealed container.</div>
+          {checks.map((c) => <CheckRow id={c.id} name={c.name} desc={c.desc} state={c.state} />)}
+          <VerdictLine label="NOT VERIFIED" tone="fail">The hole is shut. The product isn&rsquo;t working.</VerdictLine>
+        </TermPanel>
+      </div>
+
+      <p class="hd mt-16">Check row states</p>
+      <div class="mt-6">
+        <TermPanel path="states">
+          <CheckRow id="01" name="Closed" desc="Reported sink removed. No suppression added." state="pass" />
+          <CheckRow id="03" name="Behaviour held" desc="A legitimate value the fixer never saw now returns an error." state="fail" />
+          <CheckRow id="02" name="Hole shut" desc="Fire attacks the fixer never saw." state="warn" status="NO ALERT" />
+          <CheckRow id="04" name="Provenance clean" desc="Was the change itself trustworthy?" state="pending" />
+        </TermPanel>
+      </div>
+
+      <p class="hd mt-16">Terminal, transcript and code</p>
+      <div class="mt-6">
+        <TermPanel path="app/finding_08.py" footer="Scanner: 0 findings. Behaviour check: sorts by the dropped columns diverge.">
+          <pre class="term-block"><span class="tok-com"># restrict the sort column</span>
+allowed = &#123;<span class="tok-str">"id"</span>, <span class="tok-str">"name"</span>, <span class="tok-str">"price"</span>&#125;
+<span class="tok-kw">if</span> column <span class="tok-kw">not in</span> allowed:
+    column = <span class="tok-str">"name"</span>
+
+query = f<span class="tok-str">"... ORDER BY &#123;column&#125;"</span></pre>
+        </TermPanel>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- badges ---- */}
+  <section class="section rule-t" id="badges">
+    <div class="shell">
+      <p class="hd">Verdict badge</p>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <VerdictBadge label="VERIFIED" tone="pass" />
+        <VerdictBadge label="NOT VERIFIED" tone="fail" />
+        <VerdictBadge label="NO ALERT" tone="amber" />
+        <VerdictBadge label="INSUFFICIENT EVIDENCE" tone="neutral" />
+      </div>
+    </div>
+  </section>
+
+  {/* ---- strip ---- */}
+  <div class="mt-4">
+    <p class="hd shell mb-6">Statement strip</p>
+  </div>
+  <Strip>
+    The alert turning green and the bug being fixed are two different events.{' '}
+    <span class="q">The industry measures the first one.</span>
+  </Strip>
+
+  {/* ---- report rows ---- */}
+  <section class="section" id="rows">
+    <div class="shell">
+      <ReportRows
+        label="CodeQL default suite, Python, second-order flaw"
+        rows={metrics}
+        disc="A signal, not a rate. One weakness class, four flaws, three tools."
+      />
+
+      <div class="mt-16">
+        <ReportRows label="Found and closed, in the methodology notes" rows={notes} text />
+      </div>
+    </div>
+  </section>
+
+  {/* ---- prose ---- */}
+  <section class="section rule-t" id="prose">
+    <div class="shell">
+      <p class="hd">Long-form prose, the one place Inter is used</p>
+      <div class="longform mt-6">
+        <p>
+          The patch is applied to a clean checkout and scored with no network egress, torn down
+          between patches. Three of the checks are the ordinary questions any careful team asks.
+          The two that catch real failures run inputs the fixer never saw: attacks the hole must
+          still block, and legitimate values it must still accept.
+        </p>
+        <p>
+          A test is a sample, not a specification.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,16 @@
+---
+// The closing line of a terminal body: the badge, then the reason.
+import VerdictBadge from './VerdictBadge.astro';
+
+interface Props {
+  label: string;
+  tone: 'pass' | 'fail' | 'amber' | 'neutral';
+}
+
+const { label, tone } = Astro.props;
+---
+
+<div class="verdictline">
+  <VerdictBadge label={label} tone={tone} />
+  <span class="why"><slot /></span>
+</div>

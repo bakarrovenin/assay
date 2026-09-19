@@ -6,8 +6,8 @@
 <button
   type="button"
   id="theme-toggle"
-  class="grid h-[34px] w-[34px] place-items-center rounded-[3px] border border-line text-fg-2 transition-colors hover:text-fg"
-  aria-label="Switch to dark theme"
+  class="icon-btn"
+  aria-label="Switch to light theme"
   aria-live="polite"
 >
   <svg
@@ -49,8 +49,8 @@
 
   function currentTheme(): 'light' | 'dark' {
     const set = document.documentElement.getAttribute('data-theme');
-    if (set === 'light' || set === 'dark') return set;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Dark is the default; only a stored choice of light changes it.
+    return set === 'light' ? 'light' : 'dark';
   }
 
   function paint(theme: 'light' | 'dark') {
