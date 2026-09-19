@@ -106,9 +106,9 @@ export async function renderOgImage(): Promise<Buffer> {
     return `<g transform="translate(${x} ${y})" fill="${fill}">${d}</g>`;
   };
 
-  const headline = ['Your AI fixed it.', 'We check whether', 'it actually did.'];
+  const headline = ['Verify AI-authored', 'fixes'];
   const headlineSize = 76;
-  const firstBaseline = 300;
+  const firstBaseline = 340;
   const leading = 82;
 
   const verdict = layout(display, 'VERIFIED', 40, 2);
