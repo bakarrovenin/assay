@@ -1,37 +1,35 @@
 ---
 import Section from './Section.astro';
-import RuledRows from './RuledRows.astro';
+import ReportRows from './system/ReportRows.astro';
 // Move 5. Seven times a check of ours passed for a reason unrelated to the fix
 // being correct, each in the flattering direction. Count verified against the
 // evidence repo: methodology note 14 records itself as the seventh instance.
 const bugs = [
-  { lead: 'The app that would not start', body: 'A patch that failed to boot scored as a patch that shut the hole, because every attack failed to connect and every failed connection read as a blocked attack.' },
-  { lead: 'The guard that read the wrong tree', body: 'A pre-publication leak guard reported clean about the working tree while the answer key sat in an earlier commit, public forever.' },
-  { lead: 'The claim that was not in the code', body: 'A published note claimed a verification that did not exist in the scorer.' },
-  { lead: 'The correct fix we failed', body: 'Our own alert check failed a correct allow-list fix, because an allow-list cannot remove the pattern the rule matches.' },
-  { lead: 'The corpus that named its answer', body: 'The vulnerable modules carried comments naming the flaw and the fix, so every tool had been handed the answer.' },
-  { lead: 'The guard that was right by its own definition', body: 'A leak guard searched for payloads and fix code and found none, while explanatory prose describing the flaw walked straight past it.' },
-  { lead: 'The guard that passed on an incomplete tree', body: 'A leak guard reported clean while the corpus files it should have scanned were not yet tracked, so a payload inside them was invisible to it.' },
+  { k: 'The app that would not start', v: 'A patch that failed to boot scored as a patch that shut the hole, because every attack failed to connect and every failed connection read as a blocked attack.' },
+  { k: 'The guard that read the wrong tree', v: 'A pre-publication leak guard reported clean about the working tree while the answer key sat in an earlier commit, public forever.' },
+  { k: 'The claim that was not in the code', v: 'A published note claimed a verification that did not exist in the scorer.' },
+  { k: 'The correct fix we failed', v: 'Our own alert check failed a correct allow-list fix, because an allow-list cannot remove the pattern the rule matches.' },
+  { k: 'The corpus that named its answer', v: 'The vulnerable modules carried comments naming the flaw and the fix, so every tool had been handed the answer.' },
+  { k: 'The guard that was right by its own definition', v: 'A leak guard searched for payloads and fix code and found none, while explanatory prose describing the flaw walked straight past it.' },
+  { k: 'The guard that passed on an incomplete tree', v: 'A leak guard reported clean while the corpus files it should have scanned were not yet tracked, so a payload inside them was invisible to it.' },
 ];
 ---
 
 <Section id="credibility">
-  <h2 class="h2 reveal" style="max-width:22ch">Seven times, our own check was wrong.</h2>
+  <h2 class="h2 reveal">Seven times, our own check was wrong.</h2>
 
-  <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:66ch">
+  <p class="reveal body mt-8" style="--reveal-delay:60ms;max-width:66ch">
     Each passed for a reason unrelated to the fix being correct, and every one failed in the
     flattering direction. A check that wrongly accuses a good patch is investigated within the
     hour; a check that wrongly clears a bad one is the answer nobody interrogates. All seven are
     written up in full.
   </p>
 
-  <div class="reveal mt-11" style="--reveal-delay:60ms;max-width:80ch">
-    <RuledRows label="Found and closed, in the methodology notes" rows={bugs} />
+  <div class="reveal mt-10" style="--reveal-delay:60ms">
+    <ReportRows label="Found and closed, in the methodology notes" rows={bugs} text />
   </div>
 
   <p class="reveal mt-8">
-    <a href="/methodology" class="link-inline text-[15px] font-medium">
-      How each was found and closed
-    </a>
+    <a href="/methodology" class="link-inline">How each was found and closed</a>
   </p>
 </Section>

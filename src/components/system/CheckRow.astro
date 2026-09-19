@@ -1,24 +1,41 @@
 ---
 // One check: id, name, description, and its state on the right.
+//
+// Two ways to use it. Static: pass `state` and the word renders at once.
+// Resolving: pass `resolves` instead; the row shows the pending glyph until
+// a script adds .is-resolved, then it shows the state (the explainer does
+// this at beat 4). The description can also come through the default slot
+// when it needs markup.
 
 interface Props {
   id: string;
   name: string;
   desc?: string;
-  state: 'pass' | 'fail' | 'warn' | 'pending';
+  state?: 'pass' | 'fail' | 'warn' | 'pending';
+  resolves?: 'pass' | 'fail';
   /** Override the state word. Defaults to PASS, FAIL, WARN, or an ellipsis. */
   status?: string;
   class?: string;
 }
 
-const { id, name, desc, state, status, class: className = '' } = Astro.props;
-const word =
-  status ?? { pass: 'PASS', fail: 'FAIL', warn: 'WARN', pending: '…' }[state];
+const { id, name, desc, state, resolves, status, class: className = '' } = Astro.props;
+const words = { pass: 'PASS', fail: 'FAIL', warn: 'WARN', pending: '…' };
+const effective = state ?? (resolves ? 'pending' : 'pending');
+const word = status ?? words[effective];
 ---
 
-<div class={`chk is-${state} ${className}`}>
+<div class={`chk is-${effective} ${className}`} data-resolves={resolves}>
   <span class="id">{id}</span>
   <span class="nm">{name}</span>
-  {desc ? <span class="ds">{desc}</span> : <span class="ds"></span>}
-  <span class="st">{word}</span>
+  <span class="ds"><slot>{desc}</slot></span>
+  <span class="st">
+    {resolves ? (
+      <>
+        <span class="st-pending">{word}</span>
+        <span class="st-final">{words[resolves]}</span>
+      </>
+    ) : (
+      word
+    )}
+  </span>
 </div>

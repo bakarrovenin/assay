@@ -1,6 +1,9 @@
 ---
 // Client assay. Reads only this browser, makes no network calls, stores
 // nothing. Decorative, so it is hidden from assistive technology.
+import TermPanel from './system/TermPanel.astro';
+import VerdictLine from './system/VerdictLine.astro';
+
 const rows = [
   ['User agent', 'ua'],
   ['Viewport', 'viewport'],
@@ -14,35 +17,48 @@ const rows = [
 ] as const;
 ---
 
-<div
-  aria-hidden="true"
-  class="mono rounded-[3px] border border-line bg-bg-2/40 p-4 text-[11px] leading-[1.9]"
-  data-diagnostics
->
-  <div class="mb-3 border-b border-line pb-2 uppercase tracking-[0.18em] text-fg-2">
-    Client assay
-  </div>
-
-  {
-    rows.map(([label, key]) => (
-      <div class="flex gap-3">
-        <span class="w-[110px] shrink-0 uppercase tracking-[0.1em] text-fg-2 sm:w-[130px]">
-          {label}
-        </span>
-        <span class="min-w-0 flex-1 truncate" data-field={key}>
-          &mdash;
-        </span>
-      </div>
-    ))
-  }
-
-  <div class="mt-3 flex gap-3 border-t border-line pt-2">
-    <span class="w-[110px] shrink-0 uppercase tracking-[0.1em] text-fg-2 sm:w-[130px]">
-      Verdict
-    </span>
-    <span class="font-medium text-fail">UNVERIFIED</span>
-  </div>
+<div aria-hidden="true" data-diagnostics>
+  <TermPanel path="Client assay" class="diag">
+    {
+      rows.map(([label, key]) => (
+        <div class="ln out diag-row">
+          <span class="diag-k">{label}</span>
+          <span class="diag-v" data-field={key}>&mdash;</span>
+        </div>
+      ))
+    }
+    <VerdictLine label="UNVERIFIED" tone="fail" />
+  </TermPanel>
 </div>
+
+<style>
+  /* Layout only: the key column and the value truncation. */
+  .diag-row {
+    display: flex;
+    gap: 12px;
+    font-size: var(--t-desc);
+    line-height: 1.9;
+  }
+  .diag-k {
+    flex: none;
+    width: 120px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    color: var(--fg-3);
+  }
+  .diag-v {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--fg-2);
+  }
+  [data-diagnostics] :global(.term) { box-shadow: none; }
+  [data-diagnostics] :global(.term-body) { padding: 16px 18px 18px; }
+  [data-diagnostics] :global(.verdictline) { margin-top: 12px; padding-top: 12px; }
+</style>
 
 <script>
   const root = document.querySelector('[data-diagnostics]');

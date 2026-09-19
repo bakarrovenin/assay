@@ -27,6 +27,9 @@
 // arrow keys all work in every mode. In the scroll-driven modes they scroll
 // the page to the beat rather than fighting the scroll position.
 import { METHOD_VERSION } from '../lib/site';
+import TermPanel from './system/TermPanel.astro';
+import CheckRow from './system/CheckRow.astro';
+import VerdictLine from './system/VerdictLine.astro';
 
 const beats = [
   {
@@ -113,7 +116,7 @@ const N = beats.length;
     <div class="stick" data-stick>
       <div class="shell">
         <div class="top">
-          <p class="eyebrow">How it works</p>
+          <p class="hd">How it works</p>
           <div class="progress">
             <span class="stepno"><b data-cur>01</b> / {String(N).padStart(2, '0')}</span>
             <div class="dots" role="tablist" aria-label="Beats">
@@ -135,69 +138,55 @@ const N = beats.length;
 
         <div class="grid">
           <div class="stage" data-stage>
-            <div class="panel">
-              <div class="pr">
-                <div class="pr-top">
-                  <span class="pr-actor">assay-example</span>
-                  <span class="pr-bot">demo</span>
-                  <span>opened a pull request</span>
-                  <span class="pr-num">#248</span>
-                </div>
-                <div class="pr-title"><span class="kw">fix:</span> escape user input in /api/search</div>
-                <div class="scanner piece piece-scan">
-                  <span class="d"></span>
-                  <span>Semgrep 1.80.0</span>
-                  <span>&middot;</span>
-                  <b>0 findings</b>
-                </div>
+            <TermPanel path="assay verify" class="panel">
+              {/* The pull request, as the tool sees it. */}
+              <div class="ln out pr-top">
+                <span class="pr-actor">assay-example</span>
+                <span class="chip pr-bot">demo</span>
+                <span>opened a pull request</span>
+                <span class="pr-num">#248</span>
+              </div>
+              <div class="ln cmd pr-title"><span class="tok-kw">fix:</span> escape user input in /api/search</div>
+              <div class="ln out scanner piece piece-scan">
+                <span class="d" aria-hidden="true"></span>
+                <span>Semgrep 1.80.0</span>
+                <span>&middot;</span>
+                <b>0 findings</b>
               </div>
 
               <div class="assay piece piece-assay">
-                <div class="p-eyebrow">
-                  <span class="mark" aria-hidden="true">
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg>
-                  </span>
-                  Assay &middot; independent verification
-                </div>
+                <p class="hd p-eyebrow">Assay &middot; independent verification</p>
 
                 <div class="checks">
                   {
                     checks.map((c) => (
-                      <div class={`check ${c.failed ? 'is-fail' : 'is-pass'}`}>
-                        <span class="idx">{c.n}</span>
-                        <span class="glyph" aria-hidden="true">
-                          {!c.failed && (
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6" /></svg>
-                          )}
-                        </span>
-                        <div class="c-body">
-                          <div class="c-name">{c.name}</div>
-                          <div class="c-plain">{c.plain}</div>
-                          <div class="c-detail piece piece-detail">{c.detail}</div>
-                        </div>
-                      </div>
+                      <CheckRow id={c.n} name={c.name} resolves={c.failed ? 'fail' : 'pass'}>
+                        <span class="c-plain">{c.plain}</span>
+                        <span class="c-detail piece piece-detail">{c.detail}</span>
+                      </CheckRow>
                     ))
                   }
                 </div>
 
-                <div class="verdict piece piece-final"><span class="stamp">Not verified</span></div>
-                <div class="kicker piece piece-final">The hole is shut. The product isn&rsquo;t working.</div>
+                <div class="piece piece-final">
+                  <VerdictLine label="Not verified" tone="fail">The hole is shut. The product isn&rsquo;t working.</VerdictLine>
+                </div>
 
                 <div class="foot piece piece-final">
-                  <span>Method v{METHOD_VERSION}</span>
-                  <span class="evidence">View evidence &rarr;</span>
+                  <span class="hd">Method v{METHOD_VERSION}</span>
+                  <span class="hd evidence">View evidence &rarr;</span>
                 </div>
               </div>
-            </div>
+            </TermPanel>
           </div>
 
           <div class="caption">
               {
                 beats.map((s, k) => (
                   <div class={`cap ${k === 0 ? 'on' : ''}`} data-cap={k}>
-                    <h2 class="cap-h">{s.h}</h2>
+                    <h2 class="h3 cap-h">{s.h}</h2>
                     <p class="cap-b">{s.b}</p>
-                    <span class={`cap-chip ${s.red ? 'red' : ''}`}>{s.chip}</span>
+                    <span class={`chip ${s.red ? 'is-fail' : ''}`}>{s.chip}</span>
                   </div>
                 ))
               }
@@ -205,7 +194,7 @@ const N = beats.length;
 
           <div class="controls">
             <button type="button" class="btn btn-secondary btn-sm" data-prev disabled>&larr; Back</button>
-            <span class="hint" data-hint>Scroll or click to continue</span>
+            <span class="hint hd" data-hint>Scroll or click to continue</span>
             <button type="button" class="btn btn-secondary btn-sm" data-next>Next &rarr;</button>
           </div>
         </div>
@@ -216,12 +205,13 @@ const N = beats.length;
 
 <noscript>
   <style>
-    /* Without JS the section is the finished certificate with every caption
+    /* Without JS the section is the finished verdict with every caption
        under it, which is the whole argument in one static frame. */
     [data-explainer] .piece { display: block !important; }
-    [data-explainer] .piece-scan { display: inline-flex !important; }
-    [data-explainer] .verdict { display: flex !important; }
+    [data-explainer] .piece-scan { display: flex !important; }
     [data-explainer] .foot { display: flex !important; }
+    [data-explainer] .chk .st-final { display: inline !important; }
+    [data-explainer] .chk .st-pending { display: none !important; }
     [data-explainer] .cap { display: block !important; }
     [data-explainer] .cap + .cap { margin-top: 24px; }
     [data-explainer] .controls, [data-explainer] .progress { display: none !important; }
@@ -229,24 +219,24 @@ const N = beats.length;
 </noscript>
 
 <style>
+  /* Layout and assembly only. Every colour, face and size in here comes
+     from the system; the terminal panel, check rows, verdict line, chips
+     and buttons are the locked components. */
   .ex {
-    /* The nav is 61px and sticky. When pinned, the script sets --stick-top so
-       the stage at its final height sits centred in what is left of the
-       viewport, and --stick-h reserves that height from the first beat so
-       the certificate grows into space that is already its own. */
-    --nav: 61px;
+    /* The status bar scrolls away and the nav is 68px and sticky. When
+       pinned, the script sets --stick-top so the stage at its final height
+       sits centred in what is left of the viewport, and --stick-h reserves
+       that height from the first beat so the panel grows into space that
+       is already its own. */
+    --nav: 68px;
     --stick-top: calc(var(--nav) + 24px);
-    padding-block: 72px;
+    padding-block: var(--s-10) var(--s-11);
   }
 
-  @media (min-width: 1024px) {
-    .ex { padding-block: 96px; }
+  @media (max-width: 720px) {
+    .ex { padding-block: 56px 64px; }
   }
 
-  /* Pinned mode. The track is tall and the stage sticks inside it; both
-     numbers are set by the script once it has measured the stage. Flow mode
-     is the same markup with neither rule, which is also what a no-JS page
-     gets. */
   .ex.is-pinned {
     padding-block: 24px 64px;
   }
@@ -274,8 +264,7 @@ const N = beats.length;
     flex: none;
   }
   .stepno {
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: var(--t-meta);
     letter-spacing: 0.14em;
     color: var(--fg-3);
     white-space: nowrap;
@@ -305,15 +294,15 @@ const N = beats.length;
     top: 4.5px;
     height: 3px;
     border-radius: 2px;
-    background: var(--line);
+    background: var(--line-2);
     transition: background 300ms ease-out;
   }
   .dot.done::after { background: var(--fg-3); }
-  .dot.on::after { background: var(--fg); }
+  .dot.on::after { background: var(--acc); }
 
   /* Stacked on narrow screens with the caption first, so the words the
      reader is scrolling past are the ones that change. Two columns from 960,
-     caption and controls hugging the vertical middle of the certificate. */
+     caption and controls hugging the vertical middle of the panel. */
   .grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -327,7 +316,7 @@ const N = beats.length;
 
   @media (min-width: 960px) {
     .grid {
-      grid-template-columns: minmax(0, 600px) minmax(280px, 1fr);
+      grid-template-columns: minmax(0, 640px) minmax(280px, 1fr);
       grid-template-rows: auto auto;
       grid-template-areas: 'stage caption' 'stage controls';
       align-content: start;
@@ -346,227 +335,56 @@ const N = beats.length;
     min-width: 0;
   }
 
-  /* ---- the assembling certificate ---- */
-  .panel {
-    --p-dim: color-mix(in srgb, var(--fg-2) 93%, var(--bg));
-    --p-fail-dim: color-mix(in srgb, var(--fail) 76%, var(--fg));
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--panel);
-    color: var(--fg);
-    overflow: hidden;
-  }
-
-  .pr {
-    padding: 15px 20px 14px;
-    background: var(--panel-2);
-  }
+  /* ---- the assembling verdict ---- */
   .pr-top {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--fg-2);
-    margin-bottom: 10px;
   }
-  .pr-actor {
-    color: var(--fg);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-  .pr-bot {
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--p-dim);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 1px 7px;
-  }
-  .pr-num {
-    margin-left: auto;
-    padding-left: 8px;
-    color: var(--p-dim);
-    white-space: nowrap;
-  }
-  .pr-title {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    color: var(--fg);
-  }
-  /* Decoration, not meaning, so neutral rather than accent. */
-  .pr-title .kw {
-    color: var(--fg-2);
-  }
+  .pr-actor { color: var(--fg); font-weight: 500; white-space: nowrap; }
+  .pr-bot { text-transform: uppercase; letter-spacing: 0.08em; font-size: 10.5px; padding: 1px 7px; }
+  .pr-num { margin-left: auto; padding-left: 8px; white-space: nowrap; }
+  .pr-title { margin-top: 6px; }
+
   .scanner {
     align-items: center;
     gap: 8px;
     margin-top: 12px;
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    color: var(--fg-2);
   }
   .scanner .d {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--p-dim);
+    background: var(--fg-3);
   }
-  .scanner b {
-    color: var(--fg);
-    font-weight: 500;
-  }
+  .scanner b { color: var(--fg); font-weight: 500; }
 
   .assay {
-    padding: 15px 20px 18px;
+    margin-top: 18px;
+    padding-top: 16px;
     border-top: 1px solid var(--line);
   }
-  .p-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--fg-2);
-    margin-bottom: 6px;
-  }
-  .p-eyebrow .mark {
-    width: 15px;
-    height: 15px;
-    border: 1.5px solid var(--fg);
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--fg);
-    flex: none;
-  }
+  .p-eyebrow { margin-bottom: 6px; }
 
-  .checks {
-    display: flex;
-    flex-direction: column;
-  }
-  .check {
-    display: grid;
-    grid-template-columns: 22px 20px 1fr;
-    gap: 11px;
-    padding: 10px 0;
-    border-top: 1px solid var(--line);
-    align-items: start;
-    transition: opacity 350ms ease-out;
-  }
-  .idx {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    color: var(--p-dim);
-    padding-top: 2px;
-  }
-
-  /* The punch, in three states. Pending is an empty seat in neutral. Once the
-     checks resolve, a passing check is struck in the accent, and the failing
-     one keeps its seat empty in the fail colour: a check that was made and
-     did not hold, so nothing was impressed into it. Same device as the
-     hallmark; a red cross would make the miss a different kind of presence. */
-  .glyph {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
-    flex: none;
-    border: 1.5px dashed color-mix(in srgb, var(--fg-3) 55%, transparent);
-    color: transparent;
-  }
-  .glyph svg {
-    display: block;
-    opacity: 0;
-  }
-  .ex.at-4 .is-pass .glyph {
-    border-color: transparent;
-    background: var(--accent);
-    color: var(--bg);
-  }
-  .ex.at-4 .is-pass .glyph svg {
-    opacity: 1;
-    animation: fade 400ms ease;
-  }
-  .ex.at-4 .is-fail .glyph {
-    border-color: var(--fail);
-  }
-
-  .c-name {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--fg);
-    margin-bottom: 3px;
-  }
-  .c-plain,
-  .c-detail {
-    font-size: 12.5px;
-    line-height: 1.45;
-    color: var(--fg-2);
-  }
-  .c-detail {
-    margin-top: 3px;
-  }
-  .ex.at-4 .is-fail .c-name {
-    color: var(--fail);
-  }
-  .ex.at-4 .is-fail .c-detail {
-    color: var(--p-fail-dim);
-  }
+  .c-plain { display: block; }
+  .c-detail { display: none; margin-top: 3px; }
+  .ex.at-4 .c-detail { display: block; animation: fade 400ms ease; }
+  .ex.at-4 :global(.chk[data-resolves="fail"]) .c-detail { color: var(--fail); }
   /* The final frame dims the passing checks so the failure carries the eye. */
-  .ex.at-5 .is-pass {
-    opacity: 0.28;
-  }
+  .ex.at-5 :global(.chk[data-resolves="pass"]) { opacity: 0.32; transition: opacity 350ms ease-out; }
 
-  .verdict {
-    justify-content: center;
-    padding: 18px 0 10px;
-  }
-  .stamp {
-    font-family: var(--font-mono);
-    font-weight: 500;
-    font-size: 19px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--fail);
-    border: 2px solid var(--fail);
-    border-radius: 7px;
-    padding: 10px 22px;
-    transform: rotate(-2.4deg);
-  }
-  .kicker {
-    text-align: center;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--fg-2);
-  }
   .foot {
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    margin-top: 12px;
-    padding-top: 11px;
+    margin-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid var(--line);
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--p-dim);
   }
+  .foot .hd::before { content: none; }
   /* Illustrative, not a live link, so it does not take the accent. */
-  .evidence {
-    color: var(--fg-2);
-  }
+  .evidence { color: var(--fg-2); }
 
   /* ---- assembly ---- */
   /* Every piece is absent until its beat. Cumulative classes at-1 to at-5 on
@@ -576,11 +394,9 @@ const N = beats.length;
     display: none;
     animation: fade 400ms ease;
   }
-  .ex.at-1 .piece-scan { display: inline-flex; }
+  .ex.at-1 .piece-scan { display: flex; }
   .ex.at-2 .piece-assay { display: block; }
-  .ex.at-4 .piece-detail { display: block; }
-  .ex.at-5 .kicker { display: block; }
-  .ex.at-5 .verdict { display: flex; }
+  .ex.at-5 .piece-final { display: block; }
   .ex.at-5 .foot { display: flex; }
 
   @keyframes fade {
@@ -593,75 +409,53 @@ const N = beats.length;
     min-width: 0;
     min-height: 168px;
   }
-  .cap {
-    display: none;
-  }
+  .cap { display: none; }
   .cap.on {
     display: block;
     animation: fade 400ms ease;
   }
   .cap-h {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(20px, 2.2vw, 26px);
-    line-height: 1.2;
-    letter-spacing: -0.015em;
     margin: 0 0 10px;
-    text-wrap: balance;
+    /* Not balanced: balance splits the hyphenated words in these headings. */
+    text-wrap: pretty;
   }
   .cap-b {
-    font-size: 15px;
+    font-size: var(--t-small);
     line-height: 1.6;
     color: var(--fg-2);
-    margin: 0;
+    margin: 0 0 14px;
     max-width: 52ch;
-  }
-  .cap-chip {
-    display: inline-block;
-    margin-top: 14px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    color: var(--fg-2);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 5px 10px;
-  }
-  .cap-chip.red {
-    color: var(--fail);
-    border-color: color-mix(in srgb, var(--fail) 45%, transparent);
   }
 
   .controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'prev hint next';
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
   }
-  .controls .btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-  }
-  .hint {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    color: var(--fg-3);
-    text-align: center;
-  }
-  .hint.off {
-    visibility: hidden;
+  .controls [data-prev] { grid-area: prev; }
+  .controls [data-next] { grid-area: next; }
+  .hint { grid-area: hint; text-align: center; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .hint.off { visibility: hidden; }
+
+  /* Where the row cannot hold the hint, it drops under the buttons. */
+  @media (max-width: 1240px) {
+    .controls {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: 'prev . next' 'hint hint hint';
+    }
   }
 
   @media (max-width: 400px) {
-    .pr, .assay { padding-inline: 16px; }
-    .stamp { font-size: 16px; }
     .hint { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .piece, .cap.on, .ex.at-4 .is-pass .glyph svg { animation: none; }
-    .check, .dot::after { transition: none; }
+    :global(html:not([data-motion="on"])) .piece,
+    :global(html:not([data-motion="on"])) .cap.on,
+    :global(html:not([data-motion="on"])) .c-detail { animation: none; }
+    :global(html:not([data-motion="on"])) .dot::after { transition: none; }
   }
 </style>
 
@@ -680,12 +474,16 @@ const N = beats.length;
     const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
     const dots = Array.from(root.querySelectorAll<HTMLElement>('[data-dot]'));
     const caps = Array.from(root.querySelectorAll<HTMLElement>('[data-cap]'));
+    const rows = Array.from(root.querySelectorAll<HTMLElement>('.chk[data-resolves]'));
 
     const mode = new URLSearchParams(location.search).get('explainer');
     const forceFlow = mode === 'flow';
     const reduced =
-      !forceFlow && mode !== 'pin' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const NAV = 61;
+      !forceFlow &&
+      mode !== 'pin' &&
+      document.documentElement.dataset.motion !== 'on' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const NAV = 68;
     let STICK_TOP = NAV + 24;
     // Scroll distance per beat when pinned, as a fraction of the viewport.
     // 0.55 is about one deliberate trackpad flick or five wheel notches.
@@ -698,6 +496,7 @@ const N = beats.length;
     function render(k: number) {
       beat = k;
       for (let i = 1; i < N; i++) root.classList.toggle('at-' + i, k >= i);
+      rows.forEach((r) => r.classList.toggle('is-resolved', k >= 4));
       cur.textContent = String(k + 1).padStart(2, '0');
       dots.forEach((d, i) => {
         d.classList.toggle('on', i === k);
@@ -726,8 +525,10 @@ const N = beats.length;
       function measure() {
         const was = beat;
         for (let i = 1; i < N; i++) root.classList.add('at-' + i);
+        rows.forEach((r) => r.classList.add('is-resolved'));
         stickH = stick.offsetHeight;
         for (let i = 1; i < N; i++) root.classList.toggle('at-' + i, was >= i);
+        rows.forEach((r) => r.classList.toggle('is-resolved', was >= 4));
       }
 
       // Pin only where the whole stage fits under the nav with room to spare,

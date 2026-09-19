@@ -20,6 +20,7 @@ const { path, footer, label, class: className = '' } = Astro.props;
   <div class="term-bar">
     <div class="tl" aria-hidden="true"><i></i><i></i><i></i></div>
     <span class="path">{path}</span>
+    <slot name="bar" />
   </div>
   <div class="term-body"><slot /></div>
   {footer && <div class="term-foot">{footer}</div>}

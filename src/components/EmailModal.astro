@@ -19,7 +19,7 @@ import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
       <h2 id="verify-modal-title" class="h3">Join the waitlist</h2>
       <button
         type="button"
-        class="verify-modal-close"
+        class="icon-btn"
         data-verify-close
         aria-label="Close"
       >
@@ -34,15 +34,12 @@ import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
       </button>
     </div>
 
-    <p class="lede mt-3 text-[15px]" data-verify-lede>
+    <p class="body mt-3 text-fg-2" data-verify-lede>
       A verifier that runs on every pull request, on your own repositories, is in
       development. Leave an address and we will tell you when it is ready.
     </p>
 
-    <label
-      for="verify-email"
-      class="mono mt-7 block text-[11px] uppercase tracking-[0.14em] text-fg-2"
-    >
+    <label for="verify-email" class="hd mt-7 block">
       Get an install link when your slot opens
     </label>
 
@@ -54,16 +51,12 @@ import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
         required
         autocomplete="email"
         placeholder="you@company.com"
-        class="min-w-0 flex-1 rounded-[3px] border border-line bg-bg px-3.5 py-3 text-[15px] text-fg placeholder:text-fg-2 placeholder:opacity-60"
+        class="input flex-1"
       />
       <button type="submit" class="btn btn-primary shrink-0">Notify me</button>
     </div>
 
-    <p
-      class="mono mt-3 text-[11px] leading-relaxed text-fg-2"
-      data-verify-status
-      role="status"
-    >
+    <p class="disc mt-3" data-verify-status role="status">
       One message when your slot opens. Nothing else, ever.
     </p>
   </form>
@@ -89,8 +82,9 @@ import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
 
   .verify-modal-panel {
     background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 4px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-3);
+    box-shadow: var(--shadow-term);
     padding: 28px;
     text-align: left;
   }
@@ -99,24 +93,6 @@ import { INDEX_SIGNUP_ENDPOINT } from '../lib/site';
     .verify-modal-panel { padding: 32px; }
   }
 
-  .verify-modal-close {
-    display: grid;
-    place-items: center;
-    height: 30px;
-    width: 30px;
-    flex-shrink: 0;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    color: var(--fg-2);
-    background: transparent;
-    cursor: pointer;
-    transition: color 150ms ease-out, border-color 150ms ease-out;
-  }
-
-  .verify-modal-close:hover {
-    color: var(--fg);
-    border-color: color-mix(in srgb, var(--fg) 45%, transparent);
-  }
 </style>
 
 <script>

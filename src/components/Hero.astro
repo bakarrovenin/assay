@@ -1,67 +1,38 @@
 ---
 // Move 1. States the problem and points at the one thing that is real and
-// shipping today: the benchmark. The old primary CTA promised a pull-request
-// verifier we cannot run yet; that is now a labelled waitlist further down the
-// page. The certificate illustration that used to sit here is gone with the
-// explainer, so the headline keeps the width.
+// shipping today: the benchmark. The pull-request verifier is a labelled
+// waitlist further down the page. The live command line is chrome, like the
+// status bar: the one string on the page that is not site copy.
 ---
 
-<section class="hero">
+<section class="section-hero">
   <div class="shell">
-    <div class="hero-text">
-      <p class="eyebrow reveal">Independent verification for AI-authored code</p>
+    <p class="hd reveal">Independent verification for AI-authored code</p>
 
-      <h1 class="h1 hero-h1 reveal mt-6" style="--reveal-delay:60ms">
-        Verify AI-authored fixes
-      </h1>
+    <p class="prompt reveal mt-7" style="--reveal-delay:40ms" aria-hidden="true">
+      <span class="c">$</span> assay verify ./patch.diff <span class="cursor"></span>
+    </p>
 
-      <p class="h3 reveal mt-6" style="--reveal-delay:90ms; max-width:30ch">
-        Your AI fixed it. We check whether it actually did.
-      </p>
+    <h1 class="h1 reveal mt-7" style="--reveal-delay:60ms">
+      Verify <span class="g">AI-authored</span> fixes
+    </h1>
 
-      <p class="lede reveal mt-8" style="--reveal-delay:120ms">
-        AI writes your security fixes now, and most of them work. The dangerous one closes the
-        hole and quietly breaks something your tests never checked. Assay catches it.
-      </p>
+    <p class="lede reveal mt-8" style="--reveal-delay:90ms">
+      <b>Your AI fixed it. We check whether it actually did.</b>
+    </p>
 
-      <div class="reveal mt-9 flex flex-wrap gap-3" style="--reveal-delay:180ms">
-        <a href="/benchmark" class="btn btn-primary">Run the benchmark</a>
-        <a href="/the-index" class="btn btn-secondary">Read the Index</a>
-      </div>
+    <p class="lede reveal mt-4" style="--reveal-delay:120ms">
+      AI writes your security fixes now, and most of them work. The dangerous one closes the
+      hole and quietly breaks something your tests never checked. Assay catches it.
+    </p>
 
-      <p class="mono reveal mt-6 text-[12px] text-fg-2" style="--reveal-delay:240ms">
-        Free and open &middot; Four SQL injection flaws &middot; Bring any fixer
-      </p>
+    <div class="reveal mt-9 flex flex-wrap gap-3" style="--reveal-delay:180ms">
+      <a href="/benchmark" class="btn btn-primary">Run the benchmark</a>
+      <a href="/the-index" class="btn btn-secondary">Read the Index &rarr;</a>
     </div>
+
+    <p class="disc reveal mt-8" style="--reveal-delay:240ms">
+      Free and open &middot; Four SQL injection flaws &middot; Bring any fixer
+    </p>
   </div>
 </section>
-
-<style>
-  .hero {
-    display: flex;
-    align-items: center;
-    padding-block: 64px 72px;
-  }
-
-  /* Full display size. The stage 2 rebuild took the headline from 80 to 72
-     because it had to share the row with the certificate and still fit the
-     viewport. That constraint is gone with the column, so the size comes
-     back with it. 22ch lets the line set to two lines across the shell at
-     1512, breaking after "check" rather than after "We". */
-  .hero-h1 {
-    font-size: clamp(40px, 6.4vw, 80px);
-    max-width: 22ch;
-  }
-
-  @media (min-width: 960px) {
-    .hero {
-      padding-block: 96px 104px;
-    }
-  }
-
-  @media (min-width: 960px) and (max-height: 760px) {
-    .hero {
-      padding-block: 64px 72px;
-    }
-  }
-</style>

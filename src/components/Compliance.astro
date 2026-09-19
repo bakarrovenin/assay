@@ -1,18 +1,17 @@
 ---
 import Section from './Section.astro';
-import Hallmark from './Hallmark.astro';
+import TermPanel from './system/TermPanel.astro';
+import CheckRow from './system/CheckRow.astro';
 
-// The four punches map one to one onto the four fields a verdict records.
-// This is the section the hallmark metaphor was built for, so it is the
-// anchor here rather than the footnote it is on /product.
-// Three struck, one not. The fourth punch is the one nobody can strike for
-// themselves, which the copy under the device already says, so showing all
+// The four marks map one to one onto the four fields a verdict records.
+// Three struck, one not. The fourth is the one nobody can strike for
+// themselves, which the copy under the panel already says, so showing all
 // four struck contradicted the sentence beside it.
 const marks = [
-  { id: 'AGT', title: 'agent', struck: true, gloss: 'which agent wrote it' },
-  { id: 'AUT', title: 'authority', struck: true, gloss: 'what authority it held' },
-  { id: 'VER', title: 'verifier', struck: true, gloss: 'what verified it' },
-  { id: 'APR', title: 'approver', struck: false, gloss: 'who approved' },
+  { id: 'AGT', gloss: 'which agent wrote it', struck: true },
+  { id: 'AUT', gloss: 'what authority it held', struck: true },
+  { id: 'VER', gloss: 'what verified it', struck: true },
+  { id: 'APR', gloss: 'who approved', struck: false },
 ] as const;
 
 const frameworks = [
@@ -20,48 +19,43 @@ const frameworks = [
   'NIST AI agent standards',
   'CSA agentic trust',
 ];
+
+const description = `Hallmark. ${marks.map((m) => `${m.gloss}: ${m.struck ? 'struck' : 'not struck'}`).join(', ')}.`;
 ---
 
 <Section id="the-record">
   <h2 class="h2 reveal">Prove a human oversaw the machine.</h2>
 
-  <p class="reveal mt-10 text-[17px] leading-[1.62]" style="--reveal-delay:120ms;max-width:64ch">
+  <p class="reveal body mt-8" style="--reveal-delay:120ms;max-width:64ch">
     December 2027: the EU AI Act requires logged, documented human oversight of high-risk
     AI systems. Singapore&rsquo;s IMDA framework already calls for an audit trail of which
     agent acted under whose authority.
   </p>
 
-  <p class="reveal mt-7 text-[17px] leading-[1.62]" style="--reveal-delay:60ms;max-width:64ch">
+  <p class="reveal body mt-6" style="--reveal-delay:60ms;max-width:64ch">
     Every Assay verdict is a signed attestation.
   </p>
 
-  <div class="reveal mt-11 lg:mt-12" style="--reveal-delay:60ms">
-    <Hallmark class="hm-lg" marks={marks} caption="Hallmark · struck on every verdict" />
+  <div class="reveal mt-10" style="--reveal-delay:60ms">
+    <TermPanel path="Hallmark · struck on every verdict" label={description}>
+      {
+        marks.map((m) =>
+          m.struck ? (
+            <CheckRow id={m.id} name={m.gloss} state="pass" status={"\u2713"} />
+          ) : (
+            <CheckRow id={m.id} name={m.gloss} state="pending" status="" />
+          ),
+        )
+      }
+    </TermPanel>
   </div>
 
-  <p class="reveal mt-11 text-[17px] leading-[1.62]" style="--reveal-delay:60ms">
+  <p class="reveal body mt-10" style="--reveal-delay:60ms">
     The verdict becomes the record. The fourth punch is the one nobody can strike for
     themselves: independence is the part you cannot self-certify.
   </p>
 
-  <ul class="reveal mt-12 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5 lg:mt-14" style="--reveal-delay:60ms">
-    {
-      frameworks.map((name) => (
-        <li class="framework">{name}</li>
-      ))
-    }
+  <ul class="reveal mt-12 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-5" style="--reveal-delay:60ms">
+    {frameworks.map((name) => <li class="chip">{name}</li>)}
   </ul>
 </Section>
-
-<style>
-  /* Quieter than the chips they replace: these are context for the section
-     above, not claims of their own. */
-  .framework {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: var(--fg-2);
-    opacity: 0.72;
-  }
-</style>

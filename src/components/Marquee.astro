@@ -6,7 +6,7 @@ import Logo from './Logo.astro';
 const units = Array.from({ length: 8 });
 ---
 
-<div class="marquee border-y border-line py-7" aria-hidden="true">
+<div class="marquee raised border-y border-line py-7" aria-hidden="true">
   <div class="marquee-track">
     {
       units.map(() => (
@@ -19,7 +19,7 @@ const units = Array.from({ length: 8 });
   </div>
 </div>
 
-<p class="mono mt-5 text-center text-[11px] text-fg-2">
+<p class="disc mt-5 text-center">
   Take nobody&rsquo;s word for it. Royal Society, 1660.
 </p>
 
@@ -58,17 +58,11 @@ const units = Array.from({ length: 8 });
 
   .marquee-text {
     font-family: var(--font-mono);
-    font-size: 15px;
-    font-weight: 500;
+    font-size: var(--t-h3);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.34em;
+    letter-spacing: 0.3em;
     white-space: nowrap;
-  }
-
-  @media (min-width: 1024px) {
-    .marquee-text {
-      font-size: 19px;
-    }
   }
 
   @keyframes marquee-scroll {
@@ -81,13 +75,13 @@ const units = Array.from({ length: 8 });
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .marquee-track {
+    :global(html:not([data-motion="on"])) .marquee-track {
       animation: none;
       justify-content: center;
       width: 100%;
     }
     /* Static state shows one instance, not a clipped row of eight. */
-    .marquee-unit:not(:first-child) {
+    :global(html:not([data-motion="on"])) .marquee-unit:not(:first-child) {
       display: none;
     }
   }

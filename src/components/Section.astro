@@ -5,17 +5,20 @@ interface Props {
   rule?: boolean;
   /** Raised surface, used to separate adjacent sections without a box. */
   tint?: boolean;
+  /** Section rhythm. */
+  density?: 'default' | 'hero' | 'tight';
   class?: string;
   label?: string;
 }
 
-const { id, rule = true, tint = false, class: className = '', label } = Astro.props;
+const { id, rule = true, tint = false, density = 'default', class: className = '', label } = Astro.props;
+const pad = density === 'hero' ? 'section-hero' : density === 'tight' ? 'section-tight' : 'section';
 ---
 
 <section
   id={id}
   aria-label={label}
-  class={`section ${rule ? 'rule-t' : ''} ${tint ? 'bg-bg-2/70' : ''} ${className}`}
+  class={`${pad} ${rule ? 'rule-t' : ''} ${tint ? 'raised' : ''} ${className}`}
 >
   <div class="shell"><slot /></div>
 </section>

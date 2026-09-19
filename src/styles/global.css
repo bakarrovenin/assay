@@ -359,12 +359,16 @@
     font-size: var(--t-h1);
     line-height: 1.0;
     letter-spacing: -0.03em;
-    max-width: 16ch;
+    /* 20ch, not the mockup's 16, so the hyphenated phrase never splits. */
+    max-width: 20ch;
   }
 
-  .h1 .g,
   .g {
     color: var(--acc);
+  }
+
+  .h1 .g {
+    white-space: nowrap;
   }
 
   .h2 {
@@ -429,6 +433,16 @@
   }
 
   .disc::before { content: "// "; }
+
+  /* A commented line at body size: an aside the reader is meant to read. */
+  .note {
+    font-family: var(--font-mono);
+    font-size: var(--t-body);
+    line-height: 1.6;
+    color: var(--fg-2);
+  }
+
+  .note::before { content: "// "; color: var(--fg-3); }
 
   /* Older names, the same role. */
   .eyebrow, .micro {
@@ -553,6 +567,23 @@
     opacity: 0.4;
     cursor: default;
   }
+
+  /* ---- text input ---- */
+  .input {
+    width: 100%;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--t-small);
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-2);
+    padding: 11px 14px;
+    transition: border-color 150ms ease-out;
+  }
+
+  .input::placeholder { color: var(--fg-3); }
+  .input:focus { border-color: var(--acc); outline: none; }
 
   /* ---- chip: bordered inline label, mono ---- */
   .chip {
@@ -874,6 +905,25 @@
     white-space: pre;
   }
 
+  /* Diff lines: gutter number, mark, code. Inside a .term-block. */
+  .dl {
+    display: grid;
+    grid-template-columns: 3ch 1.5ch 1fr;
+    gap: 0 8px;
+    line-height: 1.75;
+  }
+
+  .dl .n { color: var(--fg-3); text-align: right; user-select: none; }
+  .dl .m { color: var(--fg-3); user-select: none; }
+  .dl.is-add { background: var(--acc-dim); }
+  .dl.is-add .m { color: var(--acc); }
+  .dl.is-del { background: var(--fail-dim); }
+  .dl.is-del .m { color: var(--fail); }
+  .dl.is-del code { color: var(--fg-2); }
+
+  .term-count { margin-left: auto; font-size: var(--t-meta); color: var(--fg-3); white-space: nowrap; }
+  .term-count b { color: var(--acc); font-weight: 500; }
+
   .term-foot {
     padding: 12px 22px;
     border-top: 1px solid var(--line);
@@ -889,7 +939,7 @@
   /* ---- check row ---- */
   .chk {
     display: grid;
-    grid-template-columns: 22px 150px 1fr auto;
+    grid-template-columns: minmax(22px, max-content) minmax(150px, max-content) 1fr auto;
     gap: 14px;
     align-items: baseline;
     padding: 9px 0;
@@ -909,6 +959,16 @@
   .chk.is-warn .st { color: var(--amber); }
   .chk.is-pending .st { color: var(--fg-3); font-weight: 400; }
   .chk.is-fail .nm { color: var(--fail); }
+
+  /* A resolving row: pending until a script adds .is-resolved, then it
+     takes the state in data-resolves. The animated explainer uses this. */
+  .chk[data-resolves] .st-final { display: none; }
+  .chk.is-resolved .st-pending { display: none; }
+  .chk.is-resolved .st-final { display: inline; }
+  .chk.is-resolved .st { font-weight: 700; }
+  .chk.is-resolved[data-resolves="pass"] .st { color: var(--acc); }
+  .chk.is-resolved[data-resolves="fail"] .st { color: var(--fail); }
+  .chk.is-resolved[data-resolves="fail"] .nm { color: var(--fail); }
 
   @media (max-width: 720px) {
     .chk { grid-template-columns: 20px 1fr auto; gap: 4px 10px; }

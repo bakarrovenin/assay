@@ -1,5 +1,8 @@
 ---
 import Section from './Section.astro';
+import TermPanel from './system/TermPanel.astro';
+import CheckRow from './system/CheckRow.astro';
+import VerdictBadge from './system/VerdictBadge.astro';
 // Move 4. The product, condensed. The full walkthrough lives in the methodology;
 // this is the homepage version. Four checks, the sealed container, three
 // verdicts, and the line that makes the verdict worth anything.
@@ -12,53 +15,47 @@ const checks = [
 ---
 
 <Section id="checks" tint>
-  <h2 class="h2 reveal" style="max-width:20ch">Four checks, in a sealed container.</h2>
+  <h2 class="h2 reveal">Four checks, in a sealed container.</h2>
 
-  <p class="reveal mt-8 text-[17px] leading-[1.6]" style="--reveal-delay:60ms;max-width:64ch">
+  <p class="reveal body mt-8" style="--reveal-delay:60ms">
     The patch is applied to a clean checkout and scored with no network egress, torn down
     between patches. Three of the checks are the ordinary questions any careful team asks. The
     two that catch real failures run inputs the fixer never saw: attacks the hole must still
     block, and legitimate values it must still accept.
   </p>
 
-  <ol class="reveal mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-[3px] border border-line bg-line sm:grid-cols-2" style="--reveal-delay:60ms">
-    {
-      checks.map((ch) => (
-        <li class="flex flex-col bg-bg p-6 lg:p-7">
-          <span class="mono text-[10px] uppercase tracking-[0.16em] text-accent">{ch.n}</span>
-          <h3 class="mt-3 font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">{ch.name}</h3>
-          <p class="mt-2 text-[14.5px] leading-[1.6] text-fg-2">{ch.body}</p>
-        </li>
-      ))
-    }
-  </ol>
+  <div class="reveal mt-10" style="--reveal-delay:60ms">
+    <TermPanel path="assay · the four checks">
+      {checks.map((ch) => <CheckRow id={ch.n} name={ch.name} desc={ch.body} state="pending" status="" />)}
+    </TermPanel>
+  </div>
 
-  <p class="mono reveal mt-8 border-l-2 border-line pl-5 text-[13px] leading-[1.7] text-fg-2" style="--reveal-delay:120ms;max-width:62ch">
+  <p class="reveal mt-8 note" style="--reveal-delay:120ms;max-width:62ch">
     If you let a student write their own exam, they will pass it. You test them on
     questions they have not seen.
   </p>
 
-  <div class="reveal mt-11 grid grid-cols-1 gap-x-8 gap-y-6 lg:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" style="--reveal-delay:60ms">
+  <div class="reveal mt-12 grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-2" style="--reveal-delay:60ms">
     <div>
-      <p class="micro mb-3">Three verdicts</p>
-      <p class="text-[16px] leading-[1.62]">
-        <span class="text-accent">VERIFIED</span>,
-        <span class="text-fail">NOT VERIFIED</span>, and
-        <strong class="font-semibold text-fg">INSUFFICIENT EVIDENCE</strong>. The third is a
+      <p class="hd mb-4">Three verdicts</p>
+      <p class="body">
+        <VerdictBadge label="VERIFIED" tone="pass" />,{' '}
+        <VerdictBadge label="NOT VERIFIED" tone="fail" />, and{' '}
+        <VerdictBadge label="INSUFFICIENT EVIDENCE" tone="neutral" />. The third is a
         first-class verdict, reported rather than dropped. A result we cannot stand behind is
         worth more than one we invent, and that is the point.
       </p>
     </div>
-    <div class="border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-      <p class="micro mb-3">Why the verdict is worth anything</p>
-      <p class="text-[16px] leading-[1.62]">
+    <div class="border-t border-line pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+      <p class="hd mb-4">Why the verdict is worth anything</p>
+      <p class="body">
         We do not write fixes. The thing being checked and the thing doing the checking are
         never the same party. Independence is the whole product.
       </p>
     </div>
   </div>
 
-  <p class="mono reveal mt-11 border-t border-line pt-6 text-[13px] leading-relaxed text-fg-2" style="--reveal-delay:60ms">
+  <p class="disc reveal mt-12 border-t border-line pt-6" style="--reveal-delay:60ms">
     Works with any scanner and any fixer. SARIF in, verdict out.
   </p>
 </Section>

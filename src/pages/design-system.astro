@@ -9,6 +9,7 @@ import VerdictBadge from '../components/system/VerdictBadge.astro';
 import VerdictLine from '../components/system/VerdictLine.astro';
 import ReportRows from '../components/system/ReportRows.astro';
 import Strip from '../components/system/Strip.astro';
+import DiffRow from '../components/system/DiffRow.astro';
 
 const colours = [
   ['--bg', 'page'],
@@ -136,6 +137,14 @@ const notes = [
         <span class="chip is-fail">verdict: NOT VERIFIED</span>
         <a href="#" class="link-inline">How each was found and closed</a>
       </div>
+      <div class="mt-6 flex max-w-[420px] gap-2.5">
+        <input class="input" type="email" placeholder="you@company.com" aria-label="Email" />
+        <button type="button" class="btn btn-primary shrink-0">Notify me</button>
+      </div>
+      <p class="note mt-6" style="max-width:62ch">
+        If you let a student write their own exam, they will pass it. You test them on
+        questions they have not seen.
+      </p>
     </div>
   </section>
 
@@ -173,6 +182,28 @@ const notes = [
           <CheckRow id="03" name="Behaviour held" desc="A legitimate value the fixer never saw now returns an error." state="fail" />
           <CheckRow id="02" name="Hole shut" desc="Fire attacks the fixer never saw." state="warn" status="NO ALERT" />
           <CheckRow id="04" name="Provenance clean" desc="Was the change itself trustworthy?" state="pending" />
+        </TermPanel>
+      </div>
+
+      <p class="hd mt-16">Resolving rows: pending until a script adds .is-resolved</p>
+      <div class="mt-6">
+        <TermPanel path="resolving">
+          <CheckRow id="01" name="Closed" desc="Is the reported hole actually gone?" resolves="pass" />
+          <CheckRow id="03" name="Behaviour held" desc="Does it still accept the input it should?" resolves="fail" class="is-resolved" />
+        </TermPanel>
+      </div>
+
+      <p class="hd mt-16">Diff lines</p>
+      <div class="mt-6">
+        <TermPanel path="app/finding_08.py · reformat">
+          <span slot="bar" class="term-count"><b>+4</b> &minus;1</span>
+          <div class="term-block">
+            <DiffRow line={{ n: 41, mark: '-', html: '    query = f<span class="tok-str">"SELECT id, name, &#123;column&#125; AS f FROM products ORDER BY &#123;column&#125;"</span>' }} />
+            <DiffRow line={{ n: 41, mark: '+', html: '    query = (' }} />
+            <DiffRow line={{ n: 42, mark: '+', html: '        f<span class="tok-str">"SELECT id, name, &#123;column&#125; AS f "</span>' }} />
+            <DiffRow line={{ n: 43, mark: '+', html: '        f<span class="tok-str">"FROM products ORDER BY &#123;column&#125;"</span>' }} />
+            <DiffRow line={{ n: 44, mark: '+', html: '    )' }} />
+          </div>
         </TermPanel>
       </div>
 

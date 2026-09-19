@@ -1,0 +1,26 @@
+---
+// One line of a unified diff, inside a terminal panel's .term-block.
+// Line HTML is pre-tokenised by the caller with the .tok-* spans.
+
+export type DiffLine = {
+  /** Line number as displayed in the gutter. */
+  n: number;
+  /** Diff marker. Added lines take the accent tint, removed the fail tint. */
+  mark?: '+' | '-';
+  /** Pre-tokenised HTML for the line. Empty string renders a blank row. */
+  html: string;
+};
+
+interface Props {
+  line: DiffLine;
+}
+
+const { line } = Astro.props;
+const cls = line.mark === '+' ? 'is-add' : line.mark === '-' ? 'is-del' : '';
+---
+
+<div class={`dl ${cls}`}>
+  <span class="n">{line.n}</span>
+  <span class="m">{line.mark ?? ''}</span>
+  <code set:html={line.html || '&nbsp;'} />
+</div>
