@@ -11,6 +11,8 @@ import ReportRows from '../components/system/ReportRows.astro';
 import Strip from '../components/system/Strip.astro';
 import DiffRow from '../components/system/DiffRow.astro';
 import Table from '../components/system/Table.astro';
+import TermLines from '../components/system/TermLines.astro';
+import VerdictPanel from '../components/system/VerdictPanel.astro';
 
 const colours = [
   ['--bg', 'page'],
@@ -206,6 +208,19 @@ const notes = [
             <DiffRow line={{ n: 44, mark: '+', html: '    )' }} />
           </div>
         </TermPanel>
+      </div>
+
+      <p class="hd mt-16">Transcript lines and a verdict panel</p>
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TermPanel path="manual_score.py · fixer-03" footer="Every held-out attack leaked.">
+          <TermLines lines={[
+            { kind: 'cmd', html: 'python manual_score.py patches/finding-01/fixer-03.py fixer-03' },
+            { kind: 'gap' },
+            { kind: 'out', html: '  A alert closed        : PASS (findings=0)' },
+            { kind: 'bad', html: '  B hole shut           : FAIL (12/12 attacks leaked)' },
+          ]} />
+        </TermPanel>
+        <VerdictPanel verdict="Not verified" tone="fail" rows={[['A alert', 'closed, 0 findings'], ['B attacks', '12 of 12 leaked'], ['Class', 'suppression in effect']]} />
       </div>
 
       <p class="hd mt-16">Terminal, transcript and code</p>

@@ -623,6 +623,15 @@
     font-family: var(--font-sans);
     font-size: 16.5px;
     line-height: 1.7;
+  }
+
+  /* Text measures 66ch; panels, rows and tables take the full shell. */
+  .longform > p,
+  .longform > h2,
+  .longform > h3,
+  .longform > ul,
+  .longform > ol,
+  .longform > blockquote {
     max-width: 66ch;
   }
 
@@ -656,6 +665,30 @@
   .longform li + li { margin-top: 0.6em; }
   .longform li::marker { color: var(--fg-2); }
 
+  /* Panels and rows inside prose keep their own type; the chip is for
+     inline code in a sentence. */
+  .longform .term code,
+  .longform .rows code,
+  .longform .table code {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-size: inherit;
+    white-space: inherit;
+  }
+
+  .longform blockquote {
+    border-left: 2px solid var(--acc);
+    padding-left: 22px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--fg);
+    margin-block: 1.8em;
+  }
+
+  .longform hr { margin-block: 2.4em; }
+
   .longform h2,
   .longform h3 {
     font-family: var(--font-mono);
@@ -665,7 +698,7 @@
     margin-top: 2.2em;
   }
 
-  .longform h2 { font-size: 22px; }
+  .longform h2 { font-size: clamp(22px, 3vw, 28px); max-width: 24ch; }
   .longform h3 { font-size: var(--t-h3); }
   .longform > h2 + *, .longform > h3 + * { margin-top: 0.7em; }
   .longform .lead-in { color: var(--fg-2); }
@@ -948,6 +981,11 @@
   .dl.is-del .m { color: var(--fail); }
   .dl.is-del code { color: var(--fg-2); }
 
+  .tl-line { white-space: pre; }
+  .tl-line.failr { font-weight: 400; }
+  .tl-line .c { color: var(--acc); user-select: none; }
+  .term-gap { height: 0.95em; }
+
   .term-count { margin-left: auto; font-size: var(--t-meta); color: var(--fg-3); white-space: nowrap; }
   .term-count b { color: var(--acc); font-weight: 500; }
 
@@ -1097,6 +1135,10 @@
   .rows.is-text .row { grid-template-columns: minmax(0, 200px) 1fr; align-items: baseline; }
   .rows.is-text .row:has(.t) { grid-template-columns: minmax(0, 200px) 1fr auto; }
   .rows.is-text.is-narrow .row { grid-template-columns: max-content 1fr; }
+  /* Text term first, then its gloss: a pair of terms of art. */
+  .rows.is-text.is-lead .row { grid-template-columns: minmax(0, max-content) 1fr; }
+  .rows.is-text.is-lead .row .v { font-weight: 700; color: var(--fg); }
+  .rows.is-text.is-lead .row .k { font-size: var(--t-body); text-transform: none; letter-spacing: 0; color: var(--fg-2); }
   .rows .v .disc { margin-top: 8px; }
   .rows .v .title { display: block; font-weight: 700; color: var(--fg); }
   .rows .v .title + span { display: block; margin-top: 4px; color: var(--fg-2); }

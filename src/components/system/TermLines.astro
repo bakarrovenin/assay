@@ -1,0 +1,44 @@
+---
+// Transcript lines inside a terminal panel: commands with a $ prompt,
+// output, output that proves a failure, and spacers.
+
+export type TermLine =
+  /** A command. Rendered with a $ prompt; html is the argument text. */
+  | { kind: 'cmd'; html: string }
+  /** Ordinary output. */
+  | { kind: 'out'; html: string }
+  /** Output that proves the failure. Rendered in the fail colour. */
+  | { kind: 'bad'; html: string }
+  /** Spacer between blocks. */
+  | { kind: 'gap' };
+
+interface Props {
+  lines: readonly TermLine[];
+}
+
+const { lines } = Astro.props;
+
+export const describe = (label: string, lines: readonly TermLine[], footer?: string) =>
+  [
+    `${label}.`,
+    ...lines.map((l) =>
+      l.kind === 'gap'
+        ? ''
+        : l.kind === 'cmd'
+          ? `Command: ${l.html.replace(/<[^>]+>/g, '')}.`
+          : `${l.kind === 'bad' ? 'Result, failure: ' : 'Result: '}${l.html.replace(/<[^>]+>/g, '')}.`,
+    ),
+    footer ?? '',
+  ].join(' ');
+---
+
+<div class="term-block">{lines.map((line) =>
+  line.kind === 'gap' ? (
+    <div class="term-gap"></div>
+  ) : (
+    <div class={`tl-line ${line.kind === 'cmd' ? 'cmd' : line.kind === 'bad' ? 'failr' : 'out'}`}>
+      {line.kind === 'cmd' && <span class="c">$ </span>}
+      <code set:html={line.html} />
+    </div>
+  ),
+)}</div>

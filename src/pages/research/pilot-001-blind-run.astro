@@ -1,10 +1,11 @@
 ---
 import PostLayout from '../../layouts/PostLayout.astro';
-import Diff from '../../components/Diff.astro';
-import type { DiffLine } from '../../components/Diff.astro';
-import DefinitionPair from '../../components/DefinitionPair.astro';
-import ConditionList from '../../components/ConditionList.astro';
-import RuledRows from '../../components/RuledRows.astro';
+import TermPanel from '../../components/system/TermPanel.astro';
+import DiffRow from '../../components/system/DiffRow.astro';
+import type { DiffLine } from '../../components/system/DiffRow.astro';
+import ReportRows from '../../components/system/ReportRows.astro';
+import Table from '../../components/system/Table.astro';
+import VerdictBadge from '../../components/system/VerdictBadge.astro';
 
 // Read by src/pages/research/index.astro, which globs the posts in this
 // directory. Same shape as the frontmatter block of the markdown posts.
@@ -53,30 +54,26 @@ const matrix: { shape: string; finding: string; cells: readonly Cell[] }[] = [
   { shape: 'Second order', finding: '13', cells: ['VERIFIED', 'VERIFIED', 'no alert raised'] },
 ];
 
-const cellClass = (cell: Cell) =>
-  cell === 'VERIFIED'
-    ? 'text-accent'
-    : cell === 'NOT VERIFIED'
-      ? 'text-fail'
-      : 'text-fg-3';
+const cellTone = (cell: Cell) =>
+  cell === 'VERIFIED' ? 'pass' : cell === 'NOT VERIFIED' ? 'fail' : cell === 'no alert raised' ? 'amber' : null;
 
 // --- the four shapes -------------------------------------------------------
 const shapes = [
   {
-    lead: 'Quoted string',
-    body: 'Single parameter. The baseline case.',
+    k: 'Quoted string',
+    v: 'Single parameter. The baseline case.',
   },
   {
-    lead: 'Numeric context',
-    body: 'No quotes anywhere in the query, so a patch that escapes or strips quotes does nothing.',
+    k: 'Numeric context',
+    v: 'No quotes anywhere in the query, so a patch that escapes or strips quotes does nothing.',
   },
   {
-    lead: 'ORDER BY identifier',
-    body: 'A column name cannot be a bound parameter. The only correct defence is an allow-list.',
+    k: 'ORDER BY identifier',
+    v: 'A column name cannot be a bound parameter. The only correct defence is an allow-list.',
   },
   {
-    lead: 'Second order',
-    body: 'The input is stored safely in one function and reaches the vulnerable query in another.',
+    k: 'Second order',
+    v: 'The input is stored safely in one function and reaches the vulnerable query in another.',
   },
 ] as const;
 
@@ -91,21 +88,21 @@ const checks = [
 // --- the tools, as pinned in patches/TOOLS.md and batch.json ---------------
 const versions = [
   {
-    lead: 'ChatGPT',
-    body: 'Model ChatGPT Think. 2026-09-14. Findings 01, 04, 08, 13.',
+    k: 'ChatGPT',
+    v: 'Model ChatGPT Think. 2026-09-14. Findings 01, 04, 08, 13.',
   },
   {
-    lead: 'Claude Code',
-    body: 'Claude Code 2.1.270, model Opus 5. 2026-09-14. Findings 01, 04, 08, 13.',
+    k: 'Claude Code',
+    v: 'Claude Code 2.1.270, model Opus 5. 2026-09-14. Findings 01, 04, 08, 13.',
   },
   {
-    lead: 'Copilot Autofix',
-    body: 'GitHub Copilot Autofix on CodeQL 2.27.0, default suite, threat model remote. 2026-09-14. Findings 04, 08, 13.',
+    k: 'Copilot Autofix',
+    v: 'GitHub Copilot Autofix on CodeQL 2.27.0, default suite, threat model remote. 2026-09-14. Findings 04, 08, 13.',
   },
   {
-    lead: 'Cursor',
-    body: 'Attempted. The blind batch could not be completed within this edition’s window. Its earlier results are published marked provisional and count in no figure here.',
-    tag: 'not counted',
+    k: 'Cursor',
+    v: 'Attempted. The blind batch could not be completed within this edition’s window. Its earlier results are published marked provisional and count in no figure here.',
+    t: 'not counted',
   },
 ] as const;
 
@@ -167,55 +164,55 @@ const cast: DiffLine[] = [
 // --- what our own method got wrong, one line each, METHODOLOGY-NOTES.md ----
 const mistakes = [
   {
-    lead: 'App never started',
-    tag: 'note 4',
-    body: 'A patch that failed to start scored as a patch that shut the hole, because every attack failed to connect and every failure was recorded as an attack that did not succeed.',
+    k: 'App never started',
+    t: 'note 4',
+    v: 'A patch that failed to start scored as a patch that shut the hole, because every attack failed to connect and every failure was recorded as an attack that did not succeed.',
   },
   {
-    lead: 'Guard read the tree',
-    tag: 'note 6',
-    body: 'A guard reported no leak before publication, correctly, about the working tree, while the answer key sat in an earlier commit that would have been public permanently.',
+    k: 'Guard read the tree',
+    t: 'note 6',
+    v: 'A guard reported no leak before publication, correctly, about the working tree, while the answer key sat in an earlier commit that would have been public permanently.',
   },
   {
-    lead: 'Claimed, not coded',
-    tag: 'note 7',
-    body: 'A published note claimed a verification that did not exist in code.',
+    k: 'Claimed, not coded',
+    t: 'note 7',
+    v: 'A published note claimed a verification that did not exist in code.',
   },
   {
-    lead: 'Check A false fail',
-    tag: 'note 9',
-    body: 'A correct fix was failed by our own check A, because an allow-list cannot remove the pattern the rule matches.',
+    k: 'Check A false fail',
+    t: 'note 9',
+    v: 'A correct fix was failed by our own check A, because an allow-list cannot remove the pattern the rule matches.',
   },
   {
-    lead: 'Answer in prose',
-    tag: 'note 12',
-    body: 'The corpus handed the fixer the answer in prose.',
+    k: 'Answer in prose',
+    t: 'note 12',
+    v: 'The corpus handed the fixer the answer in prose.',
   },
   {
-    lead: 'Correct by definition',
-    tag: 'note 12',
-    body: 'A guard searched for payloads, oracles and fix code, and was correct by its own definition, while explanatory prose walked past it.',
+    k: 'Correct by definition',
+    t: 'note 12',
+    v: 'A guard searched for payloads, oracles and fix code, and was correct by its own definition, while explanatory prose walked past it.',
   },
   {
-    lead: 'Passed on an incomplete tree',
-    tag: 'note 14',
-    body: 'A leak guard reported clean while the corpus files it should have scanned were not yet tracked, so a payload inside them was invisible to it.',
+    k: 'Passed on an incomplete tree',
+    t: 'note 14',
+    v: 'A leak guard reported clean while the corpus files it should have scanned were not yet tracked, so a payload inside them was invisible to it.',
   },
 ] as const;
 
 // --- what would change our mind ----------------------------------------------
 const reversals = [
   {
-    lead: 'Holes left open',
-    body: 'If a broader corpus shows tools leaving holes open at any material rate, the original framing was right and we will say so.',
+    k: 'Holes left open',
+    v: 'If a broader corpus shows tools leaving holes open at any material rate, the original framing was right and we will say so.',
   },
   {
-    lead: 'No reproduction',
-    body: 'If the behavioural failures do not reproduce on other flaw classes, the over-broad result is a curiosity about one shape rather than a finding.',
+    k: 'No reproduction',
+    v: 'If the behavioural failures do not reproduce on other flaw classes, the over-broad result is a curiosity about one shape rather than a finding.',
   },
   {
-    lead: 'Second order tracked',
-    body: 'If a scanner tracks second-order flow reliably, that gap closes.',
+    k: 'Second order tracked',
+    v: 'If a scanner tracks second-order flow reliably, that gap closes.',
   },
 ] as const;
 ---
@@ -243,55 +240,27 @@ const reversals = [
 
   <h2>Results</h2>
 
-  <div class="my-9 overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11">
-    <div class="overflow-x-auto">
-      <table class="w-full min-w-[560px] border-collapse text-left">
-        <caption class="sr-only">
-          Verdict per tool per finding across the standing blind cells.
-        </caption>
-        <thead>
-          <tr class="border-b border-line">
-            <th
-              scope="col"
-              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
-            >
-              Finding
+  <div class="my-9 lg:my-11">
+    <Table
+      columns={[{ label: 'Finding' }, ...tools.map((tool) => ({ label: tool }))]}
+      caption="Verdict per tool per finding across the standing blind cells."
+      foot="10 scored cells · alert closed 9 of 10 · verified 7 of 10 · 117 held-out attacks fired, 0 succeeded"
+      minWidth={560}
+    >
+      {
+        matrix.map((row) => (
+          <tr>
+            <th scope="row">
+              {row.shape} <span class="is-dim">{row.finding}</span>
             </th>
-            {
-              tools.map((tool) => (
-                <th
-                  scope="col"
-                  class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
-                >
-                  {tool}
-                </th>
-              ))
-            }
+            {row.cells.map((cell) => {
+              const tone = cellTone(cell);
+              return <td>{tone ? <VerdictBadge label={cell} tone={tone} /> : <span class="is-dim">{cell}</span>}</td>;
+            })}
           </tr>
-        </thead>
-        <tbody>
-          {
-            matrix.map((row, i) => (
-              <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
-                <th scope="row" class="whitespace-nowrap px-3 py-3 text-[13px] font-medium sm:px-4">
-                  <span class="mono">{row.shape}</span>
-                  <span class="mono ml-2 text-[11px] text-fg-3">{row.finding}</span>
-                </th>
-                {row.cells.map((cell) => (
-                  <td class={`mono whitespace-nowrap px-3 py-3 text-[13px] sm:px-4 ${cellClass(cell)}`}>
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-    </div>
-    <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
-      10 scored cells &middot; alert closed 9 of 10 &middot; verified 7 of 10 &middot; 117
-      held-out attacks fired, 0 succeeded
-    </p>
+        ))
+      }
+    </Table>
   </div>
 
   <p>
@@ -307,8 +276,8 @@ const reversals = [
     known.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <RuledRows label="Four shapes · a patch that works on one often fails on another" rows={shapes} />
+  <div class="my-9 lg:my-11">
+    <ReportRows text label="Four shapes · a patch that works on one often fails on another" rows={shapes} />
   </div>
 
   <p>
@@ -319,8 +288,8 @@ const reversals = [
     patches.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <ConditionList label="Scored on every patch, mechanically" conditions={checks} />
+  <div class="my-9 lg:my-11">
+    <ReportRows label="Scored on every patch, mechanically" text narrow rows={checks.map((v, i) => ({ k: String(i + 1).padStart(2, '0'), v }))} />
   </div>
 
   <p>
@@ -330,8 +299,8 @@ const reversals = [
 
   <h2>The tools</h2>
 
-  <div class="artifact my-9 lg:my-11">
-    <RuledRows label="As pinned in the evidence repository" rows={versions} />
+  <div class="my-9 lg:my-11">
+    <ReportRows text label="As pinned in the evidence repository" rows={versions} />
   </div>
 
   <h2>Finding one: the fix is secure and the application is broken</h2>
@@ -341,22 +310,18 @@ const reversals = [
     sortable columns, all of them in the seed file every tool was given.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <DefinitionPair
+  <div class="my-9 lg:my-11">
+    <ReportRows
       label="The allow-list each tool wrote · finding 08"
-      terms={[
-        {
-          term: 'id, name, price',
-          definition: 'Copilot Autofix. ChatGPT. The same three columns, the same two missing.',
-        },
-        {
-          term: 'id, name, price, category, sku',
-          definition: 'Claude Code. All five.',
-        },
+      text
+      lead
+      rows={[
+        { v: 'id, name, price', k: 'Copilot Autofix. ChatGPT. The same three columns, the same two missing.' },
+        { v: 'id, name, price, category, sku', k: 'Claude Code. All five.' },
       ]}
-      footer="Check C failed on the four inputs that sort by the missing columns and on nothing else · "
-      footerTerm="b07, b08, b09, b10"
-    />
+    >
+      <Fragment slot="disc">Check C failed on the four inputs that sort by the missing columns and on nothing else &middot; <b>b07, b08, b09, b10</b></Fragment>
+    </ReportRows>
   </div>
 
   <p>
@@ -373,64 +338,30 @@ const reversals = [
     formatted string into two adjacent ones, with the interpolation unchanged.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <Diff
-      file="app/finding_08.py"
-      tag="chatgpt-blind"
-      added={4}
-      removed={1}
-      lines={before}
-      footer="Semgrep before: 1 finding · after: 0 findings · the column is still formatted into the SQL in two places"
-    />
+  <div class="my-9 lg:my-11">
+    <TermPanel path="app/finding_08.py · chatgpt-blind" footer="Semgrep before: 1 finding · after: 0 findings · the column is still formatted into the SQL in two places">
+      <span slot="bar" class="term-count"><b>+4</b> &minus;1</span>
+      <div class="term-block">{before.map((l) => <DiffRow line={l} />)}</div>
+    </TermPanel>
   </div>
 
-  <div class="my-9 overflow-hidden rounded-[3px] border border-line bg-bg lg:my-11">
-    <div class="overflow-x-auto">
-      <table class="w-full min-w-[300px] border-collapse text-left">
-        <caption class="sr-only">
-          Semgrep findings on four versions of the module: hole open or shut, query
-          as one string or two.
-        </caption>
-        <thead>
-          <tr class="border-b border-line">
-            <th
-              scope="col"
-              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
-            >
-              Semgrep findings
-            </th>
-            <th
-              scope="col"
-              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
-            >
-              One string
-            </th>
-            <th
-              scope="col"
-              class="mono whitespace-nowrap px-3 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-4"
-            >
-              Two strings
-            </th>
+  <div class="my-9 lg:my-11">
+    <Table
+      columns={[{ label: 'Semgrep findings' }, { label: 'One string', num: true }, { label: 'Two strings', num: true }]}
+      caption="Semgrep findings on four versions of the module: hole open or shut, query as one string or two."
+      foot="The result follows the column, never the row."
+      minWidth={300}
+    >
+      {
+        grid.map((row) => (
+          <tr>
+            <th scope="row">{row.hole}</th>
+            <td class="num is-fail">{row.one}</td>
+            <td class="num is-pass">{row.two}</td>
           </tr>
-        </thead>
-        <tbody>
-          {
-            grid.map((row, i) => (
-              <tr class={i % 2 === 1 ? 'bg-bg-2' : ''}>
-                <th scope="row" class="mono whitespace-nowrap px-3 py-3 text-[13px] font-medium sm:px-4">
-                  {row.hole}
-                </th>
-                <td class="mono whitespace-nowrap px-3 py-3 text-[13px] text-fail sm:px-4">{row.one}</td>
-                <td class="mono whitespace-nowrap px-3 py-3 text-[13px] text-accent sm:px-4">{row.two}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-    </div>
-    <p class="mono border-t border-line px-3 py-3 text-[11px] leading-relaxed text-fg-2 sm:px-4">
-      The result follows the column, never the row.
-    </p>
+        ))
+      }
+    </Table>
   </div>
 
   <p>
@@ -447,16 +378,17 @@ const reversals = [
     by another, the scan completed normally.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <DefinitionPair
+  <div class="my-9 lg:my-11">
+    <ReportRows
       label="CodeQL 2.27.0 · default suite · threat model remote · finding 13"
-      terms={[
-        { term: '43', definition: 'rules run.' },
-        { term: '0', definition: 'results returned.' },
+      lead
+      rows={[
+        { v: '43', k: 'rules run.' },
+        { v: '0', k: 'results returned.', tone: 'fail' },
       ]}
-      footer="The rule that did not fire · "
-      footerTerm="py/sql-injection"
-    />
+    >
+      <Fragment slot="disc">The rule that did not fire &middot; <b>py/sql-injection</b></Fragment>
+    </ReportRows>
   </div>
 
   <p>
@@ -473,15 +405,11 @@ const reversals = [
     bound the parameter and also validated the input as an integer.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <Diff
-      file="app/finding_04.py"
-      tag="claude-code-blind"
-      added={4}
-      removed={1}
-      lines={cast}
-      footer={'Line 42 unchanged: query_id now echoes 3 where the baseline echoes "3" · 14 of 14 benign inputs regressed'}
-    />
+  <div class="my-9 lg:my-11">
+    <TermPanel path="app/finding_04.py · claude-code-blind" footer={'Line 42 unchanged: query_id now echoes 3 where the baseline echoes "3" · 14 of 14 benign inputs regressed'}>
+      <span slot="bar" class="term-count"><b>+4</b> &minus;1</span>
+      <div class="term-block">{cast.map((l) => <DiffRow line={l} />)}</div>
+    </TermPanel>
   </div>
 
   <p>
@@ -493,33 +421,34 @@ const reversals = [
 
   <h2>What this does not show</h2>
 
-  <div class="artifact my-9 lg:my-11">
-    <RuledRows
+  <div class="my-9 lg:my-11">
+    <ReportRows
+      text
       label="Stated by us, before anyone else states them"
       rows={[
         {
-          lead: 'One of everything',
-          body: 'One weakness class. One language. One small application. Four flaws. Three tools. Ten scored cells.',
+          k: 'One of everything',
+          v: 'One weakness class. One language. One small application. Four flaws. Three tools. Ten scored cells.',
         },
         {
-          lead: 'A signal, not a rate',
-          body: 'No ranking should be read from it. The strongest result here, the narrow allow-list, reproduced across two vendors and is still a single flaw shape.',
+          k: 'A signal, not a rate',
+          v: 'No ranking should be read from it. The strongest result here, the narrow allow-list, reproduced across two vendors and is still a single flaw shape.',
         },
         {
-          lead: 'Not holes left open',
-          body: 'On this corpus the tools did not leave a vulnerability open, once.',
+          k: 'Not holes left open',
+          v: 'On this corpus the tools did not leave a vulnerability open, once.',
         },
         {
-          lead: 'The easiest case',
-          body: 'A sixty line file with the flaw on screen. A fixer that succeeds here may not succeed where the sink is a thousand lines from the input.',
+          k: 'The easiest case',
+          v: 'A sixty line file with the flaw on screen. A fixer that succeeds here may not succeed where the sink is a thousand lines from the input.',
         },
         {
-          lead: 'A real advantage',
-          body: 'Every tool was told where to look, with a reported payload.',
+          k: 'A real advantage',
+          v: 'Every tool was told where to look, with a reported payload.',
         },
         {
-          lead: 'Assumed, not observed',
-          body: 'Results assume each tool worked from the material it was given and did not search for this corpus, which is public. We cannot observe a hosted tool’s browsing.',
+          k: 'Assumed, not observed',
+          v: 'Results assume each tool worked from the material it was given and did not search for this corpus, which is public. We cannot observe a hosted tool’s browsing.',
         },
       ]}
     />
@@ -549,8 +478,8 @@ const reversals = [
     was meant to establish.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <RuledRows label="Each failed in the flattering direction" rows={mistakes} />
+  <div class="my-9 lg:my-11">
+    <ReportRows text label="Each failed in the flattering direction" rows={mistakes} />
   </div>
 
   <p>
@@ -569,8 +498,8 @@ const reversals = [
 
   <h2>What would change our mind</h2>
 
-  <div class="artifact my-9 lg:my-11">
-    <RuledRows label="Stated before the next edition, not after" rows={reversals} />
+  <div class="my-9 lg:my-11">
+    <ReportRows text label="Stated before the next edition, not after" rows={reversals} />
   </div>
 
   <p>
@@ -580,24 +509,17 @@ const reversals = [
 
   <h2>What is published</h2>
 
-  <div class="artifact my-9 lg:my-11">
-    <DefinitionPair
+  <div class="my-9 lg:my-11">
+    <ReportRows
       label="Pilot 001 evidence"
-      terms={[
-        {
-          term: 'Published',
-          definition:
-            'The harness, the corpus, the scorer, every patch diff, the per-check evidence, the pinned versions, and the methodology notes.',
-        },
-        {
-          term: 'Withheld',
-          definition:
-            'The held-out attack sets, because publishing them allows a patch to be tuned against them.',
-        },
+      text
+      rows={[
+        { k: 'Published', v: 'The harness, the corpus, the scorer, every patch diff, the per-check evidence, the pinned versions, and the methodology notes.' },
+        { k: 'Withheld', v: 'The held-out attack sets, because publishing them allows a patch to be tuned against them.' },
       ]}
-      footer="That is the only thing we hold back · "
-      footerTerm="and this is the reason"
-    />
+    >
+      <Fragment slot="disc">That is the only thing we hold back &middot; <b>and this is the reason</b></Fragment>
+    </ReportRows>
   </div>
 
   <p>
@@ -614,31 +536,17 @@ const reversals = [
     unedited, with any reply that follows. Responses appear below.
   </p>
 
-  <div class="artifact my-9 lg:my-11">
-    <RuledRows
+  <div class="my-9 lg:my-11">
+    <ReportRows
+      text
       label="Responses · unedited"
       rows={[
-        { lead: 'ChatGPT', body: 'Automated acknowledgement only. No substantive response yet.' },
-        { lead: 'Claude Code', body: 'Automated acknowledgement only. No substantive response yet.' },
-        { lead: 'Copilot Autofix', body: 'Automated acknowledgement only. No substantive response yet.' },
+        { k: 'ChatGPT', v: 'Automated acknowledgement only. No substantive response yet.' },
+        { k: 'Claude Code', v: 'Automated acknowledgement only. No substantive response yet.' },
+        { k: 'Copilot Autofix', v: 'Automated acknowledgement only. No substantive response yet.' },
       ]}
     />
   </div>
 
-  <p class="mono text-[13px] text-fg-2">Nullius in verba.</p>
+  <p class="note">Nullius in verba.</p>
 </PostLayout>
-
-<style>
-  /* Diff renders its rows inside <code>, and .longform styles bare <code> as
-     an inline chip: light background, border, 0.87em, nowrap. Inside a dark
-     panel that washes the untokenised text out and breaks the wrapping.
-     Inline code in the prose around them keeps the chip. */
-  .artifact :global(code) {
-    background: none;
-    border: 0;
-    border-radius: 0;
-    padding: 0;
-    font-size: inherit;
-    white-space: inherit;
-  }
-</style>

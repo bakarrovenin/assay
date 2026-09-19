@@ -12,5 +12,5 @@ const { label, tone } = Astro.props;
 
 <div class="verdictline">
   <VerdictBadge label={label} tone={tone} />
-  <span class="why"><slot /></span>
+  {Astro.slots.has('default') && <span class="why"><slot /></span>}
 </div>

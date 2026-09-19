@@ -1,0 +1,26 @@
+---
+// A verdict as scanner output: the evidence rows, then the verdict line.
+import TermPanel from './TermPanel.astro';
+import VerdictLine from './VerdictLine.astro';
+
+interface Props {
+  /** The verdict word, e.g. "Not verified". */
+  verdict: string;
+  tone: 'pass' | 'fail' | 'amber' | 'neutral';
+  /** Label and value pairs. */
+  rows: readonly (readonly [string, string])[];
+  /** Shown in the bar. */
+  path?: string;
+  class?: string;
+}
+
+const { verdict, tone, rows, path = 'assay · verdict', class: className = '' } = Astro.props;
+const label = `Verdict: ${verdict}. ${rows.map(([k, v]) => `${k}: ${v}`).join('. ')}.`;
+---
+
+<TermPanel path={path} label={label} class={className}>
+  {rows.map(([k, v]) => (
+    <div class="ln out"><span class="cmt">{k}</span> {v}</div>
+  ))}
+  <VerdictLine label={verdict} tone={tone} />
+</TermPanel>
