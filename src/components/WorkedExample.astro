@@ -1,7 +1,7 @@
 ---
 import PatchAnatomy from './PatchAnatomy.astro';
-import type { DiffLine } from './Diff.astro';
-import type { TerminalLine } from './Terminal.astro';
+import type { DiffLine } from './system/DiffRow.astro';
+import type { TermLine as TerminalLine } from './system/TermLines.astro';
 
 // Tokenised by hand with the .tok-* spans CodePanel defines. No runtime
 // highlighter ships to the browser.

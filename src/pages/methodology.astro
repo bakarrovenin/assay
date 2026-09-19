@@ -3,13 +3,13 @@ import DocsLayout from '../layouts/DocsLayout.astro';
 import type { DocsGroup } from '../layouts/DocsLayout.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
-import CodePanel from '../components/CodePanel.astro';
-import ConditionList from '../components/ConditionList.astro';
-import DefinitionPair from '../components/DefinitionPair.astro';
-import RuledRows from '../components/RuledRows.astro';
-import type { Row } from '../components/RuledRows.astro';
-import Terminal from '../components/Terminal.astro';
-import type { TerminalLine } from '../components/Terminal.astro';
+import TermPanel from '../components/system/TermPanel.astro';
+import TermLines, { describe } from '../components/system/TermLines.astro';
+import type { TermLine as TerminalLine } from '../components/system/TermLines.astro';
+import ReportRows from '../components/system/ReportRows.astro';
+import type { ReportRow as Row } from '../components/system/ReportRows.astro';
+import Table from '../components/system/Table.astro';
+import VerdictBadge from '../components/system/VerdictBadge.astro';
 import { highlightJson } from '../lib/highlight';
 // The concrete worked examples and the depth-of-evidence drawing moved here
 // from the retired /product page (the restructure made Product the benchmark).
@@ -99,36 +99,36 @@ const harnessStages = [
 
 const harnessGates: Row[] = [
   {
-    lead: 'Stage 1 parity',
-    body:
+    k: 'Stage 1 parity',
+    v:
       're-scores the three patches with the current harness into a scratch tree and byte compares six artifacts against the ones committed from the manual run, run date pinned. Catches a refactor that moved a verdict rather than only moving code.',
   },
   {
-    lead: 'Stage 3 container parity',
-    body:
+    k: 'Stage 3 container parity',
+    v:
       'the same comparison from inside the container, plus diff path and patched file agreement on every field except patch_file, plus a required egress measurement per run. Catches container SQLite 3.40.1 and Python 3.9.25 disagreeing with host 3.51.0 and 3.9.6 on a response body, which moves check C.',
   },
   {
-    lead: 'Report math recount',
-    body:
+    k: 'Report math recount',
+    v:
       'recomputes every published rate, count and failure class from the per cell artifacts, importing nothing from the aggregation. Then corrupts the summary fourteen ways, one per branch, and requires the recount to report each and name the field that moved. Catches an arithmetic error in a rate, which would read as a finding rather than a bug.',
-    tag: 'both directions',
+    t: 'both directions',
   },
   {
-    lead: 'Insufficient evidence paths',
-    body:
+    k: 'Insufficient evidence paths',
+    v:
       'provokes all four on purpose: a diff that will not apply, a patch that raises on import, a container that can reach the network, absent held-out material. Each has to name itself. Catches check B scoring an app that never started as a hole that was shut.',
   },
   {
-    lead: 'Leak guard, tracked files',
-    body:
+    k: 'Leak guard, tracked files',
+    v:
       'no held-out payload in any tracked file, nothing under heldout/ tracked. Catches an attack payload reaching the public tree, which voids the finding it belongs to.',
   },
   {
-    lead: 'Leak guard, git objects',
-    body:
+    k: 'Leak guard, git objects',
+    v:
       'reads blobs and commit messages over the range a push would send, failing on a held-out payload, experimenter prose, any blob that parses as a manifest carrying the answer key, or any path under heldout/. Refuses to pass when the held-out material is absent. Catches a key cleaned in a later commit while the blob stays fetchable, which is what happened here.',
-    tag: 'both directions',
+    t: 'both directions',
     mark: true,
   },
 ];
@@ -211,37 +211,37 @@ const artifactHtml = highlightJson(artifact);
 const limitations = [
   {
     title: 'Business logic and authorization are the weak spot.',
-    body:
+    v:
       'Held-out case generation depends on a taxonomy of what wrong input looks like. For injection classes that taxonomy is well understood. For “this endpoint should not let one tenant read another tenant’s data” it is specific to your application and cannot be generated from a class definition. On these findings we return INSUFFICIENT EVIDENCE far more often than we return VERIFIED.',
   },
   {
     title: 'We cannot verify what we cannot run.',
-    body:
+    v:
       'Check 02 requires a buildable, executable environment. Projects without one, or with a build we cannot reproduce, receive INSUFFICIENT EVIDENCE on the behavioural check regardless of how good the patch is.',
   },
   {
     title: 'Language coverage is narrow at launch.',
-    body:
+    v:
       'Held-out generation and differential execution are implemented per language. Coverage is deepest where we started and thin elsewhere. Current coverage is published on this page and updated with each release, rather than being described vaguely.',
   },
   {
     title: 'Checks 01 and 03 inherit scanner blind spots.',
-    body:
+    v:
       'If your scanner cannot see a class of weakness, our re scan will not see it either. Check 02 partially compensates, because it tests the vulnerability class directly rather than through the scanner, but only for classes we can generate cases for.',
   },
   {
     title: 'Provenance signals are heuristic.',
-    body:
+    v:
       'Check 04 detects patterns associated with manipulation. It cannot prove intent, it will produce false positives on unusual but legitimate changes, and a sufficiently careful attacker who stays inside the expected blast radius will not trip it.',
   },
   {
     title: 'VERIFIED is a scoped claim, not a security guarantee.',
-    body:
+    v:
       'It means: this vulnerability class is no longer reachable on the paths we tested, behaviour was preserved on the inputs we tried, no new finding was introduced by this change, and no tampering signals were present. It does not mean the code is secure, that no other vulnerabilities exist, or that no path exists which we did not think to test. Anyone selling you the stronger claim is selling you something we do not believe is possible.',
   },
   {
     title: 'Held-out corpus leakage is a live risk.',
-    body:
+    v:
       'Over time, published verdicts leak information about how our cases are shaped. Rotation mitigates this. It does not eliminate it, and we would rather name the risk than pretend we have solved it.',
   },
 ];
@@ -288,52 +288,23 @@ const terms = [
       </p>
     </div>
 
-    <div class="reveal mt-10 overflow-hidden rounded-[3px] border border-line bg-bg">
-      <table class="w-full border-collapse text-left">
-        <caption class="sr-only">
-          The three verdicts Assay can return, and what each one means.
-        </caption>
-        <thead>
-          <tr class="border-b border-line">
-            <th
-              scope="col"
-              class="mono w-[38%] px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:w-[30%] sm:px-5"
-            >
-              Verdict
-            </th>
-            <th
-              scope="col"
-              class="mono px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-2 sm:px-5"
-            >
-              Meaning
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            verdicts.map((row, i) => (
-              <tr class={i > 0 ? 'border-t border-line' : ''}>
-                <th scope="row" class="px-4 py-5 align-top sm:px-5">
-                  <span
-                    class={`mono text-[12px] font-medium uppercase tracking-[0.1em] ${
-                      row.tone === 'accent'
-                        ? 'text-accent'
-                        : row.tone === 'fail'
-                          ? 'text-fail'
-                          : 'text-fg-2'
-                    }`}
-                  >
-                    {row.verdict}
-                  </span>
-                </th>
-                <td class="px-4 py-5 align-top text-[14.5px] leading-[1.62] text-fg-2 sm:px-5">
-                  {row.meaning}
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+    <div class="reveal mt-10">
+      <Table
+        columns={[{ label: 'Verdict' }, { label: 'Meaning' }]}
+        caption="The three verdicts Assay can return, and what each one means."
+        minWidth={0}
+      >
+        {
+          verdicts.map((row) => (
+            <tr>
+              <th scope="row">
+                <VerdictBadge label={row.verdict} tone={row.tone === 'accent' ? 'pass' : row.tone === 'fail' ? 'fail' : 'neutral'} />
+              </th>
+              <td class="wrap">{row.meaning}</td>
+            </tr>
+          ))
+        }
+      </Table>
     </div>
 
     <div class="longform reveal mt-10">
@@ -358,7 +329,7 @@ const terms = [
       Closed. Is the hole actually gone, or did it just move?
     </h2>
 
-    <p class="question reveal mt-8">
+    <p class="note reveal mt-8">
       The question: does the vulnerability still exist after the patch?
     </p>
 
@@ -440,7 +411,7 @@ const terms = [
       This is the hard check, and it is the reason the company exists.
     </p>
 
-    <p class="question reveal mt-8">
+    <p class="note reveal mt-8">
       The question: does the patch generalise beyond the specific example it was shown,
       and does the software still do what it did before?
     </p>
@@ -530,7 +501,7 @@ const terms = [
       No regression. Did the fix introduce something new?
     </h2>
 
-    <p class="question reveal mt-8">
+    <p class="note reveal mt-8">
       The question: is the codebase, taken as a whole, no worse than before?
     </p>
 
@@ -576,7 +547,7 @@ const terms = [
       Provenance clean. Was the agent itself manipulated?
     </h2>
 
-    <p class="question reveal mt-8">
+    <p class="note reveal mt-8">
       The question: is this change what the agent intended to write, or what somebody else
       persuaded it to write?
     </p>
@@ -658,7 +629,9 @@ const terms = [
     </div>
 
     <div class="reveal mt-9">
-      <CodePanel html={artifactHtml} label="verdict.json" />
+      <TermPanel path="verdict.json">
+        <pre class="term-block" set:html={artifactHtml} />
+      </TermPanel>
     </div>
 
     <div class="longform reveal mt-9">
@@ -743,7 +716,7 @@ const terms = [
     </div>
 
     <div class="reveal mt-9">
-      <ConditionList label="Four stages" conditions={harnessStages} />
+      <ReportRows label="Four stages" text narrow rows={harnessStages.map((v, i) => ({ k: String(i + 1).padStart(2, '0'), v }))} />
     </div>
 
     <div class="longform reveal mt-11">
@@ -754,15 +727,13 @@ const terms = [
     </div>
 
     <div class="reveal mt-8">
-      <RuledRows label="Gates · what each one would catch" rows={harnessGates} />
+      <ReportRows text label="Gates · what each one would catch" rows={harnessGates} />
     </div>
 
     <div class="reveal mt-9">
-      <Terminal
-        label="gate suite · 2026-09-09"
-        lines={gateRun}
-        footer="All seven gates executed on 2026-09-09 against Docker 29.5.2 in a 4 GB VM. Stage 3 re-scored every patch in a container with no measured egress, and the artifacts still byte compare against the ones committed from the hand run."
-      />
+      <TermPanel path="gate suite · 2026-09-09" footer="All seven gates executed on 2026-09-09 against Docker 29.5.2 in a 4 GB VM. Stage 3 re-scored every patch in a container with no measured egress, and the artifacts still byte compare against the ones committed from the hand run." label={describe("gate suite · 2026-09-09", gateRun, "All seven gates executed on 2026-09-09 against Docker 29.5.2 in a 4 GB VM. Stage 3 re-scored every patch in a container with no measured egress, and the artifacts still byte compare against the ones committed from the hand run.")}>
+      <TermLines lines={gateRun} />
+    </TermPanel>
     </div>
   </Section>
 
@@ -801,12 +772,12 @@ const terms = [
     </div>
 
     <div class="reveal mt-12 lg:mt-14">
-      <DefinitionPair
-        label="Pilot 001 · what is public"
-        terms={harnessScope}
-        footer="The oracle is the detector, not the answer. Publish it and a patch can be tuned to return one row and avoid five marker strings, passing check B with the hole open, on "
-        footerTerm="criteria we published ourselves."
-      />
+      <ReportRows text
+      label="Pilot 001 · what is public"
+      rows={harnessScope.map((e) => ({ k: e.term, v: e.definition }))}
+    >
+      <Fragment slot="disc">The oracle is the detector, not the answer. Publish it and a patch can be tuned to return one row and avoid five marker strings, passing check B with the hole open, on <b>criteria we published ourselves.</b></Fragment>
+    </ReportRows>
     </div>
 
     <div class="longform reveal mt-11">
@@ -883,28 +854,13 @@ const terms = [
       Read this section before you rely on us for anything.
     </p>
 
-    <ol class="mt-11 space-y-px overflow-hidden rounded-[3px] border border-line bg-line">
-      {
-        limitations.map((item, i) => (
-          <li
-            class="reveal flex gap-5 bg-bg p-6 lg:gap-7 lg:p-7"
-            style={`--reveal-delay:${Math.min(i, 4) * 50}ms`}
-          >
-            <span class="mono shrink-0 pt-1 text-[12px] font-medium text-fail">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <div>
-              <h3 class="font-display text-[17px] font-bold leading-tight tracking-[-0.012em]">
-                {item.title}
-              </h3>
-              <p class="mt-2.5 max-w-[66ch] text-[15px] leading-[1.65] text-fg-2">
-                {item.body}
-              </p>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
+    <div class="reveal mt-10" style="--reveal-delay:60ms">
+      <ReportRows
+        text
+        narrow
+        rows={limitations.map((item, i) => ({ k: String(i + 1).padStart(2, '0'), title: item.title, v: item.v }))}
+      />
+    </div>
   </Section>
 
   <!-- 12. Disputes -->
@@ -947,27 +903,15 @@ const terms = [
       Definitions, so nothing here is ambiguous.
     </h2>
 
-    <dl class="mt-11 max-w-[80ch]">
-      {
-        terms.map((term, i) => (
-          <div
-            class="reveal grid grid-cols-1 gap-x-8 gap-y-1.5 border-t border-line py-5 sm:grid-cols-[minmax(0,180px)_minmax(0,1fr)]"
-            style={`--reveal-delay:${Math.min(i, 4) * 40}ms`}
-          >
-            <dt class="font-display text-[15.5px] font-bold tracking-[-0.008em]">
-              {term[0]}
-            </dt>
-            <dd class="text-[15px] leading-[1.62] text-fg-2">{term[1]}</dd>
-          </div>
-        ))
-      }
-    </dl>
+    <div class="reveal mt-10" style="--reveal-delay:60ms">
+      <ReportRows text rows={terms.map(([k, v]) => ({ k, v }))} />
+    </div>
   </Section>
 
   <!-- Page footer block -->
   <Section id="method-version" tint>
     <div class="reveal flex flex-col items-start gap-8">
-      <p class="micro">
+      <p class="hd">
         Method version: {METHOD_VERSION} &middot; Last updated: {lastUpdated}
       </p>
 
@@ -979,22 +923,8 @@ const terms = [
       </div>
     </div>
 
-    <p class="mono mt-14 text-center text-[12px] leading-relaxed text-fg-2">
+    <p class="disc mt-14 text-center">
       Nullius in verba. Take nobody&rsquo;s word for it, including ours.
     </p>
   </Section>
 </DocsLayout>
-
-<style>
-  /* "The question:" lines. They set up every check section, so they get a
-     treatment of their own rather than sitting inside the prose. */
-  .question {
-    font-family: var(--font-mono);
-    font-size: 13.5px;
-    line-height: 1.6;
-    max-width: 62ch;
-    padding-left: 20px;
-    border-left: 2px solid var(--accent);
-    color: var(--fg);
-  }
-</style>

@@ -16,6 +16,8 @@ export type ReportRow = {
   title?: string;
   /** Inline link after a text value. */
   link?: { href: string; label: string };
+  /** Lift the row out of the set. */
+  mark?: boolean;
 };
 
 interface Props {
@@ -50,7 +52,7 @@ const { label, rows, disc, text = false, narrow = false, lead = false, class: cl
           </span>
         );
         return (
-          <Tag class="row" href={r.href}>
+          <Tag class={`row ${r.mark ? 'is-mark' : ''}`} href={r.href}>
             {lead && v}
             <span class="k">{r.k}</span>
             {!lead && v}

@@ -1106,6 +1106,7 @@
   a.row:hover { background: var(--acc-dim); }
   a.row:hover .v { color: var(--acc); }
   .disc b { color: var(--acc); font-weight: 500; }
+  .row.is-mark .k, .row.is-mark .t { color: var(--acc); }
 
   .row .k { color: var(--fg-2); font-size: var(--t-small); }
 
@@ -1198,6 +1199,7 @@
   .table .is-pass { color: var(--acc); font-weight: 700; }
   .table .is-fail { color: var(--fail); font-weight: 700; }
   .table .is-dim  { color: var(--fg-3); }
+  .table td.wrap  { white-space: normal; line-height: 1.6; }
 
   .table-foot {
     padding: 12px 16px;

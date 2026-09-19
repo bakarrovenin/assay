@@ -46,7 +46,7 @@ const flat = groups.flatMap((g) => g.items);
       <aside class="docs-rail docs-rail-left" aria-label="Document sections">
         <details class="docs-disclosure" open>
           <summary class="docs-summary">
-            <span class="micro">On this page</span>
+            <span class="hd">On this page</span>
             <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M6 9.5l6 6 6-6"
@@ -83,7 +83,7 @@ const flat = groups.flatMap((g) => g.items);
 
       <!-- Right rail: flat outline with the reading position marked. -->
       <aside class="docs-rail docs-rail-right" aria-label="On this page">
-        <p class="micro docs-toc-label">On this page</p>
+        <p class="hd docs-toc-label">On this page</p>
         <nav class="docs-toc">
           <ul>
             {
@@ -97,15 +97,15 @@ const flat = groups.flatMap((g) => g.items);
             }
           </ul>
         </nav>
-        {meta && <p class="micro docs-toc-meta">{meta}</p>}
+        {meta && <p class="hd docs-toc-meta">{meta}</p>}
       </aside>
     </div>
   </div>
 </BaseLayout>
 
 <style>
-  /* Two rails plus a readable measure do not fit inside the 1200px marketing
-     shell. Widen only on screens that can actually spend the pixels. */
+  /* Two rails plus a readable measure do not fit inside the 1120px shell.
+     Widen only on screens that can actually spend the pixels. */
   @media (min-width: 1280px) {
     .docs-shell {
       max-width: 1380px;
@@ -138,7 +138,8 @@ const flat = groups.flatMap((g) => g.items);
   }
 
   .docs-rail {
-    font-size: 13.5px;
+    font-family: var(--font-mono);
+    font-size: var(--t-desc);
   }
 
   .docs-rail-right {
@@ -148,8 +149,8 @@ const flat = groups.flatMap((g) => g.items);
   @media (min-width: 1100px) {
     .docs-rail {
       position: sticky;
-      /* 61px nav plus breathing room. */
-      top: 92px;
+      /* 68px nav plus breathing room. */
+      top: 100px;
       align-self: start;
       max-height: calc(100svh - 120px);
       overflow-y: auto;
@@ -215,9 +216,6 @@ const flat = groups.flatMap((g) => g.items);
     margin-top: 26px;
   }
 
-  /* The same metadata grammar as everywhere else: 10.5px mono, 0.2em, --fg-3.
-     This predated the grammar and was setting its own size, tracking and a
-     dimmed --fg-2 in place of --fg-3. */
   .docs-group-label {
     font-family: var(--font-mono);
     font-size: var(--t-meta);
@@ -249,8 +247,8 @@ const flat = groups.flatMap((g) => g.items);
   }
 
   .docs-nav a[aria-current='true'] {
-    color: var(--accent);
-    border-left-color: var(--accent);
+    color: var(--acc);
+    border-left-color: var(--acc);
     font-weight: 500;
   }
 
@@ -270,7 +268,7 @@ const flat = groups.flatMap((g) => g.items);
     display: block;
     padding: 5px 0;
     color: var(--fg-2);
-    font-size: 12.5px;
+    font-size: var(--t-meta);
     line-height: 1.45;
     transition: color 140ms ease-out;
   }
@@ -280,7 +278,7 @@ const flat = groups.flatMap((g) => g.items);
   }
 
   .docs-toc a[aria-current='true'] {
-    color: var(--accent);
+    color: var(--acc);
   }
 
   .docs-toc-meta {
@@ -295,13 +293,7 @@ const flat = groups.flatMap((g) => g.items);
      column both are wrong, so they are neutralised here rather than by
      rewriting 750 lines of hand-authored content. */
   .docs-main :global(.section) {
-    padding-block: 44px;
-  }
-
-  @media (min-width: 1024px) {
-    .docs-main :global(.section) {
-      padding-block: 56px;
-    }
+    padding-block: var(--s-8);
   }
 
   .docs-main :global(.shell) {
@@ -312,7 +304,7 @@ const flat = groups.flatMap((g) => g.items);
 
   /* Section tints are a full-bleed device. In a bordered reading column they
      read as an accident, so the rule alone separates sections. */
-  .docs-main :global(.section.bg-bg-2\/70) {
+  .docs-main :global(.section.raised) {
     background: transparent;
   }
 
