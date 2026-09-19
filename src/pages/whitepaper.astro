@@ -1,331 +1,176 @@
 ---
-// A standalone document. This page deliberately does NOT use BaseLayout, the
-// v2 token layer, global.css, or any site component, because none of them
-// apply to it: no nav, no footer, no modal, no theme toggle, no dark theme,
-// no section conventions. Everything it needs is in this file, so nothing
-// leaks either way.
-//
-// Treatment is taken from inferact.ai, measured rather than guessed: a warm
-// off-white ground, near black text, a humanist book face, section headings
-// barely larger than the body and told apart by weight, paragraphs separated
-// by space alone, and links underlined in the text colour.
-//
-// Copy is verbatim from assay-whitepaper-copy.md, minus the header block.
-// Three protected lines run through it, so scripts/check-protected-copy.mjs
-// covers this page.
-import { site } from '../lib/site';
+// The whitepaper. Copy is verbatim from assay-whitepaper-copy.md, minus the
+// header block. Three protected lines run through it, so
+// scripts/check-protected-copy.mjs covers this page.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TermPanel from '../components/system/TermPanel.astro';
+import CheckRow from '../components/system/CheckRow.astro';
 
-const title = 'Whitepaper · Assay';
 const description =
   'Independent verification for AI authored code. The verification gap, the four checks, Pilot 001, and what the method caught in itself.';
-const canonical = new URL('/whitepaper/', site.url).href;
-const ogImage = new URL('/og.png', site.url).href;
 
 const EVIDENCE_REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence';
 const PILOT_POST = '/research/pilot-001-patches-against-unseen-attacks';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<BaseLayout title="Whitepaper" description={description} path="/whitepaper">
+  <article>
+    <header class="section-hero rule-b">
+      <div class="shell">
+        <p class="hd reveal">assay</p>
+        <h1 class="h1 reveal mt-6" style="--reveal-delay:60ms">Nullius in verba.</h1>
+      </div>
+    </header>
 
-    {/* Google Analytics 4 (gtag.js), the same tag the rest of the site carries. */}
-    <script
-      is:inline
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-BDC37TQ4BY"></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
+    <div class="section">
+      <div class="shell">
+        <div class="longform reveal">
+        <h2>Summary</h2>
+        <p>
+          AI now writes security patches, and the patch is validated by the tool that
+          wrote it. The only signal anyone measures is whether the scanner alert closed.
+          We tested whether that signal means anything. On a controlled corpus, a patch we
+          constructed closed the alert, passed a suppression audit, and left every attack
+          we had held back still working. A closed alert is a fact about the diff, not
+          about the hole.
+        </p>
 
-      gtag('config', 'G-BDC37TQ4BY');
-    </script>
+        <h2>The gap</h2>
+        <p>
+          A scanner flags a vulnerability. An agent writes a fix. The scanner runs again,
+          the warning disappears, and the change merges. Nothing in that loop establishes
+          that the vulnerability closed. It establishes that the scanner stopped
+          reporting it, which is a different fact.
+        </p>
+        <p>
+          Automated program repair has known this for over a decade and named it:
+          overfitting, a patch that satisfies the test without correcting the fault. The
+          literature was explicit that human validation of every candidate patch was
+          mandatory. Agents did not solve overfitting. They removed the validation step
+          and measured nothing in its place.
+        </p>
+        <p>
+          A closed alert can mislead in three ways. A fix can shut the hole and break the
+          application, and the scanner scores it as a success. An alert can close because
+          a line was reformatted rather than fixed, so a correct fix and an evasion look
+          identical to the scanner. And a scanner can raise no alert at all on a flaw that
+          travels through stored data, so nothing is reported and nothing is fixed. In
+          each case the alert reports on the diff. The hole is a separate question.
+        </p>
 
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+        <h2>Why the checker cannot be the author</h2>
+        <p>
+          Aardvark writes the patch with Codex, then scans its own patch. CodeMender runs
+          its own validation. Snyk, Pixee, Mobb and ZeroPath all certify their own output.
+          Google still puts a human researcher on every CodeMender patch before it ships,
+          which is the tell: the best resourced team in the field does not trust its own
+          fixer.
+        </p>
+        <p>
+          A test is a sample, not a specification. If you let a student write their own
+          exam, they will pass it. You test them on questions they have not seen.
+        </p>
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <h2>Method</h2>
+        <p>Assay evaluates a patch against inputs the fixer never had access to.</p>
+        <p>
+          For each finding we hold back an attack set and a set of ordinary inputs that
+          must keep working. The fixer receives the flagged file and exactly one reported
+          payload. Nothing else. After the patch is applied we run four checks inside an
+          isolated container with no network egress.
+        </p>
+        <div class="my-9">
+          <TermPanel path="Method">
+            <CheckRow id="01" name="Alert closed." desc="The scanner no longer reports the finding." state="pending" status="" />
+            <CheckRow id="02" name="Hole shut." desc="No held out attack succeeds. One success is a failure." state="pending" status="" />
+            <CheckRow id="03" name="Behaviour preserved." desc="Every ordinary input matches a baseline captured from a known correct reference." state="pending" status="" />
+            <CheckRow id="04" name="Provenance clean." desc="No suppression, no new finding, and no alert closed while held out attacks still succeed." state="pending" status="" />
+          </TermPanel>
+        </div>
+        <p>
+          A patch is VERIFIED only if all four hold. INSUFFICIENT EVIDENCE is a first
+          class verdict and is reported rather than dropped.
+        </p>
 
-    {/* Light in every context. This page has no dark treatment. */}
-    <meta name="theme-color" content="#F7F6F3" />
+        <h2>Pilot 001</h2>
+        <p>
+          One seeded SQL injection, quoted string context, the easiest shape. Three
+          patches.
+        </p>
+        <p>
+          The first bound the value as a parameter rather than assembling it into the
+          query. Alert closed, zero of twelve held out attacks succeeded, no regression.
+          VERIFIED.
+        </p>
+        <p>
+          The second escaped the quote it had been shown and left the query untouched.
+          Four of twelve attacks still returned the users table. It also rejected a
+          legitimate product name containing an apostrophe. NOT VERIFIED.
+        </p>
+        <p>
+          The third, which we constructed for the purpose, changed nothing about the
+          vulnerability. It moved the query into a helper and reassembled the string in
+          a form the scanner&rsquo;s rule does not match. The alert closed. The suppression
+          audit found no marker. Twelve of twelve attacks still returned the users table
+          including password hashes.
+        </p>
+        <p>
+          Two of the four signals a competent team relies on, the scanner and the
+          suppression audit, both reported clean on a fully exploitable patch. Only the
+          held out attack set separated it from the correct fix. That demonstrates the
+          mechanism. It does not show that any commercial fixer produces it.
+        </p>
 
-    <meta property="og:type" content="article" />
-    <meta property="og:site_name" content={site.name} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
-  </head>
+        <h2>Limitations</h2>
+        <p>
+          The flaw was seeded by us. One weakness class, one language, one application,
+          one finding, the easiest shape. The three patches exercise the method rather
+          than being commercial vendor output, and the third was constructed
+          deliberately. This is a demonstration that the method discriminates, not a rate
+          that generalises to any tool.
+        </p>
+        <p>
+          The harness, corpus, scorer, results and full methodology notes are public. The
+          held out attack sets are withheld, because publishing them permits a patch to
+          be tuned against them.
+        </p>
 
-  <body>
-    <main class="doc">
-      <header class="doc-head">
-        <p class="doc-mark">assay</p>
-        <p class="doc-motto">Nullius in verba.</p>
-      </header>
+        <h2>What the method caught in itself</h2>
+        <p>
+          Three of our own checks passed for reasons unrelated to the thing being true. A
+          patch that failed to start scored as a patch that shut the hole, because every
+          attack failed to connect and every failure was recorded as an attack that did
+          not succeed. A pre publication guard reported no leak, correctly, about the
+          working tree, while the answer key remained in an earlier commit.
+        </p>
+        <p>
+          Each failed in the flattering direction. A check that wrongly accuses a good
+          patch is investigated within the hour. A check that wrongly clears a bad one is
+          the answer nobody interrogates. All are documented in full.
+        </p>
 
-      <h2>Summary</h2>
-      <p>
-        AI now writes security patches, and the patch is validated by the tool that
-        wrote it. The only signal anyone measures is whether the scanner alert closed.
-        We tested whether that signal means anything. On a controlled corpus, a patch we
-        constructed closed the alert, passed a suppression audit, and left every attack
-        we had held back still working. A closed alert is a fact about the diff, not
-        about the hole.
-      </p>
+        <h2>What follows</h2>
+        <p>
+          Pilot 001 establishes the method. The Index applies it: an independent,
+          published measure of verified fix rate against closed alert rate for each
+          commercial fixer, quarterly, with the open DARPA systems as a baseline row and
+          every vendor given right of reply, published unedited.
+        </p>
+        <p>
+          If the first Index returns verified fix rates above eighty five percent, we will
+          publish that. It would not change the argument: nobody could have known it from
+          the alert.
+        </p>
+        <p>We have no customers yet. These are the terms we intend to hold to.</p>
 
-      <h2>The gap</h2>
-      <p>
-        A scanner flags a vulnerability. An agent writes a fix. The scanner runs again,
-        the warning disappears, and the change merges. Nothing in that loop establishes
-        that the vulnerability closed. It establishes that the scanner stopped
-        reporting it, which is a different fact.
-      </p>
-      <p>
-        Automated program repair has known this for over a decade and named it:
-        overfitting, a patch that satisfies the test without correcting the fault. The
-        literature was explicit that human validation of every candidate patch was
-        mandatory. Agents did not solve overfitting. They removed the validation step
-        and measured nothing in its place.
-      </p>
-      <p>
-        A closed alert can mislead in three ways. A fix can shut the hole and break the
-        application, and the scanner scores it as a success. An alert can close because
-        a line was reformatted rather than fixed, so a correct fix and an evasion look
-        identical to the scanner. And a scanner can raise no alert at all on a flaw that
-        travels through stored data, so nothing is reported and nothing is fixed. In
-        each case the alert reports on the diff. The hole is a separate question.
-      </p>
+        </div>
 
-      <h2>Why the checker cannot be the author</h2>
-      <p>
-        Aardvark writes the patch with Codex, then scans its own patch. CodeMender runs
-        its own validation. Snyk, Pixee, Mobb and ZeroPath all certify their own output.
-        Google still puts a human researcher on every CodeMender patch before it ships,
-        which is the tell: the best resourced team in the field does not trust its own
-        fixer.
-      </p>
-      <p>
-        A test is a sample, not a specification. If you let a student write their own
-        exam, they will pass it. You test them on questions they have not seen.
-      </p>
-
-      <h2>Method</h2>
-      <p>Assay evaluates a patch against inputs the fixer never had access to.</p>
-      <p>
-        For each finding we hold back an attack set and a set of ordinary inputs that
-        must keep working. The fixer receives the flagged file and exactly one reported
-        payload. Nothing else. After the patch is applied we run four checks inside an
-        isolated container with no network egress.
-      </p>
-      <p>01 Alert closed. The scanner no longer reports the finding.</p>
-      <p>02 Hole shut. No held out attack succeeds. One success is a failure.</p>
-      <p>
-        03 Behaviour preserved. Every ordinary input matches a baseline captured from a
-        known correct reference.
-      </p>
-      <p>
-        04 Provenance clean. No suppression, no new finding, and no alert closed while
-        held out attacks still succeed.
-      </p>
-      <p>
-        A patch is VERIFIED only if all four hold. INSUFFICIENT EVIDENCE is a first
-        class verdict and is reported rather than dropped.
-      </p>
-
-      <h2>Pilot 001</h2>
-      <p>
-        One seeded SQL injection, quoted string context, the easiest shape. Three
-        patches.
-      </p>
-      <p>
-        The first bound the value as a parameter rather than assembling it into the
-        query. Alert closed, zero of twelve held out attacks succeeded, no regression.
-        VERIFIED.
-      </p>
-      <p>
-        The second escaped the quote it had been shown and left the query untouched.
-        Four of twelve attacks still returned the users table. It also rejected a
-        legitimate product name containing an apostrophe. NOT VERIFIED.
-      </p>
-      <p>
-        The third, which we constructed for the purpose, changed nothing about the
-        vulnerability. It moved the query into a helper and reassembled the string in
-        a form the scanner&rsquo;s rule does not match. The alert closed. The suppression
-        audit found no marker. Twelve of twelve attacks still returned the users table
-        including password hashes.
-      </p>
-      <p>
-        Two of the four signals a competent team relies on, the scanner and the
-        suppression audit, both reported clean on a fully exploitable patch. Only the
-        held out attack set separated it from the correct fix. That demonstrates the
-        mechanism. It does not show that any commercial fixer produces it.
-      </p>
-
-      <h2>Limitations</h2>
-      <p>
-        The flaw was seeded by us. One weakness class, one language, one application,
-        one finding, the easiest shape. The three patches exercise the method rather
-        than being commercial vendor output, and the third was constructed
-        deliberately. This is a demonstration that the method discriminates, not a rate
-        that generalises to any tool.
-      </p>
-      <p>
-        The harness, corpus, scorer, results and full methodology notes are public. The
-        held out attack sets are withheld, because publishing them permits a patch to
-        be tuned against them.
-      </p>
-
-      <h2>What the method caught in itself</h2>
-      <p>
-        Three of our own checks passed for reasons unrelated to the thing being true. A
-        patch that failed to start scored as a patch that shut the hole, because every
-        attack failed to connect and every failure was recorded as an attack that did
-        not succeed. A pre publication guard reported no leak, correctly, about the
-        working tree, while the answer key remained in an earlier commit.
-      </p>
-      <p>
-        Each failed in the flattering direction. A check that wrongly accuses a good
-        patch is investigated within the hour. A check that wrongly clears a bad one is
-        the answer nobody interrogates. All are documented in full.
-      </p>
-
-      <h2>What follows</h2>
-      <p>
-        Pilot 001 establishes the method. The Index applies it: an independent,
-        published measure of verified fix rate against closed alert rate for each
-        commercial fixer, quarterly, with the open DARPA systems as a baseline row and
-        every vendor given right of reply, published unedited.
-      </p>
-      <p>
-        If the first Index returns verified fix rates above eighty five percent, we will
-        publish that. It would not change the argument: nobody could have known it from
-        the alert.
-      </p>
-      <p>We have no customers yet. These are the terms we intend to hold to.</p>
-
-      <footer class="doc-foot">
-        <a href={EVIDENCE_REPO} rel="noopener">Evidence repository</a>
-        <a href="/methodology">Full methodology</a>
-        <a href={PILOT_POST}>Pilot 001 in detail</a>
-      </footer>
-    </main>
-  </body>
-</html>
-
-<style is:global>
-  /* Everything this page needs is declared here. global.css is not imported,
-     so none of the site's tokens, utilities or resets reach it, and nothing
-     written here can reach them: every rule is under .doc or on the two
-     elements this document owns outright. */
-
-  html {
-    -webkit-text-size-adjust: 100%;
-    /* Light in every context. This page has no dark treatment. */
-    color-scheme: light;
-  }
-
-  body {
-    margin: 0;
-    background: #f7f6f3;
-    color: #111111;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* The column is the whole page: wide margins either side, and a long run of
-     whitespace above the wordmark before anything begins. */
-  .doc {
-    box-sizing: border-box;
-    max-width: 35em;
-    margin-inline: auto;
-    padding: 128px 24px 112px;
-
-    /* A warm book face. Iowan and Charter ship with macOS, Georgia and
-       Cambria cover Windows, and the generic serif catches the rest. Set
-       locally rather than loaded, so this page fetches no font at all. */
-    font-family: 'Iowan Old Style', Charter, 'Bitstream Charter', 'Palatino Linotype',
-      Palatino, Georgia, Cambria, 'Times New Roman', serif;
-    font-size: 19px;
-    line-height: 1.7;
-  }
-
-  @media (min-width: 640px) {
-    .doc {
-      padding: 188px 32px 152px;
-    }
-  }
-
-  .doc-head {
-    margin-bottom: 68px;
-  }
-
-  .doc-mark,
-  .doc-motto {
-    margin: 0;
-    font-weight: 700;
-  }
-
-  /* Barely larger than the body, told apart by weight rather than size, and
-     given space above rather than a rule. */
-  .doc h2 {
-    margin: 2.4em 0 0;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.45;
-  }
-
-  .doc h2:first-of-type {
-    margin-top: 0;
-  }
-
-  /* Separated by space alone. */
-  .doc p {
-    margin: 0 0 1.05em;
-  }
-
-  .doc h2 + p {
-    margin-top: 0.55em;
-  }
-
-  .doc a {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    text-decoration-thickness: 1px;
-  }
-
-  .doc-foot {
-    margin-top: 4.4em;
-    font-size: 15px;
-    line-height: 1.9;
-  }
-
-  .doc-foot a {
-    margin-right: 1.5em;
-    color: #5a564f;
-  }
-
-  .doc-foot a:last-child {
-    margin-right: 0;
-  }
-
-  @media (max-width: 520px) {
-    .doc-foot a {
-      display: block;
-      margin-right: 0;
-    }
-  }
-</style>
+        <p class="mt-16 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-8">
+          <a href={EVIDENCE_REPO} rel="noopener" class="link-inline">Evidence repository</a>
+          <a href="/methodology" class="link-inline">Full methodology</a>
+          <a href={PILOT_POST} class="link-inline">Pilot 001 in detail</a>
+        </p>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
