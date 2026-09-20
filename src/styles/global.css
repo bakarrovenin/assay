@@ -451,6 +451,7 @@
   }
 
   .note::before { content: "// "; color: var(--fg-3); }
+  .note.failr { color: var(--fail); font-weight: 400; }
 
   /* Older names, the same role. */
   .eyebrow, .micro {
@@ -812,6 +813,10 @@
   .navlinks a { transition: color 150ms ease-out; }
   .navlinks a:hover,
   .navlinks a[aria-current="page"] { color: var(--fg); }
+
+  /* Footer links share the nav's sans voice. */
+  .navlinks-item { font-family: var(--font-sans); font-size: var(--t-small); color: var(--fg-2); transition: color 150ms ease-out; }
+  .navlinks-item:hover { color: var(--fg); }
 
   .nav-actions {
     display: flex;
