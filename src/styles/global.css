@@ -1199,7 +1199,8 @@
   .table .is-pass { color: var(--acc); font-weight: 700; }
   .table .is-fail { color: var(--fail); font-weight: 700; }
   .table .is-dim  { color: var(--fg-3); }
-  .table td.wrap  { white-space: normal; line-height: 1.6; }
+  .table td.wrap,
+  .table th.wrap  { white-space: normal; line-height: 1.6; }
 
   .table-foot {
     padding: 12px 16px;

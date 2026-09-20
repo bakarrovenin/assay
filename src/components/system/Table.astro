@@ -6,7 +6,7 @@
 
 interface Props {
   /** Column headings. */
-  columns: readonly { label: string; num?: boolean }[];
+  columns: readonly { label: string; num?: boolean; width?: string }[];
   /** Read to screen readers as the table caption. */
   caption: string;
   /** Footnote under the table, rendered as // NOTE. */
@@ -26,7 +26,7 @@ const { columns, caption, foot, minWidth = 640, class: className = '', ...rest }
       <caption class="sr-only">{caption}</caption>
       <thead>
         <tr>
-          {columns.map((c) => <th scope="col" class={c.num ? 'num' : ''}>{c.label}</th>)}
+          {columns.map((c) => <th scope="col" class={c.num ? 'num' : ''} style={c.width ? `width:${c.width}` : undefined}>{c.label}</th>)}
         </tr>
       </thead>
       <tbody {...rest}><slot /></tbody>

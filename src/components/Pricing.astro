@@ -1,5 +1,7 @@
 ---
 import Section from './Section.astro';
+import Table from './system/Table.astro';
+import Strip from './system/Strip.astro';
 
 // An assay ledger. Line items down the left, the charge in an amount column
 // on the right, a total due under each rule, and an authorisation line at the
@@ -11,9 +13,8 @@ import Section from './Section.astro';
 // figures on a site about verification would be the exact failure we publish
 // about, so the form yields to the facts rather than the other way round.
 //
-// There is no subtotal. Section 6 asks for one, but the three tiers are
-// mutually exclusive: a reader buys one of them, and summing them is not a
-// number that means anything.
+// There is no subtotal: the three tiers are mutually exclusive, a reader
+// buys one of them, and summing them is not a number that means anything.
 
 type Item = { label: string; qty: string; amount: string | null };
 
@@ -65,46 +66,41 @@ const accounts: {
 ---
 
 <Section id="pricing" rule={false}>
-  <div class="ledger reveal">
-    <div class="ledger-head">
-      <span>Account</span>
-      <span>Basis</span>
-      <span class="amount">Charge</span>
-    </div>
-
+  <div class="reveal grid grid-cols-1 gap-12">
     {
       accounts.map((account) => (
-        <section class="account">
-          <div class="account-head">
-            <h3 class="account-name">{account.name}</h3>
-            {account.state && <span class="account-state">{account.state}</span>}
+        <section>
+          <div class="mb-4 flex flex-wrap items-baseline gap-4">
+            <h3 class="h3">{account.name}</h3>
+            {account.state && <span class="hd">{account.state}</span>}
           </div>
 
-          <dl class="items">
+          <Table
+            columns={[{ label: 'Account' }, { label: 'Basis', width: '32%' }, { label: 'Charge', num: true, width: '12ch' }]}
+            caption={`${account.name}: line items, basis and charge.`}
+            minWidth={0}
+          >
             {account.items.map((item) => (
-              <div class="item">
-                <dt class="item-label">{item.label}</dt>
-                <dd class="item-qty">{item.qty}</dd>
-                <dd class="item-amount">{item.amount ?? '—'}</dd>
-              </div>
+              <tr>
+                <th scope="row" class="wrap">{item.label}</th>
+                <td>{item.qty}</td>
+                <td class="num">{item.amount ?? '—'}</td>
+              </tr>
             ))}
-          </dl>
+            <tr>
+              <th scope="row"><span class="hd">Total due</span></th>
+              <td class="wrap">{account.totalNote}</td>
+              <td class={`num ${account.total === '0.00' ? 'is-pass' : 'is-dim'}`}>{account.total}</td>
+            </tr>
+          </Table>
 
-          <div class="total">
-            <span class="total-label">Total due</span>
-            <span class="total-note">{account.totalNote}</span>
-            <span class={`total-amount ${account.total === '0.00' ? 'is-settled' : 'is-open'}`}>
-              {account.total}
-            </span>
-          </div>
-
-          <div class="account-cta">
+          <div class="mt-6">
             {account.cta?.modal ? (
               <button type="button" data-verify-cta class="btn btn-primary">
                 {account.cta.label}
               </button>
             ) : (
-              <span class="btn btn-secondary cursor-default opacity-60" aria-disabled="true">
+              <span class="btn btn-secondary cursor-default" aria-disabled="true">
                 {account.cta?.label}
               </span>
             )}
@@ -112,186 +108,10 @@ const accounts: {
         </section>
       ))
     }
-
-    {/* The authorisation line. Unsigned, because there is nobody to sign it. */}
-    <div class="auth">
-      <span class="auth-rule" aria-hidden="true"></span>
-      <p class="auth-line">
-        We have no customers yet. These are the terms we intend to hold to.
-      </p>
-    </div>
   </div>
 </Section>
 
-<style>
-  .ledger {
-    border-top: 1px solid var(--line);
-  }
-
-  .ledger-head,
-  .item,
-  .total {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 14ch) minmax(0, 12ch);
-    gap: 16px;
-    align-items: baseline;
-  }
-
-  .ledger-head {
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    letter-spacing: var(--t-meta-track);
-    text-transform: uppercase;
-    color: var(--fg-3);
-    padding: 12px 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .amount,
-  .item-amount,
-  .total-amount {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .account {
-    padding-block: 26px 22px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .account-head {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-
-  .account-name {
-    font-family: var(--font-display);
-    font-size: 21px;
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    line-height: 1.1;
-  }
-
-  .account-state {
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    letter-spacing: var(--t-meta-track);
-    text-transform: uppercase;
-    color: var(--fg-3);
-  }
-
-  .item {
-    padding: 7px 0;
-  }
-
-  .item-label {
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  .item-qty,
-  .item-amount {
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    color: var(--fg-2);
-  }
-
-  /* Ruled off, the way a total is. */
-  .total {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
-  }
-
-  .total-label {
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    letter-spacing: var(--t-meta-track);
-    text-transform: uppercase;
-    color: var(--fg-3);
-  }
-
-  .total-note {
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    color: var(--fg-2);
-  }
-
-  .total-amount {
-    font-family: var(--font-display);
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  /* The settled total is the one accent on this page: nothing is owed, which
-     is the whole argument of "free where the work is public". */
-  .total-amount.is-settled {
-    color: var(--accent);
-  }
-
-  /* An unpriced total is an empty cell, not a figure. At display weight the
-     marker read as a redaction bar rather than as an absent number. */
-  .total-amount.is-open {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--fg-3);
-  }
-
-  .account-cta {
-    margin-top: 20px;
-  }
-
-  .auth {
-    padding-top: 26px;
-  }
-
-  .auth-rule {
-    display: block;
-    width: min(280px, 100%);
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 10px;
-  }
-
-  .auth-line {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.7;
-    color: var(--fg-2);
-    max-width: 62ch;
-  }
-
-  @media (max-width: 640px) {
-    .ledger-head {
-      display: none;
-    }
-
-    .item,
-    .total {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .item-qty {
-      grid-column: 1;
-      color: var(--fg-3);
-    }
-
-    .item-amount {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .total-note {
-      grid-column: 1;
-    }
-
-    .total-amount {
-      grid-column: 2;
-      grid-row: 1;
-    }
-  }
-</style>
+{/* The authorisation line. Unsigned, because there is nobody to sign it. */}
+<Strip>
+  We have no customers yet. <span class="q">These are the terms we intend to hold to.</span>
+</Strip>
