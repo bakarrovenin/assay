@@ -1106,7 +1106,7 @@
   a.row:hover { background: var(--acc-dim); }
   a.row:hover .v { color: var(--acc); }
   .disc b { color: var(--acc); font-weight: 500; }
-  .row.is-mark .k, .row.is-mark .t { color: var(--acc); }
+  .rows .row.is-mark .k, .rows .row.is-mark .t { color: var(--acc); }
 
   .row .k { color: var(--fg-2); font-size: var(--t-small); }
 

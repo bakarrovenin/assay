@@ -3,10 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
-import ConditionList from '../components/ConditionList.astro';
-import DefinitionPair from '../components/DefinitionPair.astro';
-import RuledRows from '../components/RuledRows.astro';
-import type { Row } from '../components/RuledRows.astro';
+import TermPanel from '../components/system/TermPanel.astro';
+import CheckRow from '../components/system/CheckRow.astro';
+import ReportRows from '../components/system/ReportRows.astro';
+import type { ReportRow as Row } from '../components/system/ReportRows.astro';
 import { SECURITY_ADVISORY_URL, METHOD_VERSION } from '../lib/site';
 
 const checks = [
@@ -19,12 +19,12 @@ const checks = [
 // Every field that lets somebody make safety-critical changes separates the
 // maker from the checker. One does not.
 const fields: Row[] = [
-  { lead: 'Finance', body: 'the auditor did not prepare the accounts' },
-  { lead: 'Clinical trials', body: 'the reviewer is not the sponsor' },
+  { k: 'Finance', v: 'the auditor did not prepare the accounts' },
+  { k: 'Clinical trials', v: 'the reviewer is not the sponsor' },
   {
-    lead: 'AI security fixes',
-    body: 'the checker is the fixer',
-    tag: 'the gap',
+    k: 'AI security fixes',
+    v: 'the checker is the fixer',
+    t: 'the gap',
     mark: true,
   },
 ];
@@ -42,13 +42,13 @@ const terms = [
 ] as const;
 
 const commitments: Row[] = [
-  { lead: 'Harness', body: 'open source' },
-  { lead: 'Index corpus', body: 'published by identifier' },
-  { lead: 'Every verdict', body: 'ships the command that reproduces it' },
-  { lead: 'Methodology', body: 'spends as much room on where the method fails as on where it works' },
+  { k: 'Harness', v: 'open source' },
+  { k: 'Index corpus', v: 'published by identifier' },
+  { k: 'Every verdict', v: 'ships the command that reproduces it' },
+  { k: 'Methodology', v: 'spends as much room on where the method fails as on where it works' },
   {
-    lead: 'Bypasses',
-    body: 'wanted. A patch we approve that does not fix the vulnerability is the most valuable bug in the product.',
+    k: 'Bypasses',
+    v: 'wanted. A patch we approve that does not fix the vulnerability is the most valuable bug in the product.',
   },
 ];
 
@@ -56,17 +56,17 @@ const commitments: Row[] = [
 // are the woff2 files in public/fonts, the method version is METHOD_VERSION,
 // and the source is public. Nothing here is a claim about the company.
 const colophon: Row[] = [
-  { lead: 'Display', body: 'Archivo' },
-  { lead: 'Text', body: 'Inter' },
-  { lead: 'Mono', body: 'IBM Plex Mono' },
-  { lead: 'Method', body: `v${METHOD_VERSION}` },
-  { lead: 'Source', body: 'Static build, no tracking beyond page analytics' },
+  { k: 'Display', v: 'Archivo' },
+  { k: 'Text', v: 'Inter' },
+  { k: 'Mono', v: 'IBM Plex Mono' },
+  { k: 'Method', v: `v${METHOD_VERSION}` },
+  { k: 'Source', v: 'Static build, no tracking beyond page analytics' },
 ];
 
 const status: Row[] = [
-  { lead: 'Customers', body: 'none yet' },
-  { lead: 'Logos', body: 'none' },
-  { lead: 'Index results', body: 'none. The first edition has not published.' },
+  { k: 'Customers', v: 'none yet' },
+  { k: 'Logos', v: 'none' },
+  { k: 'Index results', v: 'none. The first edition has not published.' },
 ];
 ---
 
@@ -86,29 +86,24 @@ const status: Row[] = [
     <Eyebrow class="reveal">What the company is for</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">One job, held deliberately narrow.</h2>
 
-    <div class="reveal mt-10 lg:mt-11" style="--reveal-delay:120ms;max-width:76ch">
-      <ConditionList label="What we establish, on every AI-authored change" conditions={checks} />
+    {/* Four rows, and a fifth that is the one that matters: refused. */}
+    <div class="reveal mt-10" style="--reveal-delay:120ms">
+      <TermPanel path="What we establish, on every AI-authored change">
+        {checks.map((c, i) => <CheckRow id={String(i + 1).padStart(2, '0')} name={c} state="pending" status="" />)}
+        <CheckRow id="05" name="Write the fix." state="fail" status="Refused" />
+      </TermPanel>
     </div>
 
-    {/* The fifth is the one that matters, so it is set outside the set. */}
-    <div class="reveal refused mt-4" style="--reveal-delay:60ms;max-width:76ch">
-      <span class="refused-n">05</span>
-      <div>
-        <p class="refused-lab">Refused</p>
-        <p class="refused-body">Write the fix.</p>
-      </div>
-    </div>
-
-    <p class="reveal mt-8 text-[17px] leading-[1.62]" style="--reveal-delay:60ms;max-width:60ch">
+    <p class="reveal body mt-8" style="--reveal-delay:60ms;max-width:60ch">
       Independence is not a feature you add to a roadmap. It is a property of who is doing
       the looking.
     </p>
 
-    <div class="reveal mt-14 lg:mt-16" style="--reveal-delay:60ms;max-width:76ch">
-      <RuledRows label="Who checks the work" rows={fields} />
+    <div class="reveal mt-12" style="--reveal-delay:60ms">
+      <ReportRows text label="Who checks the work" rows={fields} />
     </div>
 
-    <p class="reveal mt-7 text-[16px] leading-[1.62] text-fg-2" style="--reveal-delay:60ms;max-width:62ch">
+    <p class="reveal body mt-7 text-fg-2" style="--reveal-delay:60ms;max-width:62ch">
       Not because authors are dishonest. The assumptions that produced the work also
       produce the check on the work, and the blind spot is shared.
     </p>
@@ -118,35 +113,29 @@ const status: Row[] = [
     <Eyebrow class="reveal">The credo</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Where the motto comes from.</h2>
 
-    <p class="reveal mt-9 text-[17px] leading-[1.62]" style="--reveal-delay:120ms;max-width:66ch">
+    <p class="reveal body mt-8" style="--reveal-delay:120ms;max-width:66ch">
       The Royal Society took it in 1660, breaking with a tradition of settling questions by
       citing an authority.
     </p>
 
-    <div class="reveal mt-10 lg:mt-11" style="--reveal-delay:60ms">
-      <DefinitionPair
-        label="Two ways to settle a question"
-        terms={terms}
-        footer="The Society chose "
-        footerTerm="evidence"
-      />
+    <div class="reveal mt-10" style="--reveal-delay:60ms">
+      <ReportRows label="Two ways to settle a question" text rows={terms.map((e) => ({ k: e.term, v: e.definition }))}>
+        <Fragment slot="disc">The Society chose <b>evidence</b></Fragment>
+      </ReportRows>
     </div>
 
-    <div class="reveal mt-12 lg:mt-14" style="--reveal-delay:60ms;max-width:76ch">
-      <RuledRows label="Which is why" rows={commitments} />
+    <div class="reveal mt-12" style="--reveal-delay:60ms">
+      <ReportRows text label="Which is why" rows={commitments} />
     </div>
 
     <p class="reveal mt-7" style="--reveal-delay:60ms">
-      <a href={SECURITY_ADVISORY_URL} rel="noopener" class="link-inline text-[15px] font-medium">
+      <a href={SECURITY_ADVISORY_URL} rel="noopener" class="link-inline">
         Report a bypass via GitHub private vulnerability reporting
       </a>
     </p>
 
-    <p
-      class="reveal mt-11 font-display text-[22px] font-bold leading-[1.25] tracking-[-0.016em] lg:text-[26px]"
-      style="--reveal-delay:60ms"
-    >
-      Including ours. Especially ours.
+    <p class="statement reveal mt-11" style="--reveal-delay:60ms">
+      Including ours. <span class="q">Especially ours.</span>
     </p>
   </Section>
 
@@ -154,104 +143,32 @@ const status: Row[] = [
     <Eyebrow class="reveal">Who is building it</Eyebrow>
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Early, and saying so.</h2>
 
-    <div class="reveal mt-10 lg:mt-11" style="--reveal-delay:120ms;max-width:76ch">
-      <RuledRows label="Status" rows={status} />
+    <div class="reveal mt-10" style="--reveal-delay:120ms">
+      <ReportRows text label="Status" rows={status} />
     </div>
 
-    <p class="reveal mt-12 text-[17px] leading-[1.62] lg:mt-14" style="--reveal-delay:60ms;max-width:66ch">
-      <span class="micro mb-3 block">Founder background</span>
+    <p class="reveal body mt-12" style="--reveal-delay:60ms;max-width:66ch">
+      <span class="hd mb-4 block">Founder background</span>
       Application security, plus the automated program repair literature that named
       overfitting long before the current generation of tools existed, which is why this
       looked like a gap and not a novelty.
     </p>
 
-    <p class="reveal mt-10 text-[16px] leading-[1.62] text-fg-2" style="--reveal-delay:60ms;max-width:66ch">
+    <p class="reveal body mt-8 text-fg-2" style="--reveal-delay:60ms;max-width:66ch">
       Vendors get their results and the underlying artifacts before anything publishes,
       with a window to respond. Responses go out unedited.
     </p>
 
     <div class="reveal mt-11 flex flex-wrap gap-3">
-      <span class="btn btn-primary cursor-default opacity-60" aria-disabled="true">
-        Get in touch
-      </span>
+      <span class="btn btn-primary cursor-default" aria-disabled="true">Get in touch</span>
       <a href="/methodology" class="btn btn-secondary">Read the methodology</a>
     </div>
 
     {/* The colophon proper: how this was set, under the mark it was set by. */}
-    <div class="colophon reveal">
-      <p class="mark">Nullius in verba</p>
-      <div style="max-width:66ch">
-        <RuledRows label="Colophon" rows={colophon} />
-      </div>
+    <div class="reveal mt-16 border-t border-line pt-8">
+      <p class="h2 mb-6">Nullius in verba</p>
+      <ReportRows text label="Colophon" rows={colophon} />
     </div>
   </Section>
-
-  <style>
-    .colophon {
-      margin-top: 72px;
-      padding-top: 28px;
-      border-top: 1px solid var(--line);
-    }
-
-    /* The motto set as a mark rather than as a sentence: the thing the
-       colophon is signed with. */
-    .mark {
-      font-family: var(--font-display);
-      font-size: clamp(22px, 2.4vw, 30px);
-      font-weight: 700;
-      letter-spacing: -0.015em;
-      margin-bottom: 24px;
-    }
-  </style>
 </BaseLayout>
 
-<style>
-  /* Deliberately not a ConditionList row: the fifth sits outside the frame
-     that holds the four, and its numeral is unstruck, like the approver's
-     punch in the hallmark. */
-  .refused {
-    display: grid;
-    grid-template-columns: 26px minmax(0, 1fr);
-    column-gap: 16px;
-    align-items: start;
-    padding: 14px 18px;
-    border: 1px dashed var(--line);
-    border-radius: 4px;
-  }
-
-  .refused-n {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    color: color-mix(in srgb, var(--fg-2) 55%, transparent);
-    padding-top: 3px;
-  }
-
-  .refused-lab {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--fg-2);
-  }
-
-  .refused-body {
-    margin-top: 3px;
-    font-size: 16px;
-    line-height: 1.5;
-    color: var(--fg);
-  }
-
-  @media (min-width: 1024px) {
-    .refused {
-      padding: 15px 22px;
-      column-gap: 20px;
-    }
-
-    .refused-body { font-size: 17px; }
-  }
-
-  @media (max-width: 400px) {
-    .refused { padding-inline: 14px; }
-  }
-</style>
