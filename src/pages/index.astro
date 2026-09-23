@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import Explainer from '../components/Explainer.astro';
 import Checks from '../components/Checks.astro';
 import Credibility from '../components/Credibility.astro';
 import Compliance from '../components/Compliance.astro';
@@ -11,18 +10,15 @@ import { site } from '../lib/site';
 // Six moves, each earning the next (see the restructure plan). Move 3, the
 // finding, is components/Finding.astro. It names no vendor and shows no per-tool
 // verdict, so it ships unedited; it now sits in the slot below, between the
-// explainer and the checks.
+// hero and the checks.
 import Finding from '../components/Finding.astro';
 ---
 
 <BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
+  {/* The hero carries the explainer now, as a self-playing run beside the
+      copy. The six-beat walkthrough it replaces lives on at
+      /research/how-the-alert-goes-green. */}
   <Hero />
-  {/* The six-beat explainer, its own full-width section directly below the hero
-      so the hero stays a single clean column. Also lives at
-      /research/how-the-alert-goes-green; it exists in both places on purpose.
-      It demonstrates the thesis and closes on protected line 7, so the Setup
-      section that used to restate it is gone. */}
-  <Explainer />
   {/* MOVE 3, the finding (carries protected line 2) */}
   <Finding />
   <Checks />

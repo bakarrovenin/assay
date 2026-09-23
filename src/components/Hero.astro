@@ -1,38 +1,501 @@
 ---
-// Move 1. States the problem and points at the one thing that is real and
-// shipping today: the benchmark. The pull-request verifier is a labelled
-// waitlist further down the page. The live command line is chrome, like the
-// status bar: the one string on the page that is not site copy.
+// Move 1. States the problem, and shows it happening: the hero carries the
+// explainer as one self-playing CI run beside the copy. A security fix
+// arrives, three checks come back green, then the behaviour check runs a
+// real customer's name and the fix rejects it.
+//
+// The copy comes first in the source, so it reads first without styles and
+// to a screen reader. On wide screens the headline runs across the top on
+// one line, as large as one line allows, with the copy on the left and the
+// run on the right, its top level with protected line 1. On phones the run
+// sits between protected line 1 and the rest of the copy. The command is
+// typed in the terminal only; the hero carries no second copy of it.
+//
+// The run plays once, on its own, from load. Nothing advances on click.
+// Each beat waits until the row it plays in is on screen, so on a screen
+// that holds the whole terminal it plays straight through, and on a phone,
+// where it cannot, the command types above the fold and the checks follow
+// the scroll instead of resolving unseen. Once it has finished, the Replay
+// button, a click on the terminal, or an arrow key while it is on screen
+// plays it again.
+//
+// The pull request, the scanner result and the verdict are a constructed
+// example of what Assay posts, not a screenshot of a real repository: the
+// actor is assay-example with a demo badge. Only true metadata is printed.
+//
+// Every piece of the run holds its final space from the first frame and is
+// revealed by opacity, so nothing moves the copy while it plays, and every
+// animated property is transform or opacity.
+//
+// prefers-reduced-motion (unless ?motion=on), and no JS: a still designed
+// as one, not the last frame of the run. The finished report stands on its
+// own: the command complete, three passes at full strength, the one red
+// failure, the NOT VERIFIED stamp and the final tally. Everything that only
+// means something in motion (the caption and its counter, Replay, the
+// cursor, the stepping back of the passes) is left out.
+//
+// Pacing lives in the T table at the top of the script.
+import { METHOD_VERSION } from '../lib/site';
+import TermPanel from './system/TermPanel.astro';
+import CheckRow from './system/CheckRow.astro';
+import VerdictLine from './system/VerdictLine.astro';
+
+const caps = [
+  "A security fix arrives.",
+  "Check A. The alert is closed.",
+  "Check B. Every held-out attack is blocked.",
+  "Check D. No suppression. Three greens. Any team would merge it here.",
+  "Check C. A real customer’s name goes in.",
+  "Rejected. The fix closed the hole and broke a real user."
+];
 ---
 
-<section class="section-hero">
-  <div class="shell">
-    <p class="hd reveal">Independent verification for AI-authored code</p>
+<section class="section-hero hrun" data-seq>
+  <div class="shell hrun-grid">
+    <div class="hrun-head">
+      <p class="hd reveal">Independent verification for AI-authored code</p>
 
-    <p class="prompt reveal mt-7" style="--reveal-delay:40ms" aria-hidden="true">
-      <span class="c">$</span> assay verify ./patch.diff <span class="cursor"></span>
-    </p>
-
-    <h1 class="h1 reveal mt-7" style="--reveal-delay:60ms">
-      Verify <span class="g">AI-authored</span> fixes
-    </h1>
-
-    <p class="lede reveal mt-8" style="--reveal-delay:90ms">
-      <b>Your AI fixed it. We check whether it actually did.</b>
-    </p>
-
-    <p class="lede reveal mt-4" style="--reveal-delay:120ms">
-      AI writes your security fixes now, and most of them work. The dangerous one closes the
-      hole and quietly breaks something your tests never checked. Assay catches it.
-    </p>
-
-    <div class="reveal mt-9 flex flex-wrap gap-3" style="--reveal-delay:180ms">
-      <a href="/benchmark" class="btn btn-primary">Run the benchmark</a>
-      <a href="/the-index" class="btn btn-secondary">Read the Index &rarr;</a>
+      <h1 class="h1 reveal mt-7" style="--reveal-delay:60ms">
+        Verify <span class="g">AI-authored</span> fixes
+      </h1>
     </div>
 
-    <p class="disc reveal mt-8" style="--reveal-delay:240ms">
-      Free and open &middot; Four SQL injection flaws &middot; Bring any fixer
-    </p>
+    <div class="hrun-lede">
+      <p class="lede reveal" style="--reveal-delay:90ms">
+        <b>Your AI fixed it. We check whether it actually did.</b>
+      </p>
+    </div>
+
+    <div class="hrun-rest">
+      <p class="lede reveal" style="--reveal-delay:120ms">
+        AI writes your security fixes now, and most of them work. The dangerous one closes the
+        hole and quietly breaks something your tests never checked. Assay catches it.
+      </p>
+
+      <div class="reveal mt-9 flex flex-wrap gap-3" style="--reveal-delay:180ms">
+        <a href="/benchmark" class="btn btn-primary">Run the benchmark</a>
+        <a href="/the-index" class="btn btn-secondary">Read the Index &rarr;</a>
+      </div>
+
+      <p class="disc reveal mt-8" style="--reveal-delay:240ms">
+        Free and open &middot; Four SQL injection flaws &middot; Bring any fixer
+      </p>
+    </div>
+
+    <div class="hrun-cap">
+      <div class="caps" aria-hidden="true">
+        {
+          caps.map((c, k) => (
+            <p class={`cap ${k === 0 ? 'on' : ''}`} data-cap={k}>
+              <span class="cap-n">{String(k + 1).padStart(2, '0')} / {String(caps.length).padStart(2, '0')}</span>
+              <span class="cap-t">{c}</span>
+            </p>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="hrun-stage" data-stage role="group" aria-label="How Assay works">
+      <TermPanel path="assay verify" class="panel">
+        <Fragment slot="bar"><span class="tally" aria-hidden="true"><span class="tp" data-tp>PASS <b>3</b></span><span class="tf" data-tf>FAIL <b>1</b></span></span></Fragment>
+        <div class="ln cmd cmdline"><span class="c">$</span> <span data-type>assay verify ./patch.diff</span><span class="cursor" data-cursor aria-hidden="true"></span></div>
+        <div class="pr p" data-p="pr">
+          <div class="ln out pr-top">
+            <span class="pr-actor">assay-example</span>
+            <span class="chip pr-bot">demo</span>
+            <span>opened a pull request</span>
+            <span class="pr-num">#248</span>
+          </div>
+          <div class="ln cmd"><span class="tok-kw">fix:</span> escape user input in /api/search</div>
+          <div class="ln cmt pr-finding">// SQL injection &middot; CWE-89 &middot; /api/search</div>
+        </div>
+        <div class="checks">
+          <CheckRow id="A" name="Alert closed" resolves="pass" class="p" data-row="A">
+            <span class="part p" data-p="a1">Semgrep 1.80.0 &middot; 0 findings</span>
+          </CheckRow>
+          <CheckRow id="B" name="Hole shut" resolves="pass" class="p" data-row="B">
+            <span class="part p" data-p="b1">held-out attacks blocked <b data-count>47</b>/47</span>
+          </CheckRow>
+          <CheckRow id="D" name="No suppression" resolves="pass" class="p" data-row="D">
+            <span class="part p" data-p="d1">0 suppression markers in the diff</span>
+          </CheckRow>
+          <CheckRow id="C" name="Behaviour held" resolves="fail" class="p" data-row="C">
+            <span class="part p" data-p="c1">input name=<b>O'Brien</b> &middot; a real customer</span><span class="part res p" data-p="c2">expected 200 &middot; got 400, rejected</span>
+          </CheckRow>
+        </div>
+        <div class="p verdict" data-p="verdict">
+          <VerdictLine label="Not verified" tone="fail">The hole is shut. The product isn&rsquo;t working.</VerdictLine>
+        </div>
+        <div class="p last" data-p="last"><p class="note">Every other check was green.</p></div>
+        <div class="p foot" data-p="foot">
+          <span class="hd">Method v{METHOD_VERSION}</span>
+          <span class="hd evidence">View evidence &rarr;</span>
+        </div>
+      </TermPanel>
+    </div>
+
+    <button type="button" class="btn btn-secondary btn-sm replay" data-replay>Replay &#8635;</button>
   </div>
 </section>
+
+<noscript>
+  <style>
+    /* Without JS the hero is the still: the same rules as .is-static. */
+    [data-seq] .p { opacity: 1 !important; }
+    [data-seq] .hrun-cap, [data-seq] .replay, [data-seq] .hrun-stage .cursor { display: none !important; }
+    [data-seq] .chk .st-pending { display: none !important; }
+    [data-seq] .chk .st-final { display: inline !important; }
+    [data-seq] .chk .st { font-weight: 700; }
+    [data-seq] .chk[data-resolves="pass"] .st { color: var(--acc); }
+    [data-seq] .chk[data-resolves="fail"] .st,
+    [data-seq] .chk[data-resolves="fail"] .id,
+    [data-seq] .chk[data-resolves="fail"] .nm,
+    [data-seq] .chk[data-resolves="fail"] .res { color: var(--fail); }
+    [data-seq] .chk[data-resolves="fail"]::before { opacity: 1 !important; }
+    [data-seq] .verdict .why { opacity: 1 !important; }
+    [data-seq] .tally .tp b { color: var(--acc); }
+    [data-seq] .tally .tf b { color: var(--fail); }
+  </style>
+</noscript>
+
+<style is:global>
+  /* The hero with the run in it. Layout and motion only; colour, face and
+     size come from the system. Transform and opacity are the only animated
+     properties. */
+
+  /* One source order, two compositions. Phones: headline, protected line 1,
+     the caption, the run, Replay, then the rest of the copy. */
+  .hrun-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "lede" "cap" "stage" "replay" "rest";
+  }
+  .hrun-head   { grid-area: head; }
+  .hrun-lede   { grid-area: lede; margin-top: 28px; }
+  .hrun-cap    { grid-area: cap; margin-top: 28px; min-width: 0; }
+  .hrun-stage  { grid-area: stage; margin-top: 12px; min-width: 0; }
+  .hrun .replay { grid-area: replay; justify-self: end; margin-top: 12px; }
+  .hrun-rest   { grid-area: rest; margin-top: 28px; }
+  .hrun.is-static .hrun-stage { margin-top: 28px; }
+
+  /* Wide: the headline across the top on one line, sized to the widest one
+     line the column allows (24 characters at 0.57em each, JetBrains Mono
+     with the headline tracking). Under it, the copy on the left with the
+     caption and Replay after it, and the run on the right, its top level
+     with protected line 1. */
+  @media (min-width: 1024px) {
+    .hrun-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 580px);
+      grid-template-rows: auto auto auto auto auto 1fr;
+      grid-template-areas:
+        "head   head"
+        "lede   stage"
+        "rest   stage"
+        "cap    stage"
+        "replay stage"
+        ".      stage";
+      column-gap: clamp(40px, 4vw, 56px);
+    }
+    .hrun .h1 { max-width: none; font-size: clamp(48px, calc((min(100vw, var(--wrap)) - 2 * var(--gutter)) / 13.9), 88px); }
+    .hrun-lede  { margin-top: 36px; }
+    .hrun-stage, .hrun.is-static .hrun-stage { margin-top: 36px; align-self: start; }
+    .hrun-rest  { margin-top: 16px; }
+    .hrun-cap   { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .hrun .replay { justify-self: start; margin-top: 16px; }
+  }
+
+  .hrun .replay { opacity: 0; pointer-events: none; transition: opacity 300ms ease-out; }
+  .hrun.is-done .replay { opacity: 1; pointer-events: auto; }
+  /* The still: nothing that only means something in motion. */
+  .hrun.is-static .replay,
+  .hrun.is-static .hrun-cap,
+  .hrun.is-static .hrun-stage .cursor { display: none; }
+  .hrun.is-static.is-verdict .chk[data-resolves="pass"] { opacity: 1; }
+  .hrun.is-done:not(.is-static) .hrun-stage { cursor: pointer; }
+
+  /* Captions overlap in one cell, so the tallest reserves the height and
+     nothing below them moves when they change. */
+  .hrun .caps { display: grid; min-width: 0; }
+  /* The outgoing caption clears before the next arrives, so two never
+     overlap mid-fade. */
+  .hrun .cap { grid-area: 1 / 1; margin: 0; opacity: 0; transform: translateY(6px); transition: opacity 120ms ease-in, transform 120ms ease-in; }
+  .hrun .cap.on { opacity: 1; transform: none; transition: opacity 240ms ease-out 110ms, transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1) 110ms; }
+  .hrun .cap-n { display: block; font-size: var(--t-meta); letter-spacing: var(--t-meta-track); color: var(--fg-3); margin-bottom: 10px; }
+  .hrun .cap-t { display: block; font-weight: 700; font-size: clamp(18px, 1.5vw, 22px); line-height: 1.3; letter-spacing: -0.02em; color: var(--fg); max-width: 26ch; text-wrap: pretty; }
+
+  /* Bar tally */
+  .hrun .tally { margin-left: auto; display: flex; gap: 12px; font-size: var(--t-meta); letter-spacing: 0.08em; color: var(--fg-3); white-space: nowrap; }
+  .hrun .tally b { font-weight: 500; color: var(--fg-3); }
+  .hrun .tally .on b { color: var(--acc); }
+  .hrun .tally .tf.on b { color: var(--fail); }
+
+  /* Command line */
+  .hrun .cmdline .c { color: var(--acc); }
+  .hrun-stage .cursor { display: inline-block; width: 8px; height: 16px; background: var(--acc); vertical-align: -2px; margin-left: 2px; animation: hrun-blink 1.1s steps(1) infinite; }
+  .hrun.is-typing .hrun-stage .cursor { animation: none; }
+  .hrun-stage .cursor.off { opacity: 0; animation: none; }
+
+  /* Every piece holds its final space from the start and is shown by
+     opacity, so the panel never changes height while it plays. */
+  .hrun .p { opacity: 0; }
+  .hrun .p.on { opacity: 1; animation: hrun-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+
+  .hrun .pr { margin-top: 14px; }
+  .hrun .pr-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .hrun .pr-actor { color: var(--fg); font-weight: 500; white-space: nowrap; }
+  .hrun .pr-bot { text-transform: uppercase; letter-spacing: 0.08em; font-size: 10.5px; padding: 1px 7px; }
+  .hrun .pr-num { margin-left: auto; padding-left: 8px; white-space: nowrap; }
+  .hrun .pr .ln + .ln { margin-top: 6px; }
+
+  .hrun .checks { margin-top: 18px; padding-top: 4px; border-top: 1px solid var(--line); }
+  .hrun .chk { position: relative; isolation: isolate; }
+  .hrun .chk .ds .part { display: block; }
+  .hrun .chk .ds b { color: var(--fg); font-weight: 500; }
+
+  /* The red line: a tint behind the row, faded in, never a colour tween. */
+  .hrun .chk::before { content: ""; position: absolute; inset: 0 -10px; z-index: -1; border-radius: var(--r-1); background: var(--fail-dim); opacity: 0; transition: opacity 280ms ease-out; pointer-events: none; }
+  .hrun .chk.is-red::before { opacity: 1; }
+  .hrun .chk.is-red .id, .hrun .chk.is-red .nm, .hrun .chk.is-red .ds .res { color: var(--fail); }
+
+  .hrun .chk.is-running .st-pending { animation: hrun-blink 0.9s steps(1) infinite; }
+
+  /* The strike: lands oversized, overshoots under, settles. The passes
+     strike quicker; the failure keeps the full weight. */
+  .hrun .chk.is-resolved .st-final { display: inline-block; transform-origin: 100% 60%; animation: hrun-strike 380ms cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+  .hrun .chk.is-resolved[data-resolves="pass"] .st-final { animation-duration: 260ms; }
+
+  /* Once the verdict is in, the passes step back so the failure holds the eye. */
+  .hrun .chk[data-resolves="pass"] { transition: opacity 600ms ease-out 300ms; }
+  .hrun.is-verdict .chk[data-resolves="pass"] { opacity: 0.38; }
+
+  /* The stamp. Heaviest moment in the run. */
+  .hrun .verdict.p.on { animation: none; }
+  .hrun .verdict .badge { font-size: 16px; padding: 9px 16px; letter-spacing: 0.12em; }
+  .hrun .verdict.on .badge { transform-origin: 50% 55%; animation: hrun-stamp 560ms cubic-bezier(0.2, 0.9, 0.2, 1) both; }
+  .hrun .verdict .why { opacity: 0; transition: opacity 400ms ease-out 500ms; }
+  .hrun .verdict.on .why { opacity: 1; }
+
+  .hrun .last .note { margin: 14px 0 0; font-size: var(--t-note); }
+  .hrun .foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .hrun .foot .hd::before { content: none; }
+  .hrun .foot .evidence { color: var(--fg-2); }
+
+  @keyframes hrun-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  @keyframes hrun-blink { 50% { opacity: 0; } }
+  @keyframes hrun-strike {
+    0%   { opacity: 0; transform: scale(1.9); }
+    55%  { opacity: 1; transform: scale(0.94); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes hrun-stamp {
+    0%   { opacity: 0; transform: scale(2.4); }
+    50%  { opacity: 1; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes hrun-stamp-sm {
+    0%   { opacity: 0; transform: scale(1.7); }
+    50%  { opacity: 1; transform: scale(0.96); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes hrun-strike-sm {
+    0%   { opacity: 0; transform: scale(1.5); }
+    55%  { opacity: 1; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Phones: the same run with smaller travel, so nothing crosses the panel
+     edge, and trimmed so everything through the verdict fits the screen. */
+  @media (max-width: 720px) {
+    .hrun .verdict .badge { font-size: 14px; padding: 8px 14px; }
+    .hrun .verdict.on .badge { animation-name: hrun-stamp-sm; }
+    .hrun .chk.is-resolved .st-final { animation-name: hrun-strike-sm; }
+    .hrun .pr-num { margin-left: 0; padding-left: 0; }
+    .hrun .tally { gap: 8px; }
+    .hrun .cap-n { display: none; }
+    .hrun .cap-t { font-size: 16px; max-width: none; }
+    .hrun .pr-finding, .hrun .foot { display: none; }
+    .hrun .pr { margin-top: 10px; }
+    .hrun .checks { margin-top: 12px; }
+    .hrun .chk { padding: 7px 0; }
+    .hrun .verdictline { margin-top: 12px; padding-top: 12px; }
+    .hrun .last .note { margin-top: 10px; }
+  }
+
+  /* Reduced motion and the finished frame: everything in the run at rest. */
+  .hrun.is-static .hrun-stage *, .hrun.is-static .hrun-stage *::before, .hrun.is-static .hrun-stage *::after { animation: none !important; transition: none !important; }
+</style>
+
+<script is:inline>
+(function () {
+  var root = document.querySelector('[data-seq]');
+  if (!root) return;
+
+  // Timeline in ms from the moment the whole terminal is on screen.
+  // Pacing lives here and nowhere else.
+  var T = {
+    type: 150, perChar: 30,     // the command types itself
+    run: 1100,                  // cursor stops, the pull request prints
+    A: 1500, A1: 1620, Apass: 1800,
+    B: 2250, B1: 2370, Bcount: 380, Bpass: 2800,
+    D: 3050, D1: 3170, Dpass: 3350,
+    // held beat: three greens, nothing moves. The pause the turn needs.
+    C: 4600, C1: 4900,
+    C2: 6000, Cfail: 6180,      // the name sits, then rejected
+    stamp: 6800,
+    last: 7450,
+    done: 7900
+  };
+
+  var html = document.documentElement;
+  var reduced = html.dataset.motion !== 'on' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function q(s) { return root.querySelector(s); }
+  function qa(s) { return Array.prototype.slice.call(root.querySelectorAll(s)); }
+  function piece(k) { return q('[data-p="' + k + '"]'); }
+  function row(k) { return q('[data-row="' + k + '"]'); }
+
+  var typed = q('[data-type]');
+  var CMD = typed.textContent;
+  var cursor = q('[data-cursor]');
+  var count = q('[data-count]');
+  var TOTAL = Number(count.textContent);
+  var caps = qa('[data-cap]');
+  var tp = q('[data-tp]'), tf = q('[data-tf]');
+  var stage = q('[data-stage]');
+  var replay = q('[data-replay]');
+  var pass = 0, fail = 0;
+
+  function cap(k) { caps.forEach(function (c, i) { c.classList.toggle('on', i === k); }); }
+  function on(k) { piece(k).classList.add('on'); }
+  function tally() {
+    tp.querySelector('b').textContent = pass;
+    tf.querySelector('b').textContent = fail;
+    tp.classList.toggle('on', pass > 0);
+    tf.classList.toggle('on', fail > 0);
+  }
+  function start(k) { var r = row(k); r.classList.add('on', 'is-running'); }
+  function strike(k) {
+    var r = row(k);
+    r.classList.remove('is-running');
+    r.classList.add('is-resolved');
+    if (r.dataset.resolves === 'fail') fail++; else pass++;
+    tally();
+  }
+
+  // A beat that plays in a row waits for that row to be on screen.
+  function seen(el) {
+    var r = el.getBoundingClientRect();
+    return r.top >= 0 && r.bottom <= window.innerHeight;
+  }
+
+  function build() {
+    var e = [];
+    function at(t, fn, need) { e.push([t, e.length, fn, need]); }
+    at(0, function () { cap(0); });
+    at(T.type, function () { root.classList.add('is-typing'); }, q('.cmdline'));
+    for (var k = 1; k <= CMD.length; k++) {
+      (function (k) { at(T.type + k * T.perChar, function () { typed.textContent = CMD.slice(0, k); }); })(k);
+    }
+    at(T.type + CMD.length * T.perChar, function () { root.classList.remove('is-typing'); });
+    at(T.run, function () { cursor.classList.add('off'); on('pr'); });
+    at(T.A, function () { cap(1); start('A'); }, row('A'));
+    at(T.A1, function () { on('a1'); });
+    at(T.Apass, function () { strike('A'); });
+    at(T.B, function () { cap(2); start('B'); }, row('B'));
+    at(T.B1, function () { on('b1'); });
+    at(T.Bpass, function () { count.textContent = TOTAL; strike('B'); });
+    at(T.D, function () { cap(3); start('D'); }, row('D'));
+    at(T.D1, function () { on('d1'); });
+    at(T.Dpass, function () { strike('D'); });
+    at(T.C, function () { cap(4); start('C'); }, row('C'));
+    at(T.C1, function () { on('c1'); });
+    at(T.C2, function () { cap(5); on('c2'); row('C').classList.add('is-red'); });
+    at(T.Cfail, function () { strike('C'); });
+    at(T.stamp, function () { on('verdict'); root.classList.add('is-verdict'); }, piece('verdict'));
+    at(T.last, function () { on('last'); on('foot'); });
+    at(T.done, function () { root.classList.add('is-done'); playing = false; });
+    return e.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+  }
+
+  var events = [], i = 0, t = 0, last = 0, raf = 0, playing = false, played = false;
+
+  function reset() {
+    cancelAnimationFrame(raf);
+    root.classList.remove('is-typing', 'is-verdict', 'is-done');
+    qa('.p.on').forEach(function (el) { el.classList.remove('on'); });
+    qa('[data-row]').forEach(function (r) { r.classList.remove('is-resolved', 'is-running', 'is-red'); });
+    typed.textContent = '';
+    cursor.classList.remove('off');
+    count.textContent = '0';
+    pass = 0; fail = 0; tally();
+    cap(0);
+  }
+
+  function tick(now) {
+    var dt = Math.min(now - last, 50);   // a hidden tab pauses the run, never skips it
+    last = now;
+    // Hold the clock at a beat whose row is still off screen.
+    var next = events[i];
+    if (next && next[3] && next[0] <= t + dt && !seen(next[3])) t = Math.max(t, next[0]);
+    else t += dt;
+    while (i < events.length && events[i][0] <= t) {
+      if (events[i][3] && !seen(events[i][3])) break;
+      events[i][2](); i++;
+    }
+    if (t > T.B1 && t < T.Bpass) {
+      var p = Math.min(1, (t - T.B1) / T.Bcount);
+      count.textContent = Math.round(TOTAL * (1 - Math.pow(1 - p, 2)));
+    }
+    if (i < events.length) raf = requestAnimationFrame(tick);
+  }
+
+  function play() {
+    reset();
+    void root.offsetWidth;           // restart the keyframes on replay
+    events = build(); i = 0; t = 0;
+    playing = true; played = true;
+    last = performance.now();
+    raf = requestAnimationFrame(tick);
+  }
+
+  function finish() {
+    typed.textContent = CMD;
+    cursor.classList.add('off');
+    qa('.p').forEach(function (el) { el.classList.add('on'); });
+    qa('[data-row]').forEach(function (r) { r.classList.add('is-resolved'); });
+    row('C').classList.add('is-red');
+    count.textContent = TOTAL;
+    pass = 3; fail = 1; tally();
+    cap(caps.length - 1);
+    root.classList.add('is-verdict', 'is-done');
+  }
+
+  if (reduced) {
+    root.classList.add('is-static');
+    finish();
+    return;
+  }
+
+  // From load. The beats hold themselves until their rows are on screen.
+  play();
+
+  function again() { if (!playing) play(); }
+  replay.addEventListener('click', again);
+  stage.addEventListener('click', function () { if (root.classList.contains('is-done')) again(); });
+
+  // Arrow keys replay a finished run while it is on screen and nothing else
+  // wants the keyboard.
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    if (e.altKey || e.ctrlKey || e.metaKey || playing || !played) return;
+    var a = document.activeElement;
+    if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable)) return;
+    if (document.querySelector('dialog[open]')) return;
+    var r = stage.getBoundingClientRect();
+    if (r.bottom < window.innerHeight * 0.3 || r.top > window.innerHeight * 0.7) return;
+    e.preventDefault();
+    play();
+  });
+})();
+</script>
