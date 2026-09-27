@@ -33,26 +33,28 @@ Commits must be authored by an email on the Vercel team, or Vercel blocks the
 deployment with "Git author ... must have access to the team". The repo-local
 git identity is set accordingly.
 
+## Homepage and email capture
+
+The homepage uses its own dark styling in `src/styles/landing.css`; interior
+pages retain the existing design. The hero animation is shared unchanged.
+Provider results are computed from the committed pilot records, not handwritten
+marketing figures. Tested tools are not presented as live integrations.
+
+`ContactButton.astro` opens the shared `EmailModal.astro` with contact-specific
+copy. Email addresses post to the existing Loops newsletter endpoint in
+`src/lib/site.ts`, with `userGroup=talk-to-team`. Existing Index and benchmark
+waitlists keep their own groups. This collects contacts in Loops; any internal
+notifications or follow-up automation must be configured in Loops itself.
+
+Hosted scoring remains gated by both `PUBLIC_BENCHMARK_API` and
+`PUBLIC_BENCHMARK_SCORING=1`. Until the backend is deployed, the homepage labels
+scoring as coming soon and links to the existing benchmark/waitlist.
+
 ## Before launch
 
-One thing is deliberately unwired:
-
-- **`INDEX_SIGNUP_ENDPOINT` in `src/lib/site.ts` is empty.** The Index email
-  capture is a real, labelled, validating form, but there is no list provider
-  behind it. While the constant is empty the form stays visible and says it is
-  not connected, rather than accepting an address there is nowhere to put.
-  Point it at a provider and it starts working.
-
-There is no contact email anywhere on the site, by choice. Security reports go
-to GitHub private vulnerability reporting via `SECURITY_ADVISORY_URL` in
-`src/lib/site.ts`, which requires **Private vulnerability reporting** to be
-enabled under Settings > Code security or the link 404s. Three controls have no
-target as a result and are deliberately left visible but `aria-disabled`: the
-two pricing "Talk to us" buttons and "Get in touch" on /about.
-
-Everything else on the site is either real or an explicit empty state. There
-are no fabricated customers, logos, testimonials or Index results anywhere,
-which is the point.
+Security reports use GitHub private vulnerability reporting via
+`SECURITY_ADVISORY_URL`; enable it under Settings > Code security.
+Interior-page contact controls will be revisited with the interior-page redesign.
 
 ## Structure
 

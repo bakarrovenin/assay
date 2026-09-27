@@ -1,28 +1,50 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import Checks from '../components/Checks.astro';
-import Credibility from '../components/Credibility.astro';
-import Compliance from '../components/Compliance.astro';
-import FinalCTA from '../components/FinalCTA.astro';
-import { site } from '../lib/site';
-
-// Six moves, each earning the next (see the restructure plan). Move 3, the
-// finding, is components/Finding.astro. It names no vendor and shows no per-tool
-// verdict, so it ships unedited; it now sits in the slot below, between the
-// hero and the checks.
-import Finding from '../components/Finding.astro';
+import ContactButton from '../components/ContactButton.astro';
+import { ASSAY_RUNS, ASSAY_SOURCE, byTool, SCORING_LIVE } from '../lib/benchmark';
+import '../styles/landing.css';
+const rows = byTool(ASSAY_RUNS);
 ---
-
-<BaseLayout title="Independent verification for AI-authored code" description={site.description} path="/">
-  {/* The hero carries the explainer now, as a self-playing run beside the
-      copy. The six-beat walkthrough it replaces lives on at
-      /research/how-the-alert-goes-green. */}
+<BaseLayout landing title="Verify AI-authored fixes" description="Assay checks AI-written SQL injection fixes against attacks and normal inputs. Explore the benchmark, inspect the evidence, or talk to our team." path="/">
   <Hero />
-  {/* MOVE 3, the finding (carries protected line 2) */}
-  <Finding />
-  <Checks />
-  <Credibility />
-  <Compliance />
-  <FinalCTA />
+
+  <section class="landing-section shell" id="results" aria-labelledby="results-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">The evidence</p><h2 id="results-title">How the fixes held up.</h2></div>
+      <a class="text-link" href="/benchmark/leaderboard">Explore the results <span aria-hidden="true">↗</span></a>
+    </div>
+    <p class="section-intro">We tested patches against SQL injection attacks and normal inputs. A fix has to stop the attack and keep the application working.</p>
+    <div class="results-scroll" role="region" aria-label="Provider results, scroll horizontally on small screens" tabindex="0">
+      <table class="results-table">
+        <caption>Pilot 001 · blind run · 14 September 2026</caption>
+        <thead><tr><th scope="col">Provider / tool</th><th scope="col">Patches scored</th><th scope="col">Blocked all attacks</th><th scope="col">Preserved behaviour</th><th scope="col">Verified</th></tr></thead>
+        <tbody>{rows.map(({ tool, version, tally: t }) => <tr>
+          <th scope="row">{tool}<span>{version}</span></th>
+          <td>{t.scored}</td><td>{t.holeShut}/{t.scored}</td><td>{t.behaviourHeld}/{t.scored}</td><td><span class="result-value">{t.verified}/{t.scored}</span></td>
+        </tr>)}</tbody>
+      </table>
+    </div>
+    <div class="evidence-note"><p>Small pilot, not a general ranking. Only scored patches count; “no alert” cases are excluded. These are tested tools, not partners.</p><a href={`${ASSAY_SOURCE.repo}/tree/${ASSAY_SOURCE.commit}`}>Inspect the evidence ↗</a></div>
+  </section>
+
+  <section class="landing-section shell workflow" aria-labelledby="workflow-title">
+    <p class="eyebrow">Your workflow</p>
+    <h2 id="workflow-title">Keep your fixer.<br /><span>Check its work.</span></h2>
+    <p class="section-intro">Bring a patch from the tool you already use. Assay checks what changed.</p>
+    <ol class="workflow-steps">
+      <li><span class="step-number">01</span><h3>Bring a patch</h3><p>Choose a SQL challenge. Give it to your AI tool, then bring back the fix.</p></li>
+      <li><span class="step-number">02</span><h3>Run the checks</h3><p>Check the scanner alert, unseen attacks, normal inputs and suppressed warnings.</p></li>
+      <li><span class="step-number">03</span><h3>Inspect the verdict</h3><p>See which checks passed, which failed and the evidence behind the result.</p></li>
+    </ol>
+    <p class="workflow-status"><span class="status-dot"></span>{SCORING_LIVE ? 'Benchmark scoring is live.' : 'Hosted scoring is coming soon.'} Automated checks on your own pull requests are in development.</p>
+  </section>
+
+  <section class="landing-cta shell" aria-labelledby="cta-title">
+    <p class="eyebrow">Start with one fix</p>
+    <h2 id="cta-title">Put a patch to the test.</h2>
+    <p>Four SQL injection challenges. Real checks. Evidence you can inspect.</p>
+    <div class="cta-actions"><a class="btn btn-primary" href="/benchmark">Score a patch <span aria-hidden="true">↗</span></a><ContactButton /></div>
+    {!SCORING_LIVE && <p class="availability">Explore the challenges now. Join the waitlist for scoring.</p>}
+  </section>
 </BaseLayout>

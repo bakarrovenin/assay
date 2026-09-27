@@ -1,0 +1,25 @@
+---
+import Logo from './Logo.astro';
+import ContactButton from './ContactButton.astro';
+const { footer = false } = Astro.props;
+---
+{footer ? (
+  <footer class="landing-footer shell">
+    <a href="/" aria-label="Assay, home"><Logo /></a>
+    <p>© {new Date().getFullYear()} Assay</p>
+    <nav aria-label="Footer">
+      <a href="/research">Research</a>
+      <a href="/methodology">Methodology</a>
+      <a href="https://github.com/bakarrovenin/assay-pilot-001-evidence">GitHub ↗</a>
+    </nav>
+  </footer>
+) : (
+  <header class="landing-nav shell">
+    <a href="/" aria-label="Assay, home"><Logo /></a>
+    <nav aria-label="Primary">
+      <a href="/benchmark">Benchmark</a>
+      <a href="#results">Results</a>
+      <ContactButton />
+    </nav>
+  </header>
+)}
