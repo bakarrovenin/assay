@@ -52,7 +52,7 @@ const steps = [
     eyebrow={`Benchmark · edition 1 · finding ${finding.id}`}
     title={finding.shape}
     lede={finding.body}
-    subLede={`${finding.file} · ${finding.attacks.length} held-out attacks · ${finding.benign.length} benign inputs`}
+    subLede={`${finding.file} · ${finding.attacks.length} attack cases · ${finding.benign.length} benign inputs`}
   />
 
   <Section id="submit" rule={false}>
@@ -60,8 +60,8 @@ const steps = [
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Score it.</h2>
 
     <p class="reveal body mt-8 text-fg-2" style="--reveal-delay:90ms;max-width:66ch">
-      First time here? Hand the module and prompt below to any fixer, then paste the patch it
-      returns to score it against the held-out attacks.
+      Copy the module and prompt below to try your fixer. You can prepare a patch now;
+      submitting it for a score will be available when the scoring service launches.
     </p>
 
     <form class="reveal mt-9 max-w-[80ch]" data-submit style="--reveal-delay:120ms" novalidate>
@@ -118,7 +118,7 @@ const steps = [
                 'data-verify-group': 'benchmark-waitlist',
                 'data-verify-title': 'Notify me when scoring opens',
                 'data-verify-lede':
-                  "Scoring is not live yet. The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live.",
+                  "Live scoring is not yet available. Leave an address and we will tell you the moment it is live.",
               })}
         >{SCORING_LIVE ? 'Score the patch' : 'Notify me when scoring opens'}</button>
         <span class="note failr" data-error hidden></span>
@@ -126,14 +126,12 @@ const steps = [
 
       {!SCORING_LIVE && (
         <p class="note mt-4" style="max-width:70ch">
-          Scoring goes live shortly. Until then this button opens a notify signup instead of
-          scoring, and we will tell you the moment you can score a patch here.
+          Live scoring is not yet available. Leave your email to hear when you can submit a patch.
         </p>
       )}
 
       <p class="note mt-5" style="max-width:70ch">
-        The patch is scored by the harness in a sealed container with no network egress, torn
-        down after the run. Nothing from your patch is kept beyond the result.
+        Use the supplied test module. Do not paste private repository code or credentials.
       </p>
     </form>
   </Section>
@@ -162,7 +160,7 @@ const steps = [
         data-verify-cta
         data-verify-group="benchmark-waitlist"
         data-verify-title="Notify me when scoring opens"
-        data-verify-lede="The scorer that runs the four checks on your fixer's patch is coming online shortly. Leave an address and we will tell you the moment it is live."
+        data-verify-lede="Live scoring is not yet available. Leave an address and we will tell you the moment it is live."
       >Get told when scoring opens</button>{' '}
       so you know to come back with the patch.
     </p>

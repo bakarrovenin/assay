@@ -46,7 +46,7 @@ const CHECKS = [
   <PageHeader
     eyebrow="Benchmark · edition 1 · result"
     title="Unverified."
-    lede="A self-reported result, scored by the stub in the submitter's browser. This link carries everything it shows and nothing was looked up."
+    lede="This result is carried in the link. It has not been checked against a server record."
     subLede="Runs we conducted are a separate set and never appear on this page."
   />
 
@@ -81,13 +81,13 @@ const CHECKS = [
           </div>
 
           <div data-vb="verified" hidden>
-            <VerdictLine label="Verified" tone="pass">UNVERIFIED &middot; self-reported &middot; scored by the stub, not the harness</VerdictLine>
+            <VerdictLine label="Verified" tone="pass">UNVERIFIED &middot; link-supplied result &middot; not authenticated</VerdictLine>
           </div>
           <div data-vb="failed" hidden>
-            <VerdictLine label="Not verified" tone="fail">UNVERIFIED &middot; self-reported &middot; scored by the stub, not the harness</VerdictLine>
+            <VerdictLine label="Not verified" tone="fail">UNVERIFIED &middot; link-supplied result &middot; not authenticated</VerdictLine>
           </div>
           <div data-vb="insufficient" hidden>
-            <VerdictLine label="Insufficient evidence" tone="neutral">UNVERIFIED &middot; self-reported &middot; scored by the stub, not the harness</VerdictLine>
+            <VerdictLine label="Insufficient evidence" tone="neutral">UNVERIFIED &middot; link-supplied result &middot; not authenticated</VerdictLine>
           </div>
         </TermPanel>
       </div>

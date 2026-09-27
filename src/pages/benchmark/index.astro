@@ -11,38 +11,6 @@ import { ASSAY_RUNS, ASSAY_SOURCE, FINDINGS, aggregate } from '../../lib/benchma
 // Neither number is written by hand anywhere.
 const ours = aggregate(ASSAY_RUNS);
 
-const isNot = [
-  {
-    k: 'What it does',
-    v:
-      'Scores a patch against four SQL injection shapes on a corpus we seeded, with the four checks the pilot runs: alert closed, hole shut, behaviour preserved, provenance clean.',
-  },
-  {
-    k: 'What it does not do',
-    v:
-      'It does not scan your code, and it does not verify a fix on anyone’s real codebase. Every result is about our corpus and nothing else.',
-  },
-] as const;
-
-const policy = [
-  {
-    k: 'Public corpus',
-    v: 'The modules are published now. The edition-1 attack set is published with the live scorer, by id, class and payload; until then the attacks appear by id and class only. A fixer can be tuned against a published set, which is a known property of any published benchmark.',
-  },
-  {
-    k: 'Rotation',
-    v: 'The corpus rotates each edition and the edition is stamped on every result. A score against a retired edition says so.',
-  },
-  {
-    k: 'Not the Index',
-    v: 'The Index runs on real projects with real historical vulnerabilities and its held-out attacks stay withheld. The benchmark is the opposite by design: seeded flaws, published attacks, self-service.',
-    t: 'deliberate',
-  },
-  {
-    k: 'Two sets, never merged',
-    v: 'Runs we conducted and self-reported submissions are counted and shown separately. A submission is scored on trust and marked UNVERIFIED wherever it appears.',
-  },
-] as const;
 ---
 
 <BaseLayout
@@ -53,9 +21,60 @@ const policy = [
   <PageHeader
     eyebrow="Benchmark · edition 1"
     title="Score a patch."
-    lede="Four SQL injection shapes on a corpus we seeded. Give the module to any fixer, paste the patch back, get the four checks."
-    subLede="The corpus and the attacks are public for this benchmark, which is the opposite of the Index. The page below says why."
+    lede="Can an AI patch stop SQL injection without breaking valid inputs? Start with one of four test modules."
+    subLede="Browse the modules and published pilot results now. Live patch scoring is not yet available."
   />
+
+  <Section id="findings">
+    <Eyebrow class="reveal">Pick a finding</Eyebrow>
+    <h2 class="h2 reveal" style="--reveal-delay:60ms">Choose a SQL injection case.</h2>
+
+    {/* Report rows, each row a link. The value keeps its three lines (shape,
+        body, counts), which the ReportRows string value cannot carry. */}
+    <div class="reveal rows is-text mt-10" style="--reveal-delay:120ms">
+      {
+        FINDINGS.map((f) => (
+          <a href={`/benchmark/${f.id}/`} class="row">
+            <span class="k">
+              <span class="block whitespace-nowrap">Finding {f.id}</span>
+              <span class="block normal-case tracking-normal">{f.file}</span>
+            </span>
+            <span class="v">
+              <span class="block font-bold text-fg">{f.shape}</span>
+              <span class="mt-1 block text-fg-2">{f.body}</span>
+              <span class="disc mt-2 block">
+                {f.attacks.length} attack cases · {f.benign.length} benign inputs
+              </span>
+            </span>
+            <span class="t">Open &rarr;</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <p class="reveal mt-10">
+      <a href="/benchmark/leaderboard/" class="link-inline">Results by tool and version</a>
+    </p>
+
+    {/* The product waitlist (verify-pr), kept distinct from the benchmark
+        waitlist on the finding and leaderboard pages: this is the verifier on
+        your own repositories, not the self-service corpus. */}
+    <div class="reveal mt-12 border-t border-line pt-6" style="max-width:70ch">
+      <p class="hd mb-4">The product</p>
+      <p class="body text-fg-2">
+        The benchmark uses seeded test modules. Verification for pull requests in your own
+        repositories is in development.{' '}
+        <button
+          type="button"
+          class="link-inline"
+          data-verify-cta
+          data-verify-group="verify-pr"
+          data-verify-title="Join the product waitlist"
+          data-verify-lede="A verifier that runs the four checks on every pull request, on your own repositories, is in development. Leave an address and we will tell you when it is ready."
+        >Join the product waitlist.</button>
+      </p>
+    </div>
+  </Section>
 
   <Section id="tally" rule={false}>
     <Eyebrow class="reveal">The running count</Eyebrow>
@@ -89,7 +108,7 @@ const policy = [
     <div class="reveal mt-10" style="--reveal-delay:180ms" data-submitted-tally>
       <ReportRows
         lead
-        label="Submitted · UNVERIFIED · self-reported, scored by the stub, stored in this browser only"
+        label="Submitted · UNVERIFIED · separate from Assay pilot results"
         rows={[
           { k: 'patches scored.', v: '0' },
           { k: 'shut the hole.', v: 'none' },
@@ -109,69 +128,6 @@ const policy = [
     </p>
   </Section>
 
-  <Section id="what" tint>
-    <Eyebrow class="reveal">What this is</Eyebrow>
-    <h2 class="h2 reveal" style="--reveal-delay:60ms">An instrument, not a scanner.</h2>
-
-    <div class="reveal mt-10" style="--reveal-delay:120ms">
-      <ReportRows label="Scope" rows={isNot} text />
-    </div>
-
-    <div class="reveal mt-10" style="--reveal-delay:60ms">
-      <ReportRows label="Policy · stated before anyone asks" rows={policy} text />
-    </div>
-  </Section>
-
-  <Section id="findings">
-    <Eyebrow class="reveal">Pick a finding</Eyebrow>
-    <h2 class="h2 reveal" style="--reveal-delay:60ms">Four shapes.</h2>
-
-    {/* Report rows, each row a link. The value keeps its three lines (shape,
-        body, counts), which the ReportRows string value cannot carry. */}
-    <div class="reveal rows is-text mt-10" style="--reveal-delay:120ms">
-      {
-        FINDINGS.map((f) => (
-          <a href={`/benchmark/${f.id}/`} class="row">
-            <span class="k">
-              <span class="block whitespace-nowrap">Finding {f.id}</span>
-              <span class="block normal-case tracking-normal">{f.file}</span>
-            </span>
-            <span class="v">
-              <span class="block font-bold text-fg">{f.shape}</span>
-              <span class="mt-1 block text-fg-2">{f.body}</span>
-              <span class="disc mt-2 block">
-                {f.attacks.length} held-out attacks · {f.benign.length} benign inputs
-              </span>
-            </span>
-            <span class="t">Open &rarr;</span>
-          </a>
-        ))
-      }
-    </div>
-
-    <p class="reveal mt-10">
-      <a href="/benchmark/leaderboard/" class="link-inline">Results by tool and version</a>
-    </p>
-
-    {/* The product waitlist (verify-pr), kept distinct from the benchmark
-        waitlist on the finding and leaderboard pages: this is the verifier on
-        your own repositories, not the self-service corpus. */}
-    <div class="reveal mt-12 border-t border-line pt-6" style="max-width:70ch">
-      <p class="hd mb-4">The product</p>
-      <p class="body text-fg-2">
-        This benchmark is a fixed corpus you score against by hand. The verifier it comes from
-        runs the same four checks on every pull request, on your own repositories.{' '}
-        <button
-          type="button"
-          class="link-inline"
-          data-verify-cta
-          data-verify-group="verify-pr"
-          data-verify-title="Join the product waitlist"
-          data-verify-lede="A verifier that runs the four checks on every pull request, on your own repositories, is in development. Leave an address and we will tell you when it is ready."
-        >Join the product waitlist.</button>
-      </p>
-    </div>
-  </Section>
 </BaseLayout>
 
 <script>
