@@ -1,9 +1,7 @@
 ---
 import '../styles/global.css';
+import '../styles/landing.css';
 import LandingChrome from '../components/LandingChrome.astro';
-import Nav from '../components/Nav.astro';
-import StatusBar from '../components/system/StatusBar.astro';
-import Footer from '../components/Footer.astro';
 import EmailModal from '../components/EmailModal.astro';
 import { site } from '../lib/site';
 
@@ -23,7 +21,7 @@ const {
   description,
   path = Astro.url.pathname,
   ogImage = '/og.png',
-  noindex = false,
+  noindex = Astro.url.pathname.includes('-v1'),
   landing = false,
 } = Astro.props;
 
@@ -58,7 +56,7 @@ const jsonLd = [
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'USD',
-      description: 'Free forever on public repositories.',
+      description: 'Public benchmark challenges and evidence.',
     },
   },
 ];
@@ -155,13 +153,13 @@ const jsonLd = [
     <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
 
-  <body class:list={{ landing }}>
+  <body class:list={['landing', { 'interior': !landing }]} >
     <a href="#main" class="skip-link">Skip to content</a>
-    {landing ? <LandingChrome /> : <><StatusBar /><Nav /></>}
+    <LandingChrome />
     <main id="main">
       <slot />
     </main>
-    {landing ? <LandingChrome footer /> : <Footer />}
+    <LandingChrome footer />
     <EmailModal />
 
     <script>

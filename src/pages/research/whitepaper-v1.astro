@@ -2,9 +2,9 @@
 // The whitepaper. Copy is verbatim from assay-whitepaper-copy.md, minus the
 // header block. Three protected lines run through it, so
 // scripts/check-protected-copy.mjs covers this page.
-import BaseLayout from '../layouts/BaseLayout.astro';
-import TermPanel from '../components/system/TermPanel.astro';
-import CheckRow from '../components/system/CheckRow.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TermPanel from '../../components/system/TermPanel.astro';
+import CheckRow from '../../components/system/CheckRow.astro';
 
 const description =
   'Independent verification for AI authored code. The verification gap, the four checks, Pilot 001, and what the method caught in itself.';
@@ -13,7 +13,7 @@ const EVIDENCE_REPO = 'https://github.com/bakarrovenin/assay-pilot-001-evidence'
 const PILOT_POST = '/research/pilot-001-patches-against-unseen-attacks';
 ---
 
-<BaseLayout title="Whitepaper" description={description} path="/whitepaper">
+<BaseLayout noindex title="Archived whitepaper" description={description} path="/research/whitepaper-v1">
   <article>
     <header class="section-hero rule-b">
       <div class="shell">
@@ -25,6 +25,7 @@ const PILOT_POST = '/research/pilot-001-patches-against-unseen-attacks';
     <div class="section">
       <div class="shell">
         <div class="longform reveal">
+        <p><strong>Archived reference, retained 27 September 2026.</strong> This paper describes the early constructed three-patch demonstration, not the later blind provider study. <a href="/methodology">Read the current method</a> or <a href="/evidence">inspect the dated reports</a>.</p>
         <h2>Summary</h2>
         <p>
           AI now writes security patches, and the patch is validated by the tool that

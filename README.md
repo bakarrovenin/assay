@@ -35,8 +35,11 @@ git identity is set accordingly.
 
 ## Homepage and email capture
 
-The homepage uses its own dark styling in `src/styles/landing.css`; interior
-pages retain the existing design. The hero animation is shared unchanged.
+Shared navigation now leads to Benchmark, How it works and Evidence. The dark
+visual direction lives in `src/styles/landing.css`. The hero animation retains
+its timeline, with an explicit Play demo option for reduced-motion visitors.
+The content migration and claim boundaries are recorded in `docs/content-map.md`.
+Historical reports keep their URLs; consolidated top-level URLs redirect.
 Provider results are computed from the committed pilot records, not handwritten
 marketing figures. Tested tools are not presented as live integrations.
 
@@ -54,7 +57,7 @@ scoring as coming soon and links to the existing benchmark/waitlist.
 
 Security reports use GitHub private vulnerability reporting via
 `SECURITY_ADVISORY_URL`; enable it under Settings > Code security.
-Interior-page contact controls will be revisited with the interior-page redesign.
+The shared navigation uses the Loops contact popup on every page.
 
 ## Structure
 

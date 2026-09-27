@@ -1,3 +1,4 @@
+import { BRAND_PATH } from './brand';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -126,9 +127,8 @@ export async function renderOgImage(): Promise<Buffer> {
   <rect x="0" y="${H - 96}" width="${W}" height="1" fill="${RULE}"/>
 
   <!-- Assay mark -->
-  <g transform="translate(${PAD} 56) scale(1.5)">
-    <path d="M2.4 2.4h13.2l6 6v13.2H2.4V2.4Z" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round"/>
-    <path d="M7.4 12.4l3.2 3.4 6.2-6.6" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(${PAD} 56) scale(1.1)">
+    <path d="${BRAND_PATH}" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="square"/>
   </g>
   ${text(wordmarkFont, 'ASSAY', PAD + 52, 84, 21, INK, 3.4)}
 

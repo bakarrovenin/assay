@@ -209,7 +209,6 @@ const caps = [
   .hrun .replay { opacity: 0; pointer-events: none; transition: opacity 300ms ease-out; }
   .hrun.is-done .replay { opacity: 1; pointer-events: auto; }
   /* The still: nothing that only means something in motion. */
-  .hrun.is-static .replay,
   .hrun.is-static .hrun-cap,
   .hrun.is-static .hrun-stage .cursor { display: none; }
   .hrun.is-static.is-verdict .chk[data-resolves="pass"] { opacity: 1; }
@@ -476,15 +475,20 @@ const caps = [
   if (reduced) {
     root.classList.add('is-static');
     finish();
-    return;
+    replay.textContent = 'Play demo';
+    replay.addEventListener('click', function () {
+      root.classList.remove('is-static');
+      replay.textContent = 'Replay ↻';
+      again();
+    });
   }
 
   // From load. The beats hold themselves until their rows are on screen.
-  play();
+  if (!reduced) play();
 
   function again() { if (!playing) play(); }
-  replay.addEventListener('click', again);
-  stage.addEventListener('click', function () { if (root.classList.contains('is-done')) again(); });
+  if (!reduced) replay.addEventListener('click', again);
+  stage.addEventListener('click', function () { if (!root.classList.contains('is-static') && root.classList.contains('is-done')) again(); });
 
   // Arrow keys replay a finished run while it is on screen and nothing else
   // wants the keyboard.
