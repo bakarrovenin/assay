@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactButton from '../components/ContactButton.astro';
+import { ASSAY_SOURCE } from '../lib/benchmark';
+import { SECURITY_ADVISORY_URL } from '../lib/site';
+const repo = ASSAY_SOURCE.repo;
+---
+<BaseLayout title="Evidence" description="Assay’s dated experiments, source artifacts, limitations and correction record." path="/evidence">
+  <article class="reading-page shell evidence-page">
+    <header><p class="eyebrow">Evidence</p><h1>Check our work.</h1><p class="intro">The results matter only if you can inspect how we reached them. Start with the blind pilot, then follow each verdict back to its artifacts.</p></header>
+    <section><p class="eyebrow">Start here</p><a class="featured-report" href="/research/pilot-001-blind-run"><span>Pilot 001 · blind run · 14 September 2026</span><h2>What happened when the fixers<br />couldn’t see the tests.</h2><p>Four SQL injection shapes. Results from ChatGPT, Claude Code and GitHub Copilot Autofix, with the tool versions, exclusions and limitations.</p><strong>Read the report ↗</strong></a></section>
+    <section id="artifacts"><h2>The source behind the numbers</h2><div class="evidence-links"><a href={`${repo}/tree/${ASSAY_SOURCE.commit}`}>Pilot source snapshot <span>Commit {ASSAY_SOURCE.commit} ↗</span></a><a href={`${repo}/tree/${ASSAY_SOURCE.commit}/results`}>Individual results <span>Verdicts and provenance ↗</span></a><a href={`${repo}/tree/main/harness`}>Scoring harness <span>Execution and checks ↗</span></a><a href={`${repo}/tree/main/benchmark/edition-01`}>Public benchmark corpus <span>Published challenges and cases ↗</span></a></div><p>The published benchmark material is separate from the blind pilot’s withheld cases. Public results and code do not make those experiments interchangeable.</p></section>
+    <section id="reports"><h2>Reports and worked examples</h2><div class="evidence-links"><a href="/research/pilot-001-patches-against-unseen-attacks">The initial three-patch demonstration <span>Constructed examples, not provider rankings ↗</span></a><a href="/research/how-the-alert-goes-green">How an alert goes green while the bug stays open <span>Interactive worked example ↗</span></a><a href="/research/the-authority-we-handed-over">The authority we handed over <span>Background essay ↗</span></a></div><p>The dated reports preserve their original URLs. Earlier findings remain available alongside the later corrections.</p></section>
+    <section id="about"><h2>About Assay</h2><p>Assay independently checks AI-written security patches. We do not generate the fixes we evaluate. Our current work focuses on SQL injection; automated verification on your own pull requests is still in development.</p><p>We publish the method, its limitations and failures discovered in our own checks. Vendors can respond to their results; their responses are published unedited.</p><div class="reading-actions"><ContactButton /><a class="text-link" href={SECURITY_ADVISORY_URL}>Report a bypass ↗</a></div></section>
+    <details class="reference-links"><summary>Earlier reference documents</summary><p><a href="/research/methodology-v1">Detailed method v1</a> · <a href="/research/whitepaper-v1">Original whitepaper</a>. These preserve the technical history and early proposals. For current scope, see <a href="/methodology">How it works</a>.</p></details>
+  </article>
+</BaseLayout>

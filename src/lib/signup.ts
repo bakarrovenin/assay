@@ -93,7 +93,7 @@ export async function submitSignup(
 
     const message =
       error instanceof Error && error.message.includes('Failed to fetch')
-        ? 'Too many signups, please try again shortly.'
+        ? 'Could not connect. Check your connection and try again.'
         : 'Something went wrong, please try again.';
 
     return { ok: false, message };

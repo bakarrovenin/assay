@@ -10,12 +10,16 @@ export default defineConfig({
   // people type, so it redirects rather than becoming a second copy.
   redirects: {
     '/docs': '/methodology',
+    '/whitepaper': '/methodology',
+    '/about': '/evidence#about',
+    '/research': '/evidence',
+    '/the-index': '/benchmark/leaderboard',
     // Product became the benchmark: the free instrument lives at /benchmark and
     // the explanatory material also lives on at /methodology.
     '/product': '/benchmark',
   },
   // The component sheet is a working document, not a page.
-  integrations: [sitemap({ filter: (page) => !page.includes('/design-system') })],
+  integrations: [sitemap({ filter: (page) => !page.includes('/design-system') && !page.includes('-v1') })],
   vite: {
     plugins: [tailwindcss()],
   },

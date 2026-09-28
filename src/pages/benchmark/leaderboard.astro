@@ -36,8 +36,8 @@ const toolName = (k: string) => ASSAY_RUNS.find((r) => r.toolKey === k)!.tool;
   <PageHeader
     eyebrow="Benchmark · edition 1 · results"
     title="By tool and version."
-    lede="Alert closed against verified. The cell count sits beside every rate, so three cells never read like thirty."
-    subLede="Two sets, never merged. Runs we conducted are the first sheet. Everything self-reported is the second, and is UNVERIFIED."
+    lede="Compare patches that closed the scanner alert with patches that passed all four checks. Every rate includes its sample size."
+    subLede="Assay pilot results and unverified submissions are shown separately."
   />
 
   <Section id="assay" rule={false}>
@@ -107,8 +107,8 @@ const toolName = (k: string) => ASSAY_RUNS.find((r) => r.toolKey === k)!.tool;
     <h2 class="h2 reveal" style="--reveal-delay:60ms">Self-reported. Unverified.</h2>
 
     <p class="reveal body mt-8 text-fg-2" style="--reveal-delay:120ms;max-width:66ch">
-      Scored by the stub in the submitter's browser, on trust, and in this pass stored in
-      this browser only. These never merge with the sheet above.
+      Submissions are loaded from the scoring service when available, with locally saved
+      results as a fallback. They are kept separate from the Assay pilot results above.
     </p>
 
     <div class="reveal mt-10" style="--reveal-delay:180ms">
@@ -129,7 +129,7 @@ const toolName = (k: string) => ASSAY_RUNS.find((r) => r.toolKey === k)!.tool;
     <div class="reveal mt-12 border-t border-line pt-6" style="max-width:70ch">
       <p class="hd mb-4">Next edition</p>
       <p class="body text-fg-2">
-        The corpus rotates each edition so a published benchmark cannot be tuned against.{' '}
+        Future editions will use different test cases. A published benchmark can still be tuned against; rotation does not eliminate that limitation.{' '}
         <button
           type="button"
           class="link-inline"

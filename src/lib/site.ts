@@ -4,48 +4,21 @@ export const site = {
   url: 'https://assay.website',
   tagline: 'Independent verification for AI-authored code',
   description:
-    'Every AI security tool writes its own patches and certifies its own work. Assay is the third party that checks. One verdict on every AI-authored change, before it merges.',
+    'Independent checks for AI-written SQL injection fixes. Test patches against attacks and normal inputs, and inspect the evidence.',
 } as const;
 
 /** Where security bypass reports go. GitHub private vulnerability reporting. */
 export const SECURITY_ADVISORY_URL =
   'https://github.com/bakarrovenin/assay/security/advisories/new';
 
-// Four entries. Research is the Index's working and is reached from
-// /the-index and the footer; the whitepaper and the methodology sit in the
-// footer. /research and /whitepaper keep their URLs.
+// Three canonical destinations. Historical report URLs remain accessible.
 export const nav = [
   { label: 'Benchmark', href: '/benchmark' },
-  { label: 'The Index', href: '/the-index' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'About', href: '/about' },
+  { label: 'How it works', href: '/methodology' },
+  { label: 'Evidence', href: '/evidence' },
 ] as const;
 
-export const footerColumns = [
-  {
-    title: 'Product',
-    links: [
-      { label: 'Benchmark', href: '/benchmark' },
-      { label: 'Docs', href: '/methodology' },
-      { label: 'Pricing', href: '/pricing' },
-      { label: 'The Index', href: '/the-index' },
-    ],
-  },
-  {
-    title: 'Research',
-    links: [
-      { label: 'Research', href: '/research' },
-      { label: 'Whitepaper', href: '/whitepaper' },
-      { label: 'Methodology', href: '/methodology' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { label: 'About', href: '/about' },
-    ],
-  },
-] as const;
+export const footerColumns = [{ title: 'Assay', links: [...nav] }] as const;
 
 export const METHOD_VERSION = '1.0';
 
