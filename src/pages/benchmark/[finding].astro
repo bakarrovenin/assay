@@ -259,9 +259,9 @@ const steps = [
         submitBtn.textContent = 'Scoring in a container, this takes a moment';
       }
       try {
-        const { result } = await submitScore({ finding: finding.id, patch, tool, version });
+        const { id, result } = await submitScore({ finding: finding.id, patch, tool, version });
         saveSubmitted(result);
-        window.location.href = resultUrl(result, window.location.origin);
+        window.location.href = resultUrl(result, window.location.origin, id);
       } catch (err) {
         fail(err instanceof Error ? err.message : 'scoring failed, try again shortly');
         if (submitBtn) {

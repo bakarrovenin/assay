@@ -131,6 +131,22 @@ export async function submitScore(input: {
   return body as { id: string; result: Result };
 }
 
+/** Save voluntary feedback against a result. Patch contents are never sent here. */
+export async function submitFeedback(input: {
+  result_id: string;
+  rating: 'useful' | 'not_useful';
+  message: string;
+}): Promise<void> {
+  if (!BENCHMARK_API) throw new Error('feedback service not configured');
+  const res = await fetch(`${BENCHMARK_API}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `feedback failed (${res.status})`);
+}
+
 /** The server-side leaderboard. Falls back to this browser's runs if offline. */
 export async function fetchLeaderboard(): Promise<{
   total: number;
@@ -281,8 +297,8 @@ export function decodeResult(fragment: string): Result | null {
   }
 }
 
-export const resultUrl = (r: Result, origin: string) =>
-  `${origin}/benchmark/result/#r=${encodeResult(r)}`;
+export const resultUrl = (r: Result, origin: string, submissionId?: string) =>
+  `${origin}/benchmark/result/${submissionId ? `?submission=${encodeURIComponent(submissionId)}` : ''}#r=${encodeResult(r)}`;
 
 // ---- browser storage, this browser only -------------------------------------
 

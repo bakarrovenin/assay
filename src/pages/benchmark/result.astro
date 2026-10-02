@@ -108,6 +108,24 @@ const CHECKS = [
         </p>
       </div>
 
+      <section class="mt-11 border-t border-line pt-6" style="max-width:80ch" data-feedback hidden>
+        <h2 class="hd mb-4">Was this score useful?</h2>
+        <form data-feedback-form>
+          <fieldset class="flex flex-wrap gap-x-6 gap-y-3">
+            <legend class="sr-only">Rate this score</legend>
+            <label class="inline-flex items-center gap-2"><input type="radio" name="rating" value="useful" required /> Yes</label>
+            <label class="inline-flex items-center gap-2"><input type="radio" name="rating" value="not_useful" required /> Not yet</label>
+          </fieldset>
+          <label class="block mt-5" for="score-feedback-message">
+            <span class="note block mb-2">Anything we should know? (optional)</span>
+            <textarea id="score-feedback-message" name="message" maxlength="1000" rows="3" class="input w-full" placeholder="Tell us what worked or what was missing."></textarea>
+          </label>
+          <button type="submit" class="btn btn-secondary mt-4">Send feedback</button>
+          <p class="note mt-3" style="max-width:70ch">Your rating and comment are saved with this result. Patch text is not saved. Please do not include secrets or personal information.</p>
+          <p class="note mt-3" data-feedback-status role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
       <p class="mt-10 flex flex-wrap gap-x-6 gap-y-2">
         <a href="/benchmark/" class="link-inline">Score another</a>
         <a href="/benchmark/leaderboard/" class="link-inline">Results by tool</a>
@@ -117,7 +135,7 @@ const CHECKS = [
 </BaseLayout>
 
 <script>
-  import { decodeResult, findingById, track } from '../../lib/benchmark';
+  import { BENCHMARK_API, decodeResult, findingById, submitFeedback, track } from '../../lib/benchmark';
 
   const r = decodeResult(window.location.hash);
   const empty = document.querySelector<HTMLElement>('[data-empty]')!;
@@ -131,6 +149,30 @@ const CHECKS = [
     track('benchmark_verdict', { finding_id: r.finding, tool_name: r.tool, verdict: r.verdict });
     const f = findingById(r.finding);
     const c = r.checks;
+    const submissionId = new URLSearchParams(window.location.search).get('submission');
+    const feedbackSection = document.querySelector<HTMLElement>('[data-feedback]');
+    const feedbackForm = document.querySelector<HTMLFormElement>('[data-feedback-form]');
+    const feedbackStatus = document.querySelector<HTMLElement>('[data-feedback-status]');
+    if (submissionId && BENCHMARK_API && feedbackSection && feedbackForm && feedbackStatus) {
+      feedbackSection.hidden = false;
+      feedbackForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submitButton = feedbackForm.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const rating = new FormData(feedbackForm).get('rating');
+        const message = String(new FormData(feedbackForm).get('message') || '').trim();
+        if (rating !== 'useful' && rating !== 'not_useful') return;
+        if (submitButton) submitButton.disabled = true;
+        feedbackStatus.textContent = 'Sending…';
+        try {
+          await submitFeedback({ result_id: submissionId, rating, message });
+          feedbackForm.hidden = true;
+          feedbackStatus.textContent = 'Thanks. Your feedback is saved with this score.';
+        } catch (error) {
+          feedbackStatus.textContent = error instanceof Error ? error.message : 'Could not send feedback. Try again.';
+          if (submitButton) submitButton.disabled = false;
+        }
+      });
+    }
     const pf = (ok: boolean) => (ok ? 'pass' : 'fail');
 
     const headline = document.querySelector<HTMLElement>('[data-headline]')!;
