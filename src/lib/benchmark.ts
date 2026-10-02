@@ -6,8 +6,9 @@
  *   assay      runs we conducted, read from src/data/benchmark/assay-runs.json,
  *              which is generated from the pilot repository's committed
  *              artifacts and carries their paths
- *   submitted  self-reported, scored in the browser by the stub, stored in
- *              this browser only, and marked UNVERIFIED everywhere
+ *   submitted  visitor patches scored by the live service when configured;
+ *              score metadata is stored on the server, while this browser
+ *              keeps a convenience copy for its local submitted tally
  *
  * Every rate on the site is computed by aggregate() from a list of records,
  * so any number shown can be recounted from the stored results. Nothing is
@@ -40,6 +41,8 @@ export type Result = {
   failureClass: string | null;
   /** Which scorer produced it. The stub names itself. */
   scorer: 'pilot-001-harness' | 'stub';
+  /** A scorer diagnostic shown when it could not produce check evidence. */
+  reason?: string;
   /** For assay runs, the evidence file in the pilot repository. */
   evidence?: string;
   toolKey?: string;
@@ -289,7 +292,8 @@ export function decodeResult(fragment: string): Result | null {
   try {
     const r = JSON.parse(unb64url(m[1])) as Result;
     if (r.v !== 1 || !r.finding || !r.verdict) return null;
-    // Anything arriving by URL is self-reported by definition.
+    // Links carry the displayed result; result pages can compare it with the
+    // stored server record when they include a submission ID.
     r.set = 'submitted';
     return r;
   } catch {
@@ -299,6 +303,30 @@ export function decodeResult(fragment: string): Result | null {
 
 export const resultUrl = (r: Result, origin: string, submissionId?: string) =>
   `${origin}/benchmark/result/${submissionId ? `?submission=${encodeURIComponent(submissionId)}` : ''}#r=${encodeResult(r)}`;
+
+export type StoredResult = {
+  id: string;
+  finding: FindingId;
+  tool: string;
+  version: string;
+  date: string;
+  checks: Checks | null;
+  verdict: Verdict;
+  failureClass: string | null;
+  scorer: string;
+};
+
+/** Look up the record created by the scorer for a submitted result link. */
+export async function fetchStoredResult(id: string): Promise<StoredResult | null> {
+  if (!BENCHMARK_API || !/^[a-f0-9]{32}$/i.test(id)) return null;
+  try {
+    const res = await fetch(`${BENCHMARK_API}/result/${encodeURIComponent(id)}`);
+    if (!res.ok) return null;
+    return (await res.json()) as StoredResult;
+  } catch {
+    return null;
+  }
+}
 
 // ---- browser storage, this browser only -------------------------------------
 

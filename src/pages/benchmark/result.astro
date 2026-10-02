@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PageHeader from '../../components/PageHeader.astro';
 import Section from '../../components/Section.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import TermPanel from '../../components/system/TermPanel.astro';
@@ -40,35 +39,33 @@ const CHECKS = [
 
 <BaseLayout
   title="Result · Benchmark"
-  description="A benchmark result: the tool, the version, the four checks and the verdict, carried in the link."
+  description="A benchmark score with its verdict, check results and server record status."
   path="/benchmark/result"
 >
-  <PageHeader
-    eyebrow="Benchmark · edition 1 · result"
-    title="Unverified."
-    lede="This result is carried in the link. It has not been checked against a server record."
-    subLede="Runs we conducted are a separate set and never appear on this page."
-  />
-
-  <Section id="verdict" rule={false}>
-    <div data-empty class="reveal" hidden>
+  <div data-empty hidden>
+    <Section density="hero" rule>
       <Eyebrow>No result in this link</Eyebrow>
-      <p class="body mt-6" style="max-width:62ch">
+      <h1 class="h1 mt-6">No benchmark result</h1>
+      <p class="lede mt-8" style="max-width:62ch">
         The link carries no result, or one this page cannot read.
       </p>
-      <p class="mt-6">
-        <a href="/benchmark/" class="link-inline">Score a patch</a>
-      </p>
-    </div>
+      <p class="mt-6"><a href="/benchmark/" class="link-inline">Score a patch</a></p>
+    </Section>
+  </div>
 
-    <div data-result hidden>
-      <Eyebrow class="reveal">Verdict</Eyebrow>
-      <h2 class="h2 reveal" style="--reveal-delay:60ms" data-headline>&nbsp;</h2>
+  <div data-result hidden>
+    <Section density="hero" rule>
+      <Eyebrow>Benchmark · edition 1 · result</Eyebrow>
+      <h1 class="h1 mt-6" data-headline>Benchmark result</h1>
+      <p class="lede mt-8" style="max-width:62ch" data-summary>Four checks against your submitted patch.</p>
+      <p class="note mt-5" data-record-status role="status" aria-live="polite">Checking the saved server record…</p>
+    </Section>
 
+  <Section id="verdict" rule={false} density="tight">
       {/* One panel for the three verdict shapes. The rows fill from the
           decoded result; the verdict line that shows is picked by data-vb. */}
-      <div class="mt-10" data-panel>
-        <TermPanel path="assay · result · UNVERIFIED">
+      <div data-panel>
+        <TermPanel path="assay · benchmark · result">
           {CHECKS.map(([k, name]) => <CheckRow id={k} name={name} state="pending" data-check={k} />)}
 
           <div class="ln out mt-4" data-rows>
@@ -77,22 +74,25 @@ const CHECKS = [
             ))}
           </div>
           <div class="ln out mt-4" data-rows-insufficient hidden>
-            <div class="ln out"><span class="cmt">Reason</span> <span>the patch did not change the module, so nothing about the vulnerability was tested</span></div>
+            <div class="ln out"><span class="cmt">Reason</span> <span data-reason></span></div>
           </div>
 
           <div data-vb="verified" hidden>
-            <VerdictLine label="Verified" tone="pass">UNVERIFIED &middot; link-supplied result &middot; not authenticated</VerdictLine>
+            <VerdictLine label="Verified" tone="pass">all four recorded checks passed</VerdictLine>
           </div>
           <div data-vb="failed" hidden>
-            <VerdictLine label="Not verified" tone="fail">UNVERIFIED &middot; link-supplied result &middot; not authenticated</VerdictLine>
+            <VerdictLine label="Not verified" tone="fail">one or more recorded checks failed</VerdictLine>
           </div>
           <div data-vb="insufficient" hidden>
-            <VerdictLine label="Insufficient evidence" tone="neutral">UNVERIFIED &middot; link-supplied result &middot; not authenticated</VerdictLine>
+            <VerdictLine label="Insufficient evidence" tone="neutral">the scorer could not complete all checks</VerdictLine>
+          </div>
+          <div data-vb="no-alert" hidden>
+            <VerdictLine label="No alert" tone="neutral">there was no finding to verify</VerdictLine>
           </div>
         </TermPanel>
       </div>
 
-      <div class="mt-10" data-detail>
+      <div class="mt-8" data-detail>
         <ReportRows label="The result · carried in this link" rows={detail} text />
       </div>
 
@@ -103,8 +103,8 @@ const CHECKS = [
           <button type="button" class="btn btn-secondary shrink-0" data-copy-url>Copy link</button>
         </div>
         <p class="note mt-4" style="max-width:70ch">
-          The link is the result: tool, version, finding, four checks and verdict, encoded
-          whole. Anyone opening it sees exactly this page, marked UNVERIFIED.
+          When a submission ID is present, this page checks the score and checks against
+          the saved server record. An incomplete-run diagnostic may only be in the link.
         </p>
       </div>
 
@@ -132,10 +132,11 @@ const CHECKS = [
       </p>
     </div>
   </Section>
+  </div>
 </BaseLayout>
 
 <script>
-  import { BENCHMARK_API, decodeResult, findingById, submitFeedback, track } from '../../lib/benchmark';
+  import { BENCHMARK_API, decodeResult, fetchStoredResult, findingById, submitFeedback, track } from '../../lib/benchmark';
 
   const r = decodeResult(window.location.hash);
   const empty = document.querySelector<HTMLElement>('[data-empty]')!;
@@ -150,6 +151,7 @@ const CHECKS = [
     const f = findingById(r.finding);
     const c = r.checks;
     const submissionId = new URLSearchParams(window.location.search).get('submission');
+    const recordStatus = document.querySelector<HTMLElement>('[data-record-status]')!;
     const feedbackSection = document.querySelector<HTMLElement>('[data-feedback]');
     const feedbackForm = document.querySelector<HTMLFormElement>('[data-feedback-form]');
     const feedbackStatus = document.querySelector<HTMLElement>('[data-feedback-status]');
@@ -176,19 +178,50 @@ const CHECKS = [
     const pf = (ok: boolean) => (ok ? 'pass' : 'fail');
 
     const headline = document.querySelector<HTMLElement>('[data-headline]')!;
-    headline.textContent =
-      r.verdict === 'VERIFIED'
-        ? 'The four checks hold.'
-        : r.verdict === 'NOT VERIFIED'
-          ? 'The alert is one thing. The hole is another.'
-          : 'Nothing was tested.';
+    const summary = document.querySelector<HTMLElement>('[data-summary]')!;
+    if (r.verdict === 'VERIFIED') {
+      headline.textContent = 'All four checks passed.';
+      summary.textContent = 'The patch closed the alert, blocked the attacks, preserved valid behaviour, and used no suppression.';
+    } else if (r.verdict === 'NOT VERIFIED') {
+      headline.textContent = 'The patch did not pass.';
+      summary.textContent = 'At least one benchmark check failed. The check results are below.';
+    } else if (r.verdict === 'NO ALERT') {
+      headline.textContent = 'No alert to verify.';
+      summary.textContent = 'The scanner did not report the finding, so the patch could not be tested against it.';
+    } else {
+      headline.textContent = 'Insufficient evidence.';
+      summary.textContent = 'The scorer could not complete the checks. See the diagnostic below.';
+    }
 
-    const which = r.verdict === 'VERIFIED' ? 'verified' : r.verdict === 'NOT VERIFIED' ? 'failed' : 'insufficient';
+    if (submissionId && BENCHMARK_API) {
+      const canonical = (value: unknown): string => JSON.stringify(value, (_key, item) =>
+        item && typeof item === 'object' && !Array.isArray(item)
+          ? Object.fromEntries(Object.entries(item).sort(([left], [right]) => left.localeCompare(right)))
+          : item,
+      );
+      void fetchStoredResult(submissionId).then((stored) => {
+        if (!stored) {
+          recordStatus.textContent = 'Could not check the server record. The result shown is carried in the link.';
+          return;
+        }
+        const matches = stored && stored.finding === r.finding && stored.tool === r.tool &&
+          stored.version === r.version && stored.date === r.date && stored.verdict === r.verdict &&
+          stored.failureClass === r.failureClass && canonical(stored.checks) === canonical(r.checks);
+        recordStatus.textContent = matches
+          ? `Saved result · server record ${submissionId}${r.reason ? ' · diagnostic is link-carried' : ''}`
+          : 'This link could not be matched to a saved server record.';
+      });
+    } else {
+      recordStatus.textContent = 'Link-only result · no saved server record was checked.';
+    }
+
+    const which = r.verdict === 'VERIFIED' ? 'verified' : r.verdict === 'NOT VERIFIED' ? 'failed' : r.verdict === 'NO ALERT' ? 'no-alert' : 'insufficient';
     const vb = document.querySelector<HTMLElement>(`[data-vb="${which}"]`)!;
     vb.hidden = false;
     if (which === 'insufficient') {
       document.querySelector<HTMLElement>('[data-rows]')!.hidden = true;
       document.querySelector<HTMLElement>('[data-rows-insufficient]')!.hidden = false;
+      document.querySelector<HTMLElement>('[data-reason]')!.textContent = r.reason || 'The scorer did not provide a diagnostic.';
     }
 
     if (c) {
