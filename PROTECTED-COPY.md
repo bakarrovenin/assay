@@ -9,7 +9,7 @@ or a commitment we have made in public. Rewriting one quietly changes what
 Assay claims.
 
 1. Your AI fixed it. We check whether it actually did.
-2. A patch can pass every test and leave the hole wide open.
+2. A fix can close the hole and quietly break a real user.
 3. It fixed the test, not the bug.
 4. Every vendor grades its own homework.
 5. A test is a sample, not a specification.
