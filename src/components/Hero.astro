@@ -172,33 +172,34 @@ const caps = [
   .hrun-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "eye" "head" "lede" "cap" "stage" "replay" "rest";
+    grid-template-areas: "eye" "head" "lede" "cap" "replay" "stage" "rest";
   }
   .hrun-eye    { grid-area: eye; }
   .hrun-head   { grid-area: head; }
   .hrun-lede   { grid-area: lede; margin-top: 28px; }
   .hrun-cap    { grid-area: cap; margin-top: 28px; min-width: 0; }
   .hrun-stage  { grid-area: stage; margin-top: 12px; min-width: 0; }
+  /* Replay sits on the run itself: just above its top right corner. */
   .hrun .replay { grid-area: replay; justify-self: end; margin-top: 12px; }
   .hrun-rest   { grid-area: rest; margin-top: 28px; }
-  .hrun.is-static .hrun-stage { margin-top: 28px; }
+  /* The still has no caption, so Replay takes the caption's gap. */
+  .hrun.is-static .replay { margin-top: 28px; }
 
   /* Wide: the eyebrow on its own row, then the headline in the left
-     column on two lines, with the copy, Replay and the caption under it.
-     Replay sits above the caption so it stays in the first screen in
-     motion as well as in the still.
+     column on two lines, with the copy and the caption under it. Replay
+     shares the eyebrow's row on the right, sitting on the top right
+     corner of the run, in the first screen in motion and in the still.
      The run sits on the right, its top level with the top of the
      headline. */
   @media (min-width: 1024px) {
     .hrun-grid {
       grid-template-columns: minmax(0, 1fr) minmax(0, 580px);
-      grid-template-rows: auto auto auto auto auto auto 1fr;
+      grid-template-rows: auto auto auto auto auto 1fr;
       grid-template-areas:
-        "eye    ."
+        "eye    replay"
         "head   stage"
         "lede   stage"
         "rest   stage"
-        "replay stage"
         "cap    stage"
         ".      stage";
       column-gap: clamp(40px, 4vw, 56px);
@@ -211,7 +212,8 @@ const caps = [
     .hrun-stage, .hrun.is-static .hrun-stage { margin-top: 22px; align-self: start; }
     .hrun-rest  { margin-top: 16px; }
     .hrun-cap   { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
-    .hrun .replay { justify-self: start; margin-top: 16px; }
+    .hrun-eye, .hrun .replay { align-self: end; }
+    .hrun .replay, .hrun.is-static .replay { justify-self: end; margin-top: 0; }
   }
 
   /* The control is on screen from the first frame, in every state, so the
