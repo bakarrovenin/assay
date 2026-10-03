@@ -165,29 +165,31 @@
   color-scheme: dark;
 }
 
-/* Light theme, opt-in through the toggle. */
+/* Light theme, opt-in through the toggle. A cool grey-blue paper rather
+   than white, so the page reads softer and the panels lift off it. Every
+   text grey clears 4.5:1 on all three surfaces. */
 :root[data-theme="light"] {
-  --bg:        #F3F6F5;
-  --bg-2:      #EAEFED;
-  --panel:     #FFFFFF;
+  --bg:        #EDF1F6;
+  --bg-2:      #E3E8EF;
+  --panel:     #F7F9FC;
 
-  --line:      #D8DFDC;
-  --line-2:    #C3CCC8;
+  --line:      #D3DAE3;
+  --line-2:    #BFC9D5;
 
-  --fg:        #0F1513;
-  --fg-2:      #4B5854;
-  --fg-3:      #5F6C68;
+  --fg:        #1A2331;
+  --fg-2:      #465264;
+  --fg-3:      #56627A;
 
-  --acc:       #0A6BB5;
-  --acc-dim:   rgba(10, 107, 181, 0.10);
+  --acc:       #0F65AD;
+  --acc-dim:   rgba(15, 101, 173, 0.10);
   --acc-ink:   #FFFFFF;
-  --fail:      #C8372A;
-  --fail-dim:  rgba(200, 55, 42, 0.10);
+  --fail:      #B42F24;
+  --fail-dim:  rgba(180, 47, 36, 0.10);
   --amber:     #8A5A00;
   --amber-dim: rgba(138, 90, 0, 0.12);
 
-  --selection: rgba(10, 107, 181, 0.20);
-  --shadow-term: 0 24px 60px -30px rgba(15, 21, 19, 0.35);
+  --selection: rgba(15, 101, 173, 0.20);
+  --shadow-term: 0 24px 60px -30px rgba(26, 35, 49, 0.30);
   --scanline:  rgba(0, 0, 0, 0.018);
 
   color-scheme: light;
@@ -890,23 +892,24 @@
     color: var(--fg);
   }
 
-  /* A terminal depicts a tool, so it stays dark on paper. The dark
-     token set is re-declared inside it, and every child reads its own
-     colour from the same names. */
+  /* A terminal depicts a tool, so it stays dark on paper, but as a slate
+     blue rather than near-black, so it sits on the grey-blue page without
+     shouting. The dark token set is re-declared inside it, and every child
+     reads its own colour from the same names. */
   :root[data-theme="light"] .term {
-    --bg:      #0B0E0D;
-    --bg-2:    #0F1413;
-    --panel:   #0E1211;
-    --line:    #1E2624;
-    --line-2:  #2A3431;
-    --fg:      #D6E0DC;
-    --fg-2:    #8A9793;
-    --fg-3:    #748079;
-    --acc:     #45BDF5;
-    --acc-dim: rgba(69, 189, 245, 0.10);
+    --bg:      #1B2430;
+    --bg-2:    #1F2935;
+    --panel:   #1E2733;
+    --line:    #2C3744;
+    --line-2:  #3A4655;
+    --fg:      #DCE4EE;
+    --fg-2:    #A3AFBE;
+    --fg-3:    #8E9AAB;
+    --acc:     #5CC4F5;
+    --acc-dim: rgba(92, 196, 245, 0.12);
     --acc-ink: #04121A;
-    --fail:    #FF5C49;
-    --fail-dim: rgba(255, 92, 73, 0.12);
+    --fail:    #FF6B5A;
+    --fail-dim: rgba(255, 107, 90, 0.14);
     --amber:   #F5B544;
     --amber-dim: rgba(245, 181, 68, 0.12);
     color-scheme: dark;
