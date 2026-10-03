@@ -14,7 +14,7 @@ export const SECURITY_ADVISORY_URL =
 // Three canonical destinations. Historical report URLs remain accessible.
 export const nav = [
   { label: 'Benchmark', href: '/benchmark' },
-  { label: 'How it works', href: '/methodology' },
+  { label: 'Methodology', href: '/methodology' },
   { label: 'Evidence', href: '/evidence' },
 ] as const;
 

@@ -8,9 +8,9 @@ const checks = [
  ['check-04','04','No shortcuts?','Check that warnings were not suppressed.'],
 ];
 ---
-<BaseLayout title="How it works" description="One patch. Four independent checks. A verdict backed by the cases that ran." path="/methodology">
+<BaseLayout title="Methodology" description="One patch. Four independent checks. A verdict backed by the cases that ran." path="/methodology">
  <article class="method-page shell">
-  <header><p class="eyebrow">How it works</p><h1>The alert is gone.<br/><span>Is the bug?</span></h1><p class="intro">We test the patch against attacks <em>and</em> ordinary use. Closing the warning is only the first check.</p></header>
+  <header><p class="eyebrow">Methodology</p><h1>The alert is gone.<br/><span>Is the bug?</span></h1><p class="intro">We test the patch against attacks <em>and</em> ordinary use. Closing the warning is only the first check.</p></header>
   <section class="flow" id="contract" aria-label="Patch verification process">
    <div class="flow-end"><span class="eyebrow">Input</span><h2>Your AI’s patch</h2><div class="diff" aria-hidden="true"><span>− unsafe query</span><span>+ proposed fix</span></div><p>Same code. A second opinion.</p></div>
    <div class="checks">{checks.map(([id,n,title,body],i)=><div class="gate" id={id} style={`--step:${i}`}><span class="gate-number">{n}</span><div><h3>{title}</h3><p>{body}</p></div><span class="pulse" aria-hidden="true"></span></div>)}</div>
