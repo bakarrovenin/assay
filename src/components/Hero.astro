@@ -15,9 +15,9 @@
 // Each beat waits until the row it plays in is on screen, so on a screen
 // that holds the whole terminal it plays straight through, and on a phone,
 // where it cannot, the command types above the fold and the checks follow
-// the scroll instead of resolving unseen. Once it has finished, the Replay
-// button, a click on the terminal, or an arrow key while it is on screen
-// plays it again.
+// the scroll instead of resolving unseen. The Replay button is always on
+// screen and restarts the run at any point. Once it has finished, a click
+// on the terminal or an arrow key while it is on screen also plays it again.
 //
 // The pull request, the scanner result and the verdict are a constructed
 // example of what Assay posts, not a screenshot of a real repository: the
@@ -184,7 +184,9 @@ const caps = [
   .hrun.is-static .hrun-stage { margin-top: 28px; }
 
   /* Wide: the eyebrow on its own row, then the headline in the left
-     column on two lines, with the copy, the caption and Replay under it.
+     column on two lines, with the copy, Replay and the caption under it.
+     Replay sits above the caption so it stays in the first screen in
+     motion as well as in the still.
      The run sits on the right, its top level with the top of the
      headline. */
   @media (min-width: 1024px) {
@@ -196,8 +198,8 @@ const caps = [
         "head   stage"
         "lede   stage"
         "rest   stage"
-        "cap    stage"
         "replay stage"
+        "cap    stage"
         ".      stage";
       column-gap: clamp(40px, 4vw, 56px);
     }
@@ -212,8 +214,9 @@ const caps = [
     .hrun .replay { justify-self: start; margin-top: 16px; }
   }
 
-  .hrun .replay { opacity: 0; pointer-events: none; transition: opacity 300ms ease-out; }
-  .hrun.is-done .replay { opacity: 1; pointer-events: auto; }
+  /* The control is on screen from the first frame, in every state, so the
+     run can always be started or restarted, even while it plays or waits
+     for a row to scroll into view. */
   /* The still: nothing that only means something in motion. */
   .hrun.is-static .hrun-cap,
   .hrun.is-static .hrun-stage .cursor { display: none; }
@@ -485,7 +488,7 @@ const caps = [
     replay.addEventListener('click', function () {
       root.classList.remove('is-static');
       replay.textContent = 'Replay ↻';
-      again();
+      play();
     });
   }
 
@@ -493,7 +496,8 @@ const caps = [
   if (!reduced) play();
 
   function again() { if (!playing) play(); }
-  if (!reduced) replay.addEventListener('click', again);
+  // The button restarts the run from any point; it never waits for it to finish.
+  if (!reduced) replay.addEventListener('click', play);
   stage.addEventListener('click', function () { if (!root.classList.contains('is-static') && root.classList.contains('is-done')) again(); });
 
   // Arrow keys replay a finished run while it is on screen and nothing else
