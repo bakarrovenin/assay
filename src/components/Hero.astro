@@ -54,11 +54,13 @@ const caps = [
 
 <section class="section-hero hrun" data-seq>
   <div class="shell hrun-grid">
-    <div class="hrun-head">
+    <div class="hrun-eye">
       <p class="hd reveal">Independent verification for AI-authored code</p>
+    </div>
 
-      <h1 class="h1 reveal mt-7" style="--reveal-delay:60ms">
-        Verify <span class="g">AI-authored</span> fixes
+    <div class="hrun-head">
+      <h1 class="h1 reveal" style="--reveal-delay:60ms">
+        Verify<br /> <span class="g">AI-authored</span> fixes
       </h1>
     </div>
 
@@ -175,8 +177,9 @@ const caps = [
   .hrun-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "head" "lede" "cap" "stage" "replay" "rest";
+    grid-template-areas: "eye" "head" "lede" "cap" "stage" "replay" "rest";
   }
+  .hrun-eye    { grid-area: eye; }
   .hrun-head   { grid-area: head; }
   .hrun-lede   { grid-area: lede; margin-top: 28px; }
   .hrun-cap    { grid-area: cap; margin-top: 28px; min-width: 0; }
@@ -185,17 +188,17 @@ const caps = [
   .hrun-rest   { grid-area: rest; margin-top: 28px; }
   .hrun.is-static .hrun-stage { margin-top: 28px; }
 
-  /* Wide: the headline across the top on one line, sized to the widest one
-     line the column allows (24 characters at 0.57em each, JetBrains Mono
-     with the headline tracking). Under it, the copy on the left with the
-     caption and Replay after it, and the run on the right, its top level
-     with protected line 1. */
+  /* Wide: the eyebrow on its own row, then the headline in the left
+     column on two lines, with the copy, the caption and Replay under it.
+     The run sits on the right, its top level with the top of the
+     headline. */
   @media (min-width: 1024px) {
     .hrun-grid {
       grid-template-columns: minmax(0, 1fr) minmax(0, 580px);
-      grid-template-rows: auto auto auto auto auto 1fr;
+      grid-template-rows: auto auto auto auto auto auto 1fr;
       grid-template-areas:
-        "head   head"
+        "eye    ."
+        "head   stage"
         "lede   stage"
         "rest   stage"
         "cap    stage"
@@ -203,9 +206,12 @@ const caps = [
         ".      stage";
       column-gap: clamp(40px, 4vw, 56px);
     }
-    .hrun .h1 { max-width: none; font-size: clamp(48px, calc((min(100vw, var(--wrap)) - 2 * var(--gutter)) / 13.9), 88px); }
+    /* Sized to the left column, so "AI-authored fixes" holds one line
+       (about 8.3em in Inter with the headline tracking). */
+    .landing .hrun .hrun-head .h1 { font-size: clamp(36px, calc((min(100vw, 1240px) - 2 * var(--gutter) - 580px - clamp(40px, 4vw, 56px)) / 8.6), 66px); }
     .hrun-lede  { margin-top: 36px; }
-    .hrun-stage, .hrun.is-static .hrun-stage { margin-top: 36px; align-self: start; }
+    /* The headline's own top margin, so the run starts level with it. */
+    .hrun-stage, .hrun.is-static .hrun-stage { margin-top: 22px; align-self: start; }
     .hrun-rest  { margin-top: 16px; }
     .hrun-cap   { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
     .hrun .replay { justify-self: start; margin-top: 16px; }
