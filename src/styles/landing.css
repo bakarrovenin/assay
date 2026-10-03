@@ -1,12 +1,15 @@
-/* Homepage-only art direction. Interior pages retain their existing theme. */
-body.landing {
+/* Homepage-only art direction. Interior pages retain their existing theme.
+   The palette below is the dark theme only. It is scoped off the light
+   theme so that the light tokens in global.css reach the page; declared
+   on body unconditionally, it overrode them everywhere. */
+:root:not([data-theme="light"]) body.landing {
   --bg: #08080b; --bg-2: #101015; --panel: #101015;
   --fg: #f0eff5; --fg-2: #aaa8b8; --fg-3: #9693a6;
   --line: #24232e; --line-2: #363341; --acc: #b8a0ff;
   --acc-ink: #120d20; --acc-dim: #b8a0ff12;
   --fail: #ff8276; --fail-dim: #ff827612;
-  background: var(--bg); color: var(--fg); font-family: Inter, sans-serif;
 }
+body.landing { background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
 .landing .shell { max-width: 1240px; }
 .landing .btn { font-family: Inter, sans-serif; text-transform: none; letter-spacing: -.015em; border-radius: 9px; min-height: 46px; padding: 12px 20px; font-weight: 500; }
 .landing .btn-primary { background: #f0eff5; color: #121116; border: 1px solid #f0eff5; box-shadow: 0 2px 12px #ffffff12; }
@@ -127,3 +130,27 @@ body.landing {
   .evidence-links a { flex-direction:column; gap:8px; }
   .landing-footer nav { flex-wrap:wrap; }
 }
+
+/* Light theme. The rules above set some colours directly for the dark
+   palette; on paper each one takes the light token that does the same job.
+   Terminal panels stay dark through the .term rule in global.css. */
+:root[data-theme="light"] .landing .btn-primary { background: var(--fg); color: var(--bg); border-color: var(--fg); box-shadow: none; }
+:root[data-theme="light"] .landing .btn-primary:hover { background: var(--acc); border-color: var(--acc); color: var(--acc-ink); }
+:root[data-theme="light"] .landing .btn-secondary { background: var(--panel); }
+:root[data-theme="light"] .landing .btn-secondary:hover { background: var(--bg-2); border-color: var(--fg-3); }
+:root[data-theme="light"] .landing .hrun::before { background: var(--bg); border-top-color: var(--line-2); box-shadow: none; }
+:root[data-theme="light"] .landing .hrun .h1 .g { background-image: linear-gradient(110deg, var(--fg), var(--acc)); }
+:root[data-theme="light"] .landing .hrun-stage { box-shadow: var(--shadow-term); }
+:root[data-theme="light"] .landing .hrun .hd,
+:root[data-theme="light"] .landing .eyebrow,
+:root[data-theme="light"] .step-number,
+:root[data-theme="light"] .featured-report>span { color: var(--acc); }
+:root[data-theme="light"] .status-dot { background: var(--acc); }
+:root[data-theme="light"] .landing .text-link,
+:root[data-theme="light"] .evidence-note a,
+:root[data-theme="light"] .landing a:hover,
+:root[data-theme="light"] .reading-page p a,
+:root[data-theme="light"] .reading-page details a,
+:root[data-theme="light"] .verdict-definitions dt { color: var(--acc); }
+:root[data-theme="light"] .result-value { color: var(--acc); background: var(--acc-dim); border-color: var(--line-2); }
+:root[data-theme="light"] .featured-report { border-color: var(--line-2); }
